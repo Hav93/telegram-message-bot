@@ -1,0 +1,93 @@
+# Python相关
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 虚拟环境
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE相关
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志文件
+*.log
+logs/
+*.log.*
+
+# 数据文件
+data/
+sessions/
+temp/
+*.session
+*.session-journal
+
+# 配置文件（保护敏感信息）
+.env
+app.config
+config/config.env
+!.env.example
+!app.config.example
+
+# Docker相关
+.dockerignore
+
+# 前端开发文件
+frontend/node_modules/
+frontend/.vite/
+frontend/dist/*.map
+
+# 备份文件
+*.backup
+backup/
+*.bak
+
+# 测试文件
+test_*
+*_test.py
+tests/
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+
+# 操作系统
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

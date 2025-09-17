@@ -1,0 +1,1096 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+增强版Telegram消息转发机器人 - 干净的Web启动器
+解决实时监听问题的核心版本
+"""
+
+import logging
+import asyncio
+import os
+import sys
+from pathlib import Path
+
+# 设置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s | %(levelname)s | %(name)s:%(funcName)s:%(lineno)d - %(message)s',
+    handlers=[
+        logging.FileHandler('logs/web_enhanced_clean.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+async def main():
+    """主函数"""
+    try:
+        logger.info("🚀 启动增强版Telegram消息转发机器人Web界面")
+        
+        # 确保日志目录存在
+        os.makedirs('logs', exist_ok=True)
+        
+        # 加载配置
+        logger.info("📄 加载配置...")
+        from config import Config
+        
+        # 启动增强版机器人管理器
+        logger.info("🤖 启动增强版机器人管理器...")
+        try:
+            from enhanced_bot import EnhancedTelegramBot
+            from telegram_client_manager import multi_client_manager
+            
+            # 创建增强版机器人实例
+            enhanced_bot = EnhancedTelegramBot()
+            logger.info("✅ 增强版机器人管理器已创建")
+            
+            # 启动机器人（后台运行）
+            await enhanced_bot.start(web_mode=True)
+            logger.info("✅ 增强版机器人已在后台启动")
+            
+        except ImportError as e:
+            logger.error(f"❌ 增强版机器人管理器加载失败: {e}")
+            logger.info("💡 使用传统模式启动...")
+            enhanced_bot = None
+        
+        # 创建简化的FastAPI应用
+        logger.info("🌐 启动Web服务器...")
+        from fastapi import FastAPI, Request
+        from fastapi.responses import JSONResponse
+        from fastapi.staticfiles import StaticFiles
+        from fastapi.middleware.cors import CORSMiddleware
+        
+        app = FastAPI(
+            title="Telegram消息转发机器人 - 增强版",
+            description="Telegram消息转发机器人v3.0",
+            version="3.0.0"
+        )
+        
+        # 添加CORS中间件
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+        
+        # 挂载React前端
+        frontend_dist = Path("frontend/dist")
+        if frontend_dist.exists():
+            app.mount("/assets", StaticFiles(directory=frontend_dist / "assets"), name="react-assets")
+            app.mount("/static", StaticFiles(directory=frontend_dist), name="react-static")
+            logger.info("✅ React前端已挂载")
+        else:
+            logger.warning("⚠️ React前端构建文件不存在")
+        
+        # 增强版API - 客户端管理
+        @app.get("/api/clients")
+        async def get_all_clients():
+            """获取所有客户端状态"""
+            try:
+                if enhanced_bot:
+                    clients_status = enhanced_bot.get_client_status()
+                    return JSONResponse(content={
+                        "success": True,
+                        "clients": clients_status
+                    })
+                else:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "增强版机器人不可用，运行在传统模式"
+                    })
+            except Exception as e:
+                logger.error(f"获取客户端状态失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"获取客户端状态失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.get("/api/system/enhanced-status")
+        async def get_enhanced_system_status():
+            """获取增强版系统状态"""
+            try:
+                if enhanced_bot:
+                    clients_status = enhanced_bot.get_client_status()
+                    return JSONResponse(content={
+                        "success": True,
+                        "enhanced_mode": True,
+                        "clients": clients_status,
+                        "total_clients": len(clients_status),
+                        "running_clients": sum(1 for client in clients_status.values() if client.get("running", False)),
+                        "connected_clients": sum(1 for client in clients_status.values() if client.get("connected", False))
+                    })
+                else:
+                    return JSONResponse(content={
+                        "success": True,
+                        "enhanced_mode": False,
+                        "message": "运行在传统模式"
+                    })
+            except Exception as e:
+                logger.error(f"获取增强版系统状态失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"获取系统状态失败: {str(e)}"
+                }, status_code=500)
+        
+        # 基础API代理 - 转发到传统API（如果需要）
+        @app.get("/api/rules")
+        async def get_rules():
+            """获取规则列表（代理到服务）"""
+            try:
+                from services import ForwardRuleService
+                rules = await ForwardRuleService.get_all_rules()
+                # 将规则对象转换为字典，包含关联数据
+                rules_data = []
+                for rule in rules:
+                    rule_dict = {
+                        "id": rule.id,
+                        "name": rule.name,
+                        "source_chat_id": rule.source_chat_id,
+                        "source_chat_name": rule.source_chat_name,
+                        "target_chat_id": rule.target_chat_id,
+                        "target_chat_name": rule.target_chat_name,
+                        "is_active": rule.is_active,
+                        "enable_keyword_filter": rule.enable_keyword_filter,
+                        "enable_regex_replace": getattr(rule, 'enable_regex_replace', False),
+                        "client_id": getattr(rule, 'client_id', 'main_user'),
+                        "client_type": getattr(rule, 'client_type', 'user'),
+                        
+                        # 消息类型过滤
+                        "enable_text": getattr(rule, 'enable_text', True),
+                        "enable_photo": getattr(rule, 'enable_photo', True),
+                        "enable_video": getattr(rule, 'enable_video', True),
+                        "enable_document": getattr(rule, 'enable_document', True),
+                        "enable_audio": getattr(rule, 'enable_audio', True),
+                        "enable_voice": getattr(rule, 'enable_voice', True),
+                        "enable_sticker": getattr(rule, 'enable_sticker', False),
+                        "enable_animation": getattr(rule, 'enable_animation', True),
+                        "enable_webpage": getattr(rule, 'enable_webpage', True),
+                        
+                        # 高级设置
+                        "forward_delay": getattr(rule, 'forward_delay', 0),
+                        "max_message_length": getattr(rule, 'max_message_length', 4096),
+                        "enable_link_preview": getattr(rule, 'enable_link_preview', True),
+                        
+                        # 时间过滤
+                        "time_filter_type": getattr(rule, 'time_filter_type', 'after_start'),
+                        "start_time": rule.start_time.isoformat() if rule.start_time else None,
+                        "end_time": rule.end_time.isoformat() if rule.end_time else None,
+                        
+                        "created_at": rule.created_at.isoformat() if rule.created_at else None,
+                        "updated_at": rule.updated_at.isoformat() if rule.updated_at else None,
+                        "keywords": [{"word": kw.word, "mode": kw.mode} for kw in rule.keywords] if rule.keywords else [],
+                        "replace_rules": [{"pattern": rr.pattern, "replacement": rr.replacement} for rr in rule.replace_rules] if rule.replace_rules else []
+                    }
+                    rules_data.append(rule_dict)
+                
+                return JSONResponse(content={
+                    "success": True,
+                    "rules": rules_data
+                })
+            except Exception as e:
+                logger.error(f"获取规则失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"获取规则失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.post("/api/rules")
+        async def create_rule(request: Request):
+            """创建规则"""
+            try:
+                data = await request.json()
+                from services import ForwardRuleService
+                
+                # 验证必需的字段
+                required_fields = ['name', 'source_chat_id', 'target_chat_id']
+                for field in required_fields:
+                    if field not in data:
+                        return JSONResponse(content={
+                            "success": False,
+                            "message": f"缺少必需字段: {field}"
+                        }, status_code=400)
+                
+                # 提取参数，允许可选字段
+                kwargs = {k: v for k, v in data.items() if k not in required_fields}
+                
+                rule = await ForwardRuleService.create_rule(
+                    name=data['name'],
+                    source_chat_id=data['source_chat_id'],
+                    source_chat_name=data.get('source_chat_name', ''),
+                    target_chat_id=data['target_chat_id'],
+                    target_chat_name=data.get('target_chat_name', ''),
+                    **kwargs
+                )
+                # 序列化规则数据
+                rule_data = None
+                if rule:
+                    rule_data = {
+                        "id": rule.id,
+                        "name": rule.name,
+                        "source_chat_id": rule.source_chat_id,
+                        "source_chat_name": rule.source_chat_name,
+                        "target_chat_id": rule.target_chat_id,
+                        "target_chat_name": rule.target_chat_name,
+                        "is_active": rule.is_active,
+                        "enable_keyword_filter": rule.enable_keyword_filter,
+                        "enable_regex_replace": getattr(rule, 'enable_regex_replace', False),
+                        "client_id": getattr(rule, 'client_id', 'main_user'),
+                        "client_type": getattr(rule, 'client_type', 'user'),
+                        
+                        # 消息类型过滤
+                        "enable_text": getattr(rule, 'enable_text', True),
+                        "enable_photo": getattr(rule, 'enable_photo', True),
+                        "enable_video": getattr(rule, 'enable_video', True),
+                        "enable_document": getattr(rule, 'enable_document', True),
+                        "enable_audio": getattr(rule, 'enable_audio', True),
+                        "enable_voice": getattr(rule, 'enable_voice', True),
+                        "enable_sticker": getattr(rule, 'enable_sticker', False),
+                        "enable_animation": getattr(rule, 'enable_animation', True),
+                        "enable_webpage": getattr(rule, 'enable_webpage', True),
+                        
+                        # 高级设置
+                        "forward_delay": getattr(rule, 'forward_delay', 0),
+                        "max_message_length": getattr(rule, 'max_message_length', 4096),
+                        "enable_link_preview": getattr(rule, 'enable_link_preview', True),
+                        
+                        # 时间过滤
+                        "time_filter_type": getattr(rule, 'time_filter_type', 'after_start'),
+                        "start_time": rule.start_time.isoformat() if rule.start_time else None,
+                        "end_time": rule.end_time.isoformat() if rule.end_time else None,
+                        
+                        "created_at": rule.created_at.isoformat() if rule.created_at else None,
+                        "updated_at": rule.updated_at.isoformat() if rule.updated_at else None
+                    }
+                
+                return JSONResponse(content={
+                    "success": True,
+                    "rule": rule_data,
+                    "message": "规则创建成功"
+                })
+            except Exception as e:
+                logger.error(f"创建规则失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"创建规则失败: {str(e)}"
+                }, status_code=500)
+
+        @app.get("/api/rules/{rule_id}")
+        async def get_rule(rule_id: int):
+            """获取单个规则详情"""
+            try:
+                from services import ForwardRuleService
+                rule = await ForwardRuleService.get_rule_by_id(rule_id)
+                
+                if not rule:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "规则不存在"
+                    }, status_code=404)
+                
+                # 序列化规则数据
+                rule_dict = {
+                    "id": rule.id,
+                    "name": rule.name,
+                    "source_chat_id": rule.source_chat_id,
+                    "source_chat_name": rule.source_chat_name,
+                    "target_chat_id": rule.target_chat_id,
+                    "target_chat_name": rule.target_chat_name,
+                    "is_active": rule.is_active,
+                    "enable_keyword_filter": rule.enable_keyword_filter,
+                    "enable_regex_replace": getattr(rule, 'enable_regex_replace', False),
+                    "client_id": getattr(rule, 'client_id', 'main_user'),
+                    "client_type": getattr(rule, 'client_type', 'user'),
+                    
+                    # 消息类型过滤
+                    "enable_text": getattr(rule, 'enable_text', True),
+                    "enable_photo": getattr(rule, 'enable_photo', True),
+                    "enable_video": getattr(rule, 'enable_video', True),
+                    "enable_document": getattr(rule, 'enable_document', True),
+                    "enable_audio": getattr(rule, 'enable_audio', True),
+                    "enable_voice": getattr(rule, 'enable_voice', True),
+                    "enable_sticker": getattr(rule, 'enable_sticker', False),
+                    "enable_animation": getattr(rule, 'enable_animation', True),
+                    "enable_webpage": getattr(rule, 'enable_webpage', True),
+                    
+                    # 高级设置
+                    "forward_delay": getattr(rule, 'forward_delay', 0),
+                    "max_message_length": getattr(rule, 'max_message_length', 4096),
+                    "enable_link_preview": getattr(rule, 'enable_link_preview', True),
+                    
+                    # 时间过滤
+                    "time_filter_type": getattr(rule, 'time_filter_type', 'after_start'),
+                    "start_time": rule.start_time.isoformat() if rule.start_time else None,
+                    "end_time": rule.end_time.isoformat() if rule.end_time else None,
+                    
+                    "created_at": rule.created_at.isoformat() if rule.created_at else None,
+                    "updated_at": rule.updated_at.isoformat() if rule.updated_at else None,
+                    "keywords": [{"word": kw.word, "mode": kw.mode} for kw in rule.keywords] if rule.keywords else [],
+                    "replace_rules": [{"pattern": rr.pattern, "replacement": rr.replacement} for rr in rule.replace_rules] if rule.replace_rules else []
+                }
+                
+                return JSONResponse(content={
+                    "success": True,
+                    "rule": rule_dict
+                })
+            except Exception as e:
+                logger.error(f"获取规则详情失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"获取规则详情失败: {str(e)}"
+                }, status_code=500)
+
+        @app.put("/api/rules/{rule_id}")
+        async def update_rule(rule_id: int, request: Request):
+            """更新规则"""
+            try:
+                data = await request.json()
+                from services import ForwardRuleService
+                
+                # 获取现有规则
+                existing_rule = await ForwardRuleService.get_rule_by_id(rule_id)
+                if not existing_rule:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "规则不存在"
+                    }, status_code=404)
+                
+                # 过滤掉不应该更新的字段
+                allowed_fields = {
+                    'name', 'source_chat_id', 'source_chat_name', 'target_chat_id', 'target_chat_name',
+                    'is_active', 'enable_keyword_filter', 'enable_regex_replace', 'client_id', 'client_type',
+                    'enable_text', 'enable_media', 'enable_photo', 'enable_video', 'enable_document',
+                    'enable_audio', 'enable_voice', 'enable_sticker', 'enable_animation', 'enable_webpage',
+                    'forward_delay', 'max_message_length', 'enable_link_preview', 'time_filter_type',
+                    'start_time', 'end_time'
+                }
+                update_data = {k: v for k, v in data.items() if k in allowed_fields}
+                
+                # 更新规则
+                success = await ForwardRuleService.update_rule(rule_id, **update_data)
+                
+                if not success:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "更新规则失败"
+                    }, status_code=500)
+                
+                # 获取更新后的规则
+                updated_rule = await ForwardRuleService.get_rule_by_id(rule_id)
+                
+                return JSONResponse(content={
+                    "success": True,
+                    "rule": {
+                        "id": updated_rule.id,
+                        "name": updated_rule.name,
+                        "source_chat_id": updated_rule.source_chat_id,
+                        "source_chat_name": updated_rule.source_chat_name,
+                        "target_chat_id": updated_rule.target_chat_id,
+                        "target_chat_name": updated_rule.target_chat_name,
+                        "is_active": updated_rule.is_active,
+                        "enable_keyword_filter": updated_rule.enable_keyword_filter,
+                        "enable_regex_replace": getattr(updated_rule, 'enable_regex_replace', False),
+                        "client_id": getattr(updated_rule, 'client_id', 'main_user'),
+                        "client_type": getattr(updated_rule, 'client_type', 'user'),
+                        
+                        # 消息类型过滤
+                        "enable_text": getattr(updated_rule, 'enable_text', True),
+                        "enable_photo": getattr(updated_rule, 'enable_photo', True),
+                        "enable_video": getattr(updated_rule, 'enable_video', True),
+                        "enable_document": getattr(updated_rule, 'enable_document', True),
+                        "enable_audio": getattr(updated_rule, 'enable_audio', True),
+                        "enable_voice": getattr(updated_rule, 'enable_voice', True),
+                        "enable_sticker": getattr(updated_rule, 'enable_sticker', False),
+                        "enable_animation": getattr(updated_rule, 'enable_animation', True),
+                        "enable_webpage": getattr(updated_rule, 'enable_webpage', True),
+                        
+                        # 高级设置
+                        "forward_delay": getattr(updated_rule, 'forward_delay', 0),
+                        "max_message_length": getattr(updated_rule, 'max_message_length', 4096),
+                        "enable_link_preview": getattr(updated_rule, 'enable_link_preview', True),
+                        
+                        # 时间过滤
+                        "time_filter_type": getattr(updated_rule, 'time_filter_type', 'after_start'),
+                        "start_time": updated_rule.start_time.isoformat() if updated_rule.start_time else None,
+                        "end_time": updated_rule.end_time.isoformat() if updated_rule.end_time else None,
+                        
+                        "created_at": updated_rule.created_at.isoformat() if updated_rule.created_at else None,
+                        "updated_at": updated_rule.updated_at.isoformat() if updated_rule.updated_at else None
+                    } if updated_rule else None,
+                    "message": "规则更新成功"
+                })
+            except Exception as e:
+                logger.error(f"更新规则失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"更新规则失败: {str(e)}"
+                }, status_code=500)
+
+        @app.delete("/api/rules/{rule_id}")
+        async def delete_rule(rule_id: int):
+            """删除规则"""
+            try:
+                from services import ForwardRuleService
+                
+                # 检查规则是否存在
+                existing_rule = await ForwardRuleService.get_rule_by_id(rule_id)
+                if not existing_rule:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "规则不存在"
+                    }, status_code=404)
+                
+                # 删除规则
+                success = await ForwardRuleService.delete_rule(rule_id)
+                
+                if not success:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "删除规则失败"
+                    }, status_code=500)
+                
+                return JSONResponse(content={
+                    "success": True,
+                    "message": "规则删除成功"
+                })
+            except Exception as e:
+                logger.error(f"删除规则失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"删除规则失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.get("/api/chats")
+        async def get_chats():
+            """获取聊天列表"""
+            try:
+                # 从多客户端管理器获取聊天列表（线程安全方式）
+                if multi_client_manager:
+                    all_chats = []
+                    clients_info = []
+                    
+                    for client_id, client_wrapper in multi_client_manager.clients.items():
+                        if client_wrapper.connected:
+                            try:
+                                # 使用线程安全方法获取聊天列表
+                                client_chats = client_wrapper.get_chats_sync()
+                                all_chats.extend(client_chats)
+                                
+                                # 收集客户端信息
+                                client_info = {
+                                    "client_id": client_id,
+                                    "client_type": client_wrapper.client_type,
+                                    "chat_count": len(client_chats),
+                                    "display_name": client_chats[0]["client_display_name"] if client_chats else f"{client_wrapper.client_type}: {client_id}"
+                                }
+                                clients_info.append(client_info)
+                                
+                            except Exception as e:
+                                logger.warning(f"获取客户端 {client_id} 聊天列表失败: {e}")
+                                continue
+                    
+                    # 按客户端分组聊天
+                    chats_by_client = {}
+                    for chat in all_chats:
+                        client_id = chat["client_id"]
+                        if client_id not in chats_by_client:
+                            chats_by_client[client_id] = []
+                        chats_by_client[client_id].append(chat)
+                    
+                    return JSONResponse(content={
+                        "success": True,
+                        "chats": all_chats,
+                        "chats_by_client": chats_by_client,
+                        "clients_info": clients_info,
+                        "total_chats": len(all_chats),
+                        "connected_clients": len(clients_info)
+                    })
+                else:
+                    return JSONResponse(content={
+                        "success": True,
+                        "chats": [],
+                        "chats_by_client": {},
+                        "clients_info": [],
+                        "total_chats": 0,
+                        "connected_clients": 0
+                    })
+            except Exception as e:
+                logger.error(f"获取聊天列表失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"获取聊天列表失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.post("/api/refresh-chats")
+        async def refresh_chats():
+            """刷新聊天列表"""
+            try:
+                # 在增强模式下，聊天列表是实时的，无需特别刷新
+                return JSONResponse(content={
+                    "success": True,
+                    "message": "聊天列表已刷新",
+                    "updated_count": 0
+                })
+            except Exception as e:
+                logger.error(f"刷新聊天列表失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"刷新聊天列表失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.get("/api/logs")
+        async def get_logs(page: int = 1, limit: int = 20, status: str = None, 
+                          date: str = None, start_date: str = None, end_date: str = None):
+            """获取日志列表"""
+            try:
+                from models import MessageLog
+                from sqlalchemy import desc, select, and_, func
+                from database import get_db
+                from datetime import datetime, date as date_type
+                
+                async for db in get_db():
+                    # 构建查询
+                    query = select(MessageLog)
+                    
+                    # 状态过滤
+                    if status:
+                        query = query.where(MessageLog.status == status)
+                    
+                    # 日期过滤
+                    if date:
+                        # 单日期筛选
+                        try:
+                            target_date = datetime.strptime(date, '%Y-%m-%d').date()
+                            query = query.where(func.date(MessageLog.created_at) == target_date)
+                        except ValueError:
+                            logger.warning(f"无效的日期格式: {date}")
+                    
+                    elif start_date or end_date:
+                        # 日期范围筛选
+                        date_conditions = []
+                        if start_date:
+                            try:
+                                start_dt = datetime.strptime(start_date, '%Y-%m-%d').date()
+                                date_conditions.append(func.date(MessageLog.created_at) >= start_dt)
+                            except ValueError:
+                                logger.warning(f"无效的开始日期格式: {start_date}")
+                        
+                        if end_date:
+                            try:
+                                end_dt = datetime.strptime(end_date, '%Y-%m-%d').date()
+                                date_conditions.append(func.date(MessageLog.created_at) <= end_dt)
+                            except ValueError:
+                                logger.warning(f"无效的结束日期格式: {end_date}")
+                        
+                        if date_conditions:
+                            query = query.where(and_(*date_conditions))
+                    
+                    # 排序（最新的在前）
+                    query = query.order_by(desc(MessageLog.created_at))
+                    
+                    # 分页
+                    offset = (page - 1) * limit
+                    paginated_query = query.offset(offset).limit(limit)
+                    
+                    # 执行查询，预加载规则信息
+                    from sqlalchemy.orm import joinedload
+                    paginated_query = paginated_query.options(joinedload(MessageLog.rule))
+                    result = await db.execute(paginated_query)
+                    logs = result.scalars().all()
+                    
+                    # 获取总数
+                    count_query = select(MessageLog)
+                    if status:
+                        count_query = count_query.where(MessageLog.status == status)
+                    count_result = await db.execute(count_query)
+                    total = len(count_result.scalars().all())
+                    
+                    # 序列化日志数据
+                    logs_data = []
+                    for log in logs:
+                        # 获取规则名称（通过预加载的关系）
+                        rule_name = None
+                        if log.rule and hasattr(log.rule, 'name'):
+                            rule_name = log.rule.name
+                        elif log.rule_id:
+                            rule_name = f"规则 #{log.rule_id}"
+                        
+                        log_data = {
+                            "id": log.id,
+                            "rule_id": log.rule_id,
+                            "rule_name": rule_name,
+                            # 前端期望的字段名映射
+                            "message_id": log.source_message_id,  # 前端期望 message_id
+                            "forwarded_message_id": log.target_message_id,  # 前端期望 forwarded_message_id
+                            "source_chat_id": log.source_chat_id,
+                            "source_chat_name": log.source_chat_name,
+                            "target_chat_id": log.target_chat_id,
+                            "target_chat_name": log.target_chat_name,
+                            "message_text": log.original_text,  # 前端期望 message_text
+                            "message_type": log.media_type or 'text',  # 前端期望 message_type
+                            "status": log.status,
+                            "error_message": log.error_message,
+                            "processing_time": log.processing_time,
+                            "created_at": log.created_at.isoformat() if log.created_at else None
+                        }
+                        logs_data.append(log_data)
+                    
+                    return JSONResponse(content={
+                        "success": True,
+                        "items": logs_data,  # 前端期望 items 字段
+                        "total": total,
+                        "page": page,
+                        "limit": limit
+                    })
+                    
+            except Exception as e:
+                logger.error(f"获取日志失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"获取日志失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.post("/api/clients")
+        async def add_client(request: Request):
+            """添加新客户端"""
+            try:
+                data = await request.json()
+                client_id = data.get('client_id')
+                client_type = data.get('client_type')
+                
+                if not client_id or not client_type:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "客户端ID和类型不能为空"
+                    }, status_code=400)
+                
+                if client_type not in ['user', 'bot']:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "客户端类型必须是 user 或 bot"
+                    }, status_code=400)
+                
+                # 验证机器人客户端必需字段
+                if client_type == 'bot':
+                    bot_token = data.get('bot_token')
+                    admin_user_id = data.get('admin_user_id')
+                    
+                    if not bot_token:
+                        return JSONResponse(content={
+                            "success": False,
+                            "message": "机器人客户端必须提供Bot Token"
+                        }, status_code=400)
+                    
+                    if not admin_user_id:
+                        return JSONResponse(content={
+                            "success": False,
+                            "message": "机器人客户端必须提供管理员用户ID"
+                        }, status_code=400)
+                
+                # 验证用户客户端必需字段
+                elif client_type == 'user':
+                    api_id = data.get('api_id')
+                    api_hash = data.get('api_hash')
+                    phone = data.get('phone')
+                    
+                    if not api_id:
+                        return JSONResponse(content={
+                            "success": False,
+                            "message": "用户客户端必须提供API ID"
+                        }, status_code=400)
+                    
+                    if not api_hash:
+                        return JSONResponse(content={
+                            "success": False,
+                            "message": "用户客户端必须提供API Hash"
+                        }, status_code=400)
+                    
+                    if not phone:
+                        return JSONResponse(content={
+                            "success": False,
+                            "message": "用户客户端必须提供手机号"
+                        }, status_code=400)
+                
+                if enhanced_bot:
+                    # 传递配置参数给客户端管理器
+                    client = enhanced_bot.multi_client_manager.add_client_with_config(
+                        client_id, 
+                        client_type,
+                        config_data=data  # 传递完整的配置数据
+                    )
+                    
+                    # 如果是用户客户端，需要验证码登录流程
+                    if client_type == 'user':
+                        return JSONResponse(content={
+                            "success": True,
+                            "message": f"用户客户端 {client_id} 添加成功，请准备接收验证码",
+                            "need_verification": True,
+                            "client_id": client_id
+                        })
+                    else:
+                        return JSONResponse(content={
+                            "success": True,
+                            "message": f"机器人客户端 {client_id} 添加成功"
+                        })
+                else:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "增强版客户端管理器不可用"
+                    }, status_code=400)
+            except Exception as e:
+                logger.error(f"添加客户端失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"添加客户端失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.post("/api/clients/{client_id}/start")
+        async def start_client(client_id: str):
+            """启动客户端"""
+            try:
+                if enhanced_bot:
+                    success = enhanced_bot.multi_client_manager.start_client(client_id)
+                    if success:
+                        return JSONResponse(content={
+                            "success": True,
+                            "message": f"客户端 {client_id} 启动成功"
+                        })
+                    else:
+                        return JSONResponse(content={
+                            "success": False,
+                            "message": f"客户端 {client_id} 启动失败"
+                        }, status_code=400)
+                else:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "增强版客户端管理器不可用"
+                    }, status_code=400)
+            except Exception as e:
+                logger.error(f"启动客户端失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"启动客户端失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.post("/api/clients/{client_id}/stop")
+        async def stop_client(client_id: str):
+            """停止客户端"""
+            try:
+                if enhanced_bot:
+                    success = enhanced_bot.multi_client_manager.stop_client(client_id)
+                    if success:
+                        return JSONResponse(content={
+                            "success": True,
+                            "message": f"客户端 {client_id} 停止成功"
+                        })
+                    else:
+                        return JSONResponse(content={
+                            "success": False,
+                            "message": f"客户端 {client_id} 不存在或已停止"
+                        }, status_code=400)
+                else:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "增强版客户端管理器不可用"
+                    }, status_code=400)
+            except Exception as e:
+                logger.error(f"停止客户端失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"停止客户端失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.delete("/api/clients/{client_id}")
+        async def remove_client(client_id: str):
+            """删除客户端"""
+            try:
+                if enhanced_bot:
+                    success = enhanced_bot.multi_client_manager.remove_client(client_id)
+                    if success:
+                        return JSONResponse(content={
+                            "success": True,
+                            "message": f"客户端 {client_id} 删除成功"
+                        })
+                    else:
+                        return JSONResponse(content={
+                            "success": False,
+                            "message": f"客户端 {client_id} 不存在或删除失败"
+                        }, status_code=400)
+                else:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "增强版客户端管理器不可用"
+                    }, status_code=400)
+            except Exception as e:
+                logger.error(f"删除客户端失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"删除客户端失败: {str(e)}"
+                }, status_code=500)
+        
+        # 系统设置API
+        @app.get("/api/settings")
+        async def get_settings():
+            """获取系统设置"""
+            try:
+                from config import Config
+                
+                # 返回当前配置
+                settings = {
+                    "api_id": getattr(Config, 'API_ID', ''),
+                    "api_hash": getattr(Config, 'API_HASH', ''),
+                    "bot_token": getattr(Config, 'BOT_TOKEN', ''),
+                    "phone_number": getattr(Config, 'PHONE_NUMBER', ''),
+                    "admin_user_ids": getattr(Config, 'ADMIN_USER_IDS', ''),
+                    "enable_proxy": getattr(Config, 'ENABLE_PROXY', False),
+                    "proxy_type": getattr(Config, 'PROXY_TYPE', 'http'),
+                    "proxy_host": getattr(Config, 'PROXY_HOST', '127.0.0.1'),
+                    "proxy_port": getattr(Config, 'PROXY_PORT', '7890'),
+                    "proxy_username": getattr(Config, 'PROXY_USERNAME', ''),
+                    "proxy_password": "***" if getattr(Config, 'PROXY_PASSWORD', '') else '',
+                    "enable_log_cleanup": getattr(Config, 'ENABLE_LOG_CLEANUP', False),
+                    "log_retention_days": getattr(Config, 'LOG_RETENTION_DAYS', '30'),
+                    "log_cleanup_time": getattr(Config, 'LOG_CLEANUP_TIME', '02:00'),
+                    "max_log_size": getattr(Config, 'MAX_LOG_SIZE', '100'),
+                }
+                
+                return JSONResponse(content={
+                    "success": True,
+                    "config": settings
+                })
+            except Exception as e:
+                logger.error(f"获取设置失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"获取设置失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.post("/api/settings")
+        async def save_settings(request: Request):
+            """保存系统设置"""
+            try:
+                data = await request.json()
+                
+                # 构建新的配置内容
+                config_lines = []
+                
+                # Telegram配置
+                config_lines.append("# Telegram API配置")
+                config_lines.append(f"API_ID={data.get('api_id', '')}")
+                config_lines.append(f"API_HASH={data.get('api_hash', '')}")
+                config_lines.append(f"BOT_TOKEN={data.get('bot_token', '')}")
+                config_lines.append(f"PHONE_NUMBER={data.get('phone_number', '')}")
+                config_lines.append(f"ADMIN_USER_IDS={data.get('admin_user_ids', '')}")
+                config_lines.append("")
+                
+                # 代理配置
+                config_lines.append("# 代理配置")
+                config_lines.append(f"ENABLE_PROXY={str(data.get('enable_proxy', False)).lower()}")
+                config_lines.append(f"PROXY_TYPE={data.get('proxy_type', 'http')}")
+                config_lines.append(f"PROXY_HOST={data.get('proxy_host', '127.0.0.1')}")
+                config_lines.append(f"PROXY_PORT={data.get('proxy_port', '7890')}")
+                config_lines.append(f"PROXY_USERNAME={data.get('proxy_username', '')}")
+                if data.get('proxy_password') and data.get('proxy_password') != '***':
+                    config_lines.append(f"PROXY_PASSWORD={data.get('proxy_password', '')}")
+                config_lines.append("")
+                
+                # 日志管理配置
+                config_lines.append("# 日志管理配置")
+                config_lines.append(f"ENABLE_LOG_CLEANUP={str(data.get('enable_log_cleanup', False)).lower()}")
+                config_lines.append(f"LOG_RETENTION_DAYS={data.get('log_retention_days', '30')}")
+                config_lines.append(f"LOG_CLEANUP_TIME={data.get('log_cleanup_time', '02:00')}")
+                config_lines.append(f"MAX_LOG_SIZE={data.get('max_log_size', '100')}")
+                config_lines.append("")
+                
+                # 写入配置文件
+                config_content = '\n'.join(config_lines)
+                
+                # 确保config目录存在
+                import os
+                from pathlib import Path
+                os.makedirs('config', exist_ok=True)
+                
+                # 写入到持久化配置文件
+                config_files_to_write = [
+                    Path("config/app.config"),  # 持久化配置文件
+                    Path("app.config")          # 兼容性配置文件
+                ]
+                
+                success_count = 0
+                errors = []
+                
+                for config_file in config_files_to_write:
+                    try:
+                        config_file.write_text(config_content, encoding='utf-8')
+                        os.chmod(config_file, 0o644)
+                        success_count += 1
+                        logger.info(f"✅ 配置已写入: {config_file}")
+                    except Exception as e:
+                        error_msg = f"写入配置文件 {config_file} 失败: {e}"
+                        errors.append(error_msg)
+                        logger.error(error_msg)
+                
+                if success_count > 0:
+                    # 重新加载配置以确保立即生效
+                    try:
+                        from config import Config
+                        Config.reload()
+                        logger.info("✅ 配置重新加载成功")
+                    except Exception as e:
+                        logger.error(f"⚠️ 配置重新加载失败: {e}")
+                    
+                    return JSONResponse(content={
+                        "success": True,
+                        "message": f"设置已保存到 {success_count} 个配置文件",
+                        "files_written": success_count,
+                        "errors": errors if errors else None
+                    })
+                else:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "所有配置文件写入失败",
+                        "errors": errors
+                    }, status_code=500)
+                    
+            except Exception as e:
+                logger.error(f"保存设置失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"保存设置失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.post("/api/clients/{client_id}/login")
+        async def client_login(client_id: str, request: Request):
+            """用户客户端登录流程"""
+            try:
+                data = await request.json()
+                step = data.get('step')  # 'send_code', 'submit_code', 'submit_password'
+                
+                if not enhanced_bot:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "增强版客户端管理器不可用"
+                    }, status_code=400)
+                
+                client_manager = enhanced_bot.multi_client_manager.clients.get(client_id)
+                if not client_manager:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": f"客户端 {client_id} 不存在"
+                    }, status_code=404)
+                
+                if client_manager.client_type != 'user':
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "只有用户客户端支持验证码登录"
+                    }, status_code=400)
+                
+                if step == 'send_code':
+                    # 发送验证码
+                    result = await client_manager.send_verification_code()
+                    return JSONResponse(content=result)
+                
+                elif step == 'submit_code':
+                    # 提交验证码
+                    code = data.get('code')
+                    if not code:
+                        return JSONResponse(content={
+                            "success": False,
+                            "message": "验证码不能为空"
+                        }, status_code=400)
+                    
+                    result = await client_manager.submit_verification_code(code)
+                    return JSONResponse(content=result)
+                
+                elif step == 'submit_password':
+                    # 提交二步验证密码
+                    password = data.get('password')
+                    if not password:
+                        return JSONResponse(content={
+                            "success": False,
+                            "message": "密码不能为空"
+                        }, status_code=400)
+                    
+                    result = await client_manager.submit_password(password)
+                    return JSONResponse(content=result)
+                
+                else:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "无效的登录步骤"
+                    }, status_code=400)
+                
+            except Exception as e:
+                logger.error(f"客户端登录失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"客户端登录失败: {str(e)}"
+                }, status_code=500)
+        
+        # React前端路由
+        from fastapi import Request
+        from fastapi.responses import HTMLResponse
+        
+        @app.get("/")
+        async def serve_react_root():
+            """服务React应用根路径"""
+            if frontend_dist.exists():
+                index_file = frontend_dist / "index.html"
+                if index_file.exists():
+                    with open(index_file, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    return HTMLResponse(content=content)
+            return HTMLResponse(content="<h1>增强版机器人Web界面</h1><p>React前端未构建，请运行 cd frontend && npm run build</p>")
+        
+        @app.get("/{path:path}")
+        async def serve_react_spa(path: str):
+            """服务React应用 - SPA路由"""
+            # 排除API路径
+            if path.startswith('api/'):
+                return JSONResponse(content={"detail": "API路径不存在"}, status_code=404)
+                
+            if frontend_dist.exists():
+                index_file = frontend_dist / "index.html"
+                if index_file.exists():
+                    with open(index_file, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    return HTMLResponse(content=content)
+            return HTMLResponse(content="<h1>增强版机器人Web界面</h1><p>React前端未构建</p>")
+        
+        # 启动Web服务器
+        logger.info(f"🌐 启动Web服务器: http://0.0.0.0:{Config.WEB_PORT}")
+        logger.info("💡 功能说明:")
+        logger.info(f"   - React前端: http://localhost:{Config.WEB_PORT}")
+        logger.info("   - 客户端管理: /api/clients")
+        logger.info("   - 系统状态: /api/system/enhanced-status")
+        
+        # 返回app实例以便外部启动
+        return app
+        
+    except Exception as e:
+        logger.error(f"启动失败: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
+
+if __name__ == "__main__":
+    try:
+        # 创建应用实例
+        app = asyncio.run(main())
+        
+        if app:
+            # 启动Web服务器
+            import uvicorn
+            from config import Config
+            uvicorn.run(
+                app,
+                host=Config.WEB_HOST,
+                port=Config.WEB_PORT,
+                log_level="info"
+            )
+    except KeyboardInterrupt:
+        logger.info("👋 程序被用户中断")
+    except Exception as e:
+        logger.error(f"程序异常退出: {e}")
+        sys.exit(1)

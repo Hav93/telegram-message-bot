@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  telegram-message-bot:
+    image: hav93/telegram-message-bot:3.0
+    container_name: telegram-message-bot
+    restart: always
+    networks:
+      - telegram-net
+
+    ports:
+      - 9393:9393
+
+    environment:
+      - TZ=Asia/Shanghai
+      # === Telegram API配置 ===
+      - API_ID=your_api_id_here                    # 从 https://my.telegram.org 获取
+      - API_HASH=your_api_hash_here               # 从 https://my.telegram.org 获取
+      - BOT_TOKEN=your_bot_token_here         # 从 @BotFather 获取
+      - PHONE_NUMBER=your_phone_number_here       # 您的手机号（国际格式）
+      - ADMIN_USER_IDS=your_admin_user_ids     # 管理员用户ID（多个用逗号分隔）
+      - HTTP_PROXY=your_http_proxy_here
+      - HTTPS_PROXY=your_https_proxy_here
+      - DATABASE_URL=sqlite:///data/bot.db
+      
+      # Web界面配置
+      - WEB_HOST=0.0.0.0
+      - WEB_PORT=9393
+      
+      # 权限配置
+      - PUID=1000
+      - PGID=1000
+      
+    volumes:
+      - /path/to/your/data:/app/data
+      - /path/to/your/logs:/app/logs
+      - /path/to/your/temp:/app/temp
+      - /path/to/your/sessions:/app/sessions
+      - /path/to/your/config:/app/config
+      
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:9393/').raise_for_status()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  telegram-net:
+    driver: bridge
