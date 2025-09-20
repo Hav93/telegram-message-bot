@@ -371,7 +371,7 @@ class TelegramClientManager:
             self.logger.error(f"处理规则 {rule.id}({rule.name}) 失败: {e}")
             # 记录错误日志
             try:
-                await self._log_message(rule.id, message, "failed", str(e))
+                await self._log_message(rule.id, message, "failed", str(e), rule.name)
             except Exception as log_error:
                 self.logger.error(f"记录错误日志失败: {log_error}")
     
@@ -408,11 +408,11 @@ class TelegramClientManager:
             await self._forward_message(rule, message, text_to_forward)
             
             # 记录日志
-            await self._log_message(rule.id, message, "success")
+            await self._log_message(rule.id, message, "success", None, rule.name)
             
         except Exception as e:
             self.logger.error(f"规则处理失败: {e}")
-            await self._log_message(rule.id, message, "failed", str(e))
+            await self._log_message(rule.id, message, "failed", str(e), rule.name)
     
     def _check_message_type(self, rule: ForwardRule, message) -> bool:
         """检查消息类型是否符合规则"""
@@ -556,7 +556,7 @@ class TelegramClientManager:
             self.logger.error(f"转发消息失败: {e}")
             raise
     
-    async def _log_message(self, rule_id: int, message, status: str, error_message: str = None):
+    async def _log_message(self, rule_id: int, message, status: str, error_message: str = None, rule_name: str = None):
         """记录消息日志"""
         try:
             async for db in get_db():
@@ -570,8 +570,19 @@ class TelegramClientManager:
                 else:
                     source_chat_id = str(message.peer_id.user_id)
                 
+                # 如果没有提供rule_name，尝试从数据库获取
+                if not rule_name and rule_id:
+                    try:
+                        from sqlalchemy import select
+                        rule_result = await db.execute(select(ForwardRule.name).where(ForwardRule.id == rule_id))
+                        rule_record = rule_result.scalar_one_or_none()
+                        rule_name = rule_record if rule_record else None
+                    except Exception as e:
+                        self.logger.warning(f"获取规则名称失败: {e}")
+                
                 log_entry = MessageLog(
                     rule_id=rule_id,
+                    rule_name=rule_name,
                     source_chat_id=source_chat_id,
                     source_message_id=message.id,
                     target_chat_id="",  # 这里应该在转发成功后更新
@@ -1333,14 +1344,14 @@ class MultiClientManager:
             await client_wrapper._forward_message(rule, message, message.text)
             
             # 使用客户端包装器的日志记录方法
-            await client_wrapper._log_message(rule.id, message, 'success')
+            await client_wrapper._log_message(rule.id, message, 'success', None, rule.name)
             return True
             
         except Exception as e:
             self.logger.error(f"❌ 转发消息失败: {e}")
             # 记录失败日志
             try:
-                await client_wrapper._log_message(rule.id, message, 'failed', str(e))
+                await client_wrapper._log_message(rule.id, message, 'failed', str(e), rule.name)
             except Exception as log_error:
                 self.logger.error(f"❌ 记录转发日志失败: {log_error}")
             return False
