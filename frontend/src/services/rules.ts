@@ -88,6 +88,16 @@ export const rulesApi = {
     }
   },
 
+  // 更新聊天名称
+  updateChatNames: async (): Promise<any> => {
+    return api.post('/api/rules/update-chat-names');
+  },
+
+  // 从Telegram获取聊天信息
+  fetchChatInfo: async (): Promise<any> => {
+    return api.post('/api/rules/fetch-chat-info');
+  },
+
   // 导出规则
   export: async (ids?: number[]): Promise<any> => {
     const response = await api.post('/api/rules/export', { ids: ids || [] });
