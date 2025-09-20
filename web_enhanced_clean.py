@@ -73,13 +73,11 @@ async def auto_database_migration():
                 
                 await db.commit()
                 logger.info("✅ 自动数据库迁移完成")
-            
-            # 检查并更新聊天名称
-            await auto_update_chat_names(db)
             else:
                 logger.info("✅ 数据库结构检查完成，无需迁移")
-                # 即使不需要迁移，也检查聊天名称
-                await auto_update_chat_names(db)
+            
+            # 检查并更新聊天名称（无论是否需要迁移都执行）
+            await auto_update_chat_names(db)
             break
             
     except Exception as e:
