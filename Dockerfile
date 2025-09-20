@@ -31,10 +31,10 @@ RUN apt-get update && apt-get install -y \
     tzdata \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
+# 注释掉Node.js安装，因为我们直接复制前端构建结果
+# RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+#     && apt-get install -y nodejs \
+#     && rm -rf /var/lib/apt/lists/*
 
 # 复制Python依赖文件
 COPY requirements.txt .
@@ -51,6 +51,8 @@ COPY *.py ./
 
 # 创建必要的目录
 RUN mkdir -p /app/data /app/logs /app/temp /app/sessions
+
+# NAS环境数据库优化已包含在*.py复制中
 
 # 设置权限
 RUN chmod -R 755 /app && \

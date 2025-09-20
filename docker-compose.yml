@@ -2,44 +2,51 @@ version: '3.8'
 
 services:
   telegram-message-bot:
-    image: hav93/telegram-message-bot:3.0
+    image: telegram-message-bot:v3.6
     container_name: telegram-message-bot
     restart: always
-    networks:
-      - telegram-net
 
     ports:
-      - 9393:9393
+      - "9393:9393"
 
     environment:
       - TZ=Asia/Shanghai
-      # === Telegram API配置 ===
-      - API_ID=your_api_id_here                    # 从 https://my.telegram.org 获取
-      - API_HASH=your_api_hash_here               # 从 https://my.telegram.org 获取
-      - BOT_TOKEN=your_bot_token_here         # 从 @BotFather 获取
-      - PHONE_NUMBER=your_phone_number_here       # 您的手机号（国际格式）
-      - ADMIN_USER_IDS=your_admin_user_ids     # 管理员用户ID（多个用逗号分隔）
-      - HTTP_PROXY=your_http_proxy_here
-      - HTTPS_PROXY=your_https_proxy_here
-      - DATABASE_URL=sqlite:///data/bot.db
       
-      # Web界面配置
+      # === Telegram API配置 ===
+      # 请在 .env 文件中设置这些值，或通过环境变量传递
+      - API_ID=${API_ID}
+      - API_HASH=${API_HASH}
+      - BOT_TOKEN=${BOT_TOKEN}
+      - PHONE_NUMBER=${PHONE_NUMBER}
+      - ADMIN_USER_IDS=${ADMIN_USER_IDS}
+      
+      # === 代理配置（可选）===
+      # 外网环境可不设置代理
+      - ENABLE_PROXY=${ENABLE_PROXY:-false}
+      - PROXY_TYPE=${PROXY_TYPE:-http}
+      - PROXY_HOST=${PROXY_HOST:-127.0.0.1}
+      - PROXY_PORT=${PROXY_PORT:-1080}
+      - PROXY_USERNAME=${PROXY_USERNAME:-}
+      - PROXY_PASSWORD=${PROXY_PASSWORD:-}
+      
+      # === 应用配置 ===
+      - DATABASE_URL=sqlite:///data/bot.db
       - WEB_HOST=0.0.0.0
       - WEB_PORT=9393
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
       
-      # 权限配置
+      # === 权限配置 ===
       - PUID=1000
       - PGID=1000
       
     volumes:
-      - /path/to/your/data:/app/data
-      - /path/to/your/logs:/app/logs
-      - /path/to/your/temp:/app/temp
-      - /path/to/your/sessions:/app/sessions
-      - /path/to/your/config:/app/config
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./sessions:/app/sessions
+      - ./temp:/app/temp
       
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:9393/').raise_for_status()"]
+      test: ["CMD", "/app/healthcheck.sh"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -17,3 +17,4 @@ pytz==2023.3
 requests==2.31.0
 itsdangerous==2.1.2
 fastapi-cors==0.0.6
+psutil==5.9.8

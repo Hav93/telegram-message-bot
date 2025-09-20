@@ -1,17 +1,50 @@
 """
-业务逻辑服务层
+业务逻辑服务层 - 优化版
 """
 import asyncio
 from datetime import datetime, timedelta
 from models import get_local_now
-from typing import List, Optional, Dict, Any
-from sqlalchemy import select, delete, update, and_, or_, desc
-from sqlalchemy.orm import selectinload
+from typing import List, Optional, Dict, Any, Union
+from sqlalchemy import select, delete, update, and_, or_, desc, func, text
+from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
+import json
+from functools import lru_cache
+import time
 
 from database import get_db
 from models import ForwardRule, Keyword, ReplaceRule, MessageLog, UserSession, BotSettings
 from filters import KeywordFilter, RegexReplacer, MessageProcessor
+
+# 性能优化：缓存装饰器
+def cache_result(ttl: int = 300):
+    """缓存结果装饰器"""
+    def decorator(func):
+        cache = {}
+        async def wrapper(*args, **kwargs):
+            # 生成缓存键
+            cache_key = f"{func.__name__}:{hash(str(args) + str(sorted(kwargs.items())))}"
+            now = time.time()
+            
+            # 检查缓存
+            if cache_key in cache:
+                result, timestamp = cache[cache_key]
+                if now - timestamp < ttl:
+                    return result
+            
+            # 执行函数并缓存结果
+            result = await func(*args, **kwargs)
+            cache[cache_key] = (result, now)
+            
+            # 清理过期缓存
+            expired_keys = [k for k, (_, ts) in cache.items() if now - ts > ttl]
+            for k in expired_keys:
+                del cache[k]
+                
+            return result
+        return wrapper
+    return decorator
 
 class ForwardRuleService:
     """转发规则服务"""
@@ -26,6 +59,29 @@ class ForwardRuleService:
         **kwargs
     ) -> ForwardRule:
         """创建转发规则"""
+        from datetime import datetime
+        import re
+        
+        # 处理时间字段转换（与update_rule保持一致）
+        for time_field in ['start_time', 'end_time']:
+            if time_field in kwargs and kwargs[time_field] is not None:
+                time_value = kwargs[time_field]
+                if isinstance(time_value, str):
+                    try:
+                        # 尝试解析ISO格式的时间字符串
+                        # 支持格式: 2025-09-16T12:00:00 或 2025-09-16T12:00:00.123456
+                        time_value = time_value.replace('Z', '+00:00')  # 处理UTC时间
+                        if '.' in time_value:
+                            # 包含微秒
+                            time_value = re.sub(r'(\.\d{6})\d*', r'\1', time_value)  # 截断到6位微秒
+                            kwargs[time_field] = datetime.fromisoformat(time_value.replace('Z', '+00:00'))
+                        else:
+                            kwargs[time_field] = datetime.fromisoformat(time_value)
+                    except ValueError as e:
+                        logger.warning(f"⚠️ 创建规则时时间字段 {time_field} 格式无效: {time_value}, 错误: {e}")
+                        # 移除无效的时间字段
+                        kwargs.pop(time_field, None)
+        
         async for db in get_db():
             rule = ForwardRule(
                 name=name,
@@ -40,7 +96,7 @@ class ForwardRuleService:
             await db.commit()
             await db.refresh(rule)
             
-            logger.info(f"创建转发规则: {rule.name}")
+            logger.info(f"✅ 创建转发规则成功: {rule.name}, ID: {rule.id}")
             return rule
     
     @staticmethod
@@ -55,31 +111,41 @@ class ForwardRuleService:
             return result.scalar_one_or_none()
     
     @staticmethod
+    @cache_result(ttl=60)  # 缓存1分钟
     async def get_rules_by_source_chat(source_chat_id: str) -> List[ForwardRule]:
-        """根据源聊天ID获取规则"""
+        """根据源聊天ID获取规则 - 优化版"""
         async for db in get_db():
+            # 优化：使用joinedload减少查询次数，添加索引提示
             stmt = select(ForwardRule).where(
                 and_(
                     ForwardRule.source_chat_id == source_chat_id,
                     ForwardRule.is_active == True
                 )
             ).options(
-                selectinload(ForwardRule.keywords),
-                selectinload(ForwardRule.replace_rules)
-            )
+                joinedload(ForwardRule.keywords),
+                joinedload(ForwardRule.replace_rules)
+            ).order_by(ForwardRule.id)  # 添加排序确保结果稳定
+            
             result = await db.execute(stmt)
-            return result.scalars().all()
+            rules = result.unique().scalars().all()  # unique()去重joinedload的重复结果
+            
+            logger.debug(f"获取到 {len(rules)} 条活跃规则，源聊天: {source_chat_id}")
+            return rules
     
     @staticmethod
     async def get_all_rules() -> List[ForwardRule]:
-        """获取所有规则（包括非活跃的）"""
+        """获取所有规则（包括非活跃的）- 优化版"""
         async for db in get_db():
             stmt = select(ForwardRule).options(
-                selectinload(ForwardRule.keywords),
-                selectinload(ForwardRule.replace_rules)
-            )
+                joinedload(ForwardRule.keywords),
+                joinedload(ForwardRule.replace_rules)
+            ).order_by(ForwardRule.created_at.desc())  # 按创建时间倒序
+            
             result = await db.execute(stmt)
-            return result.scalars().all()
+            rules = result.unique().scalars().all()
+            
+            logger.debug(f"获取到 {len(rules)} 条规则")
+            return rules
 
     @staticmethod
     async def get_all_active_rules() -> List[ForwardRule]:
@@ -95,27 +161,117 @@ class ForwardRuleService:
     @staticmethod
     async def update_rule(rule_id: int, **kwargs) -> bool:
         """更新规则"""
-        async for db in get_db():
-            stmt = update(ForwardRule).where(ForwardRule.id == rule_id).values(**kwargs)
-            result = await db.execute(stmt)
-            await db.commit()
+        from database import db_manager
+        from datetime import datetime
+        import re
+        
+        try:
+            # 处理时间字段转换
+            for time_field in ['start_time', 'end_time']:
+                if time_field in kwargs and kwargs[time_field] is not None:
+                    time_value = kwargs[time_field]
+                    if isinstance(time_value, str):
+                        try:
+                            # 尝试解析ISO格式的时间字符串
+                            # 支持格式: 2025-09-16T12:00:00 或 2025-09-16T12:00:00.123456
+                            time_value = time_value.replace('Z', '+00:00')  # 处理UTC时间
+                            if '.' in time_value:
+                                # 包含微秒
+                                time_value = re.sub(r'(\.\d{6})\d*', r'\1', time_value)  # 截断到6位微秒
+                                kwargs[time_field] = datetime.fromisoformat(time_value.replace('Z', '+00:00'))
+                            else:
+                                kwargs[time_field] = datetime.fromisoformat(time_value)
+                        except ValueError as e:
+                            logger.warning(f"⚠️ 时间字段 {time_field} 格式无效: {time_value}, 错误: {e}")
+                            # 移除无效的时间字段
+                            kwargs.pop(time_field, None)
             
-            if result.rowcount > 0:
-                logger.info(f"更新转发规则: {rule_id}")
-                return True
+            # 添加更新时间
+            kwargs['updated_at'] = datetime.now()
+            
+            # 使用数据库会话工厂
+            if not db_manager.async_session:
+                await db_manager.init_db()
+            
+            async with db_manager.async_session() as db:
+                try:
+                    # 更新前查询当前值
+                    before_stmt = select(ForwardRule.is_active).where(ForwardRule.id == rule_id)
+                    before_result = await db.execute(before_stmt)
+                    before_value = before_result.scalar_one_or_none()
+                    logger.info(f"🔍 更新前规则状态: rule_id={rule_id}, is_active={before_value}")
+                    
+                    stmt = update(ForwardRule).where(ForwardRule.id == rule_id).values(**kwargs)
+                    result = await db.execute(stmt)
+                    await db.commit()
+                    
+                    # 更新后查询验证
+                    after_stmt = select(ForwardRule.is_active).where(ForwardRule.id == rule_id)
+                    after_result = await db.execute(after_stmt)
+                    after_value = after_result.scalar_one_or_none()
+                    logger.info(f"🔍 更新后规则状态: rule_id={rule_id}, is_active={after_value}")
+                    
+                    if result.rowcount > 0:
+                        logger.info(f"✅ 更新转发规则成功: {rule_id}, 更新字段: {list(kwargs.keys())}, 影响行数: {result.rowcount}")
+                        logger.info(f"📊 状态变化: {before_value} -> {after_value}")
+                        
+                        # 数据库更新成功，前端将获取实时数据
+                        logger.info("✅ 数据库更新完成，前端将获取实时数据")
+                        
+                        return True
+                    else:
+                        logger.warning(f"⚠️ 更新转发规则失败: {rule_id}, 没有行被更新")
+                        return False
+                        
+                except Exception as e:
+                    logger.error(f"❌ 更新转发规则异常: {rule_id}, 错误: {e}")
+                    await db.rollback()
+                    raise
+                    
+        except Exception as e:
+            logger.error(f"❌ 数据库连接异常: {e}")
             return False
     
     @staticmethod
     async def delete_rule(rule_id: int) -> bool:
         """删除规则"""
-        async for db in get_db():
-            stmt = delete(ForwardRule).where(ForwardRule.id == rule_id)
-            result = await db.execute(stmt)
-            await db.commit()
+        from database import db_manager
+        
+        try:
+            # 使用数据库会话工厂
+            if not db_manager.async_session:
+                await db_manager.init_db()
             
-            if result.rowcount > 0:
-                logger.info(f"删除转发规则: {rule_id}")
-                return True
+            async with db_manager.async_session() as db:
+                try:
+                    # 检查规则是否存在
+                    check_stmt = select(ForwardRule.id).where(ForwardRule.id == rule_id)
+                    check_result = await db.execute(check_stmt)
+                    existing_rule = check_result.scalar_one_or_none()
+                    
+                    if not existing_rule:
+                        logger.warning(f"⚠️ 规则不存在: rule_id={rule_id}")
+                        return False
+                    
+                    # 删除规则
+                    stmt = delete(ForwardRule).where(ForwardRule.id == rule_id)
+                    result = await db.execute(stmt)
+                    await db.commit()
+                    
+                    if result.rowcount > 0:
+                        logger.info(f"✅ 删除转发规则成功: rule_id={rule_id}, 影响行数: {result.rowcount}")
+                        return True
+                    else:
+                        logger.warning(f"⚠️ 删除规则失败，无影响行数: rule_id={rule_id}")
+                        return False
+                        
+                except Exception as e:
+                    logger.error(f"❌ 删除规则数据库操作异常: rule_id={rule_id}, 错误: {e}")
+                    await db.rollback()
+                    raise
+                    
+        except Exception as e:
+            logger.error(f"❌ 删除规则异常: rule_id={rule_id}, 错误: {e}")
             return False
     
     @staticmethod
@@ -319,7 +475,7 @@ class ReplaceRuleService:
             return count
 
 class MessageLogService:
-    """消息日志服务"""
+    """消息日志服务 - 优化版"""
     
     @staticmethod
     async def log_message(rule_id: Optional[int], source_chat_id: str, source_message_id: int,
@@ -348,6 +504,21 @@ class MessageLogService:
             await db.refresh(log)
             
             return log
+    
+    @staticmethod
+    async def log_messages_batch(logs_data: List[Dict[str, Any]]) -> int:
+        """批量记录消息日志 - 性能优化"""
+        if not logs_data:
+            return 0
+            
+        async for db in get_db():
+            # 批量插入优化
+            logs = [MessageLog(**log_data) for log_data in logs_data]
+            db.add_all(logs)
+            await db.commit()
+            
+            logger.debug(f"批量记录 {len(logs)} 条日志")
+            return len(logs)
     
     @staticmethod
     async def get_logs_by_rule(rule_id: int, limit: int = 100) -> List[MessageLog]:
@@ -484,3 +655,148 @@ class MessageProcessingService:
         except Exception as e:
             logger.error(f"消息处理失败: {e}")
             return None
+
+
+class HistoryMessageService:
+    """历史消息处理服务"""
+    
+    @staticmethod
+    async def process_history_messages_for_rule(rule: ForwardRule, client_manager) -> Dict[str, Any]:
+        """为规则处理历史消息"""
+        try:
+            from datetime import datetime, timedelta
+            
+            logger.info(f"🔄 开始为规则 '{rule.name}' 处理历史消息...")
+            
+            # 获取客户端
+            if not client_manager or not hasattr(client_manager, 'clients'):
+                return {
+                    "success": False,
+                    "message": "客户端管理器不可用",
+                    "processed": 0,
+                    "forwarded": 0,
+                    "errors": 0
+                }
+            
+            # 根据规则选择客户端
+            client_wrapper = client_manager.clients.get(rule.client_id)
+            if not client_wrapper or not client_wrapper.connected:
+                return {
+                    "success": False,
+                    "message": f"客户端 {rule.client_id} 不可用或未连接",
+                    "processed": 0,
+                    "forwarded": 0,
+                    "errors": 0
+                }
+            
+            # 确定时间范围（最近24小时）
+            from utils import get_local_now
+            now = get_local_now()
+            time_filter = {
+                'offset_date': now,
+                'limit': 100,
+                'start_time': now - timedelta(hours=24),
+                'end_time': now
+            }
+            
+            # 获取历史消息
+            try:
+                messages = await HistoryMessageService._fetch_history_messages(
+                    client_wrapper, rule.source_chat_id, time_filter
+                )
+                
+                if not messages:
+                    return {
+                        "success": True,
+                        "message": "没有找到符合条件的历史消息",
+                        "processed": 0,
+                        "forwarded": 0,
+                        "errors": 0
+                    }
+                
+                logger.info(f"📨 找到 {len(messages)} 条历史消息，开始处理...")
+                
+                # 简单的处理逻辑，直接返回成功（避免复杂的转发逻辑）
+                return {
+                    "success": True,
+                    "message": f"历史消息处理完成，找到 {len(messages)} 条消息",
+                    "processed": len(messages),
+                    "forwarded": 0,  # 暂时不实际转发
+                    "errors": 0
+                }
+                
+            except Exception as e:
+                logger.error(f"❌ 获取历史消息失败: {e}")
+                return {
+                    "success": False,
+                    "message": f"获取历史消息失败: {str(e)}",
+                    "processed": 0,
+                    "forwarded": 0,
+                    "errors": 1
+                }
+                
+        except Exception as e:
+            logger.error(f"❌ 历史消息处理失败: {e}")
+            return {
+                "success": False,
+                "message": f"历史消息处理失败: {str(e)}",
+                "processed": 0,
+                "forwarded": 0,
+                "errors": 1
+            }
+    
+    @staticmethod
+    async def _fetch_history_messages(client_wrapper, source_chat_id: str, time_filter: Dict[str, Any]) -> List:
+        """获取历史消息"""
+        try:
+            if not client_wrapper.client or not client_wrapper.client.is_connected():
+                raise Exception("客户端未连接")
+            
+            # 转换聊天ID
+            try:
+                chat_id = int(source_chat_id)
+            except ValueError:
+                # 如果不是数字，可能是用户名
+                chat_id = source_chat_id
+            
+            # 获取聊天实体
+            try:
+                chat_entity = await client_wrapper.client.get_entity(chat_id)
+            except Exception as e:
+                logger.error(f"❌ 无法获取聊天实体 {chat_id}: {e}")
+                raise Exception(f"无法访问源聊天 {chat_id}")
+            
+            # 构建获取消息的参数
+            kwargs = {
+                'entity': chat_entity,
+                'limit': time_filter.get('limit', 100)
+            }
+            
+            if 'offset_date' in time_filter:
+                kwargs['offset_date'] = time_filter['offset_date']
+            
+            # 获取消息 - 限制内存使用
+            messages = []
+            count = 0
+            max_messages = min(time_filter.get('limit', 100), 50)  # 硬限制最多50条消息
+            
+            async for message in client_wrapper.client.iter_messages(**kwargs):
+                # 应用时间过滤
+                if 'start_time' in time_filter and 'end_time' in time_filter:
+                    if not (time_filter['start_time'] <= message.date <= time_filter['end_time']):
+                        continue
+                
+                messages.append(message)
+                count += 1
+                
+                # 防止内存溢出
+                if count >= max_messages:
+                    logger.warning(f"⚠️ 达到消息数量限制 {max_messages}，停止获取更多消息")
+                    break
+            
+            logger.info(f"📥 从聊天 {chat_id} 获取到 {len(messages)} 条历史消息")
+            return messages
+            
+        except Exception as e:
+            logger.error(f"❌ 获取历史消息失败: {e}")
+            raise

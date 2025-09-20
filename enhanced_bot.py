@@ -48,14 +48,25 @@ class EnhancedTelegramBot:
             except Exception as e:
                 self.logger.error(f"状态回调执行失败: {e}")
     
-    async def start(self, web_mode: bool = False):
+    async def start(self, web_mode: bool = False, skip_config_validation: bool = False):
         """启动机器人"""
         try:
             self.logger.info("🚀 启动增强版Telegram消息转发机器人")
             
-            # 验证配置
-            validate_config()
-            self.logger.info("✅ 配置验证通过")
+            # 验证配置（Web模式下可以跳过）
+            if not skip_config_validation:
+                try:
+                    validate_config()
+                    self.logger.info("✅ 配置验证通过")
+                except ValueError as config_error:
+                    if web_mode:
+                        self.logger.warning(f"⚠️ 配置未完整，将以Web-only模式启动: {config_error}")
+                        self.logger.info("🌐 启动Web界面进行配置...")
+                        return  # 跳过Telegram客户端启动，仅启动Web服务
+                    else:
+                        raise  # 非Web模式时仍然抛出配置错误
+            else:
+                self.logger.info("⏭️ 跳过配置验证（Web-only模式）")
             
             # 创建目录
             Config.create_directories()
@@ -64,13 +75,22 @@ class EnhancedTelegramBot:
             await init_database()
             self.logger.info("✅ 数据库初始化完成")
             
-            # 添加默认用户客户端
-            user_client = self.multi_client_manager.add_client("main_user", "user")
+            # 添加默认用户客户端（带配置）
+            user_config = {
+                'api_id': Config.API_ID,
+                'api_hash': Config.API_HASH,
+                'phone': Config.PHONE_NUMBER
+            }
+            user_client = self.multi_client_manager.add_client_with_config("main_user", "user", user_config)
             user_client.add_status_callback(self._notify_status_change)
             
             # 如果配置了BOT_TOKEN，添加机器人客户端
             if Config.BOT_TOKEN:
-                bot_client = self.multi_client_manager.add_client("main_bot", "bot")
+                bot_config = {
+                    'bot_token': Config.BOT_TOKEN,
+                    'admin_user_id': Config.ADMIN_USER_IDS[0] if Config.ADMIN_USER_IDS else None
+                }
+                bot_client = self.multi_client_manager.add_client_with_config("main_bot", "bot", bot_config)
                 bot_client.add_status_callback(self._notify_status_change)
             
             # 启动客户端
@@ -176,6 +196,47 @@ class EnhancedTelegramBot:
         """同步获取聊天列表（兼容原有接口）"""
         # 这里可以实现获取聊天列表的逻辑
         return []
+    
+    async def forward_history_messages(self, rule_id: int, hours: int = 24):
+        """转发历史消息（当规则从关闭状态激活时）"""
+        try:
+            from services import ForwardRuleService
+            
+            # 获取规则信息
+            rule = await ForwardRuleService.get_rule_by_id(rule_id)
+            if not rule:
+                self.logger.warning(f"规则 {rule_id} 不存在，跳过历史消息转发")
+                return
+            
+            if not rule.is_active:
+                self.logger.warning(f"规则 {rule_id} 未激活，跳过历史消息转发")
+                return
+            
+            self.logger.info(f"规则 {rule_id} 激活，开始处理历史消息...")
+            
+            # 使用多客户端管理器的历史消息处理方法
+            if hasattr(self.multi_client_manager, 'process_history_messages'):
+                result = self.multi_client_manager.process_history_messages(rule)
+                if result and result.get('success'):
+                    # 显示详细的处理统计
+                    total_fetched = result.get('total_fetched', 0)
+                    forwarded = result.get('forwarded', 0)
+                    skipped = result.get('skipped', 0) 
+                    errors = result.get('errors', 0)
+                    
+                    self.logger.info(f"规则 {rule_id} 历史消息处理完成:")
+                    self.logger.info(f"  📥 获取: {total_fetched} 条")
+                    self.logger.info(f"  ✅ 转发: {forwarded} 条")
+                    self.logger.info(f"  ⏭️ 跳过: {skipped} 条")
+                    self.logger.info(f"  ❌ 错误: {errors} 条")
+                else:
+                    self.logger.warning(f"规则 {rule_id} 历史消息处理失败: {result.get('message', 'Unknown error') if result else 'No result'}")
+            else:
+                self.logger.warning(f"多客户端管理器不支持历史消息处理")
+            
+        except Exception as e:
+            self.logger.error(f"转发历史消息失败: {e}")
+            raise
 
 
 async def main():

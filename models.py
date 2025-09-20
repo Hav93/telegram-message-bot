@@ -12,13 +12,25 @@ Base = declarative_base()
 
 def get_local_now():
     """获取本地时区的当前时间"""
-    if os.environ.get('TZ') == 'Asia/Shanghai':
-        # 使用中国时区
+    try:
         import pytz
-        tz = pytz.timezone('Asia/Shanghai')
-        return datetime.now(tz)
-    else:
-        # 使用系统本地时区
+        tz_name = os.environ.get('TZ', 'UTC')
+        if tz_name == 'Asia/Shanghai':
+            tz = pytz.timezone('Asia/Shanghai')
+            return datetime.now(tz)
+        elif tz_name != 'UTC':
+            # 尝试使用指定的时区
+            try:
+                tz = pytz.timezone(tz_name)
+                return datetime.now(tz)
+            except pytz.UnknownTimeZoneError:
+                # 如果时区无效，使用UTC
+                return datetime.now(pytz.UTC)
+        else:
+            # 使用UTC时区
+            return datetime.now(pytz.UTC)
+    except ImportError:
+        # 如果pytz不可用，使用系统本地时间
         return datetime.now()
 
 class ForwardRule(Base):

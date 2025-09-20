@@ -44,7 +44,7 @@ async def main():
             enhanced_bot = EnhancedTelegramBot()
             logger.info("✅ 增强版机器人管理器已创建")
             
-            # 启动机器人（后台运行）
+            # 启动机器人（后台运行，支持无配置Web-only模式）
             await enhanced_bot.start(web_mode=True)
             logger.info("✅ 增强版机器人已在后台启动")
             
@@ -62,8 +62,8 @@ async def main():
         
         app = FastAPI(
             title="Telegram消息转发机器人 - 增强版",
-            description="Telegram消息转发机器人v3.0",
-            version="3.0.0"
+            description="Telegram消息转发机器人v3.6",
+            version="3.6.0"
         )
         
         # 添加CORS中间件
@@ -111,26 +111,40 @@ async def main():
         async def get_enhanced_system_status():
             """获取增强版系统状态"""
             try:
-                if enhanced_bot:
+                # 由于我们使用的是web_enhanced_clean.py，始终返回增强模式
+                if enhanced_bot and hasattr(enhanced_bot, 'get_client_status'):
                     clients_status = enhanced_bot.get_client_status()
                     return JSONResponse(content={
                         "success": True,
                         "enhanced_mode": True,
+                        "app_version": Config.APP_VERSION,
+                        "app_name": Config.APP_NAME,
+                        "app_description": Config.APP_DESCRIPTION,
                         "clients": clients_status,
                         "total_clients": len(clients_status),
                         "running_clients": sum(1 for client in clients_status.values() if client.get("running", False)),
                         "connected_clients": sum(1 for client in clients_status.values() if client.get("connected", False))
                     })
                 else:
+                    # 即使enhanced_bot为None，仍然返回增强模式为true
+                    # 因为我们使用的是web_enhanced_clean.py
                     return JSONResponse(content={
                         "success": True,
-                        "enhanced_mode": False,
-                        "message": "运行在传统模式"
+                        "enhanced_mode": True,
+                        "app_version": Config.APP_VERSION,
+                        "app_name": Config.APP_NAME,
+                        "app_description": Config.APP_DESCRIPTION,
+                        "clients": {},
+                        "total_clients": 0,
+                        "running_clients": 0,
+                        "connected_clients": 0,
+                        "message": "增强模式已启用，正在初始化..."
                     })
             except Exception as e:
                 logger.error(f"获取增强版系统状态失败: {e}")
                 return JSONResponse(content={
                     "success": False,
+                    "enhanced_mode": True,  # 保持增强模式状态
                     "message": f"获取系统状态失败: {str(e)}"
                 }, status_code=500)
         
@@ -367,6 +381,20 @@ async def main():
                 }
                 update_data = {k: v for k, v in data.items() if k in allowed_fields}
                 
+                # 检查是否是激活规则的操作（基于更新前的状态）
+                is_activating = (
+                    'is_active' in update_data and 
+                    update_data['is_active'] is True and 
+                    existing_rule.is_active is False
+                )
+                
+                # 调试日志
+                logger.info(f"规则更新调试 - rule_id: {rule_id}")
+                logger.info(f"  - 原始请求数据: {data}")
+                logger.info(f"  - 过滤后更新数据: {update_data}")
+                logger.info(f"  - 现有规则状态: is_active={existing_rule.is_active}")
+                logger.info(f"  - 是否激活操作: {is_activating}")
+                
                 # 更新规则
                 success = await ForwardRuleService.update_rule(rule_id, **update_data)
                 
@@ -378,6 +406,16 @@ async def main():
                 
                 # 获取更新后的规则
                 updated_rule = await ForwardRuleService.get_rule_by_id(rule_id)
+                
+                # 如果是激活规则且enhanced_bot存在，触发历史消息转发
+                if is_activating and enhanced_bot:
+                    try:
+                        # 获取最近24小时内的历史消息进行转发
+                        await enhanced_bot.forward_history_messages(rule_id, hours=24)
+                        logger.info(f"规则 {rule_id} 激活，已触发历史消息转发")
+                    except Exception as history_error:
+                        logger.warning(f"历史消息转发失败: {history_error}")
+                        # 不影响规则更新的成功响应
                 
                 return JSONResponse(content={
                     "success": True,
@@ -465,12 +503,12 @@ async def main():
         async def get_chats():
             """获取聊天列表"""
             try:
-                # 从多客户端管理器获取聊天列表（线程安全方式）
-                if multi_client_manager:
+                # 从增强版机器人获取聊天列表
+                if enhanced_bot and enhanced_bot.multi_client_manager:
                     all_chats = []
                     clients_info = []
                     
-                    for client_id, client_wrapper in multi_client_manager.clients.items():
+                    for client_id, client_wrapper in enhanced_bot.multi_client_manager.clients.items():
                         if client_wrapper.connected:
                             try:
                                 # 使用线程安全方法获取聊天列表
@@ -649,6 +687,121 @@ async def main():
                 return JSONResponse(content={
                     "success": False,
                     "message": f"获取日志失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.post("/api/logs/batch-delete")
+        async def batch_delete_logs(request: Request):
+            """批量删除日志"""
+            try:
+                data = await request.json()
+                ids = data.get('ids', [])
+                
+                if not ids:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "未提供要删除的日志ID"
+                    }, status_code=400)
+                
+                from models import MessageLog
+                from database import get_db
+                from sqlalchemy import select, delete
+                
+                async for db in get_db():
+                    # 验证日志是否存在
+                    existing_logs = await db.execute(
+                        select(MessageLog.id).where(MessageLog.id.in_(ids))
+                    )
+                    existing_ids = [row[0] for row in existing_logs.fetchall()]
+                    
+                    if not existing_ids:
+                        return JSONResponse(content={
+                            "success": False,
+                            "message": "未找到要删除的日志"
+                        }, status_code=404)
+                    
+                    # 批量删除
+                    delete_query = delete(MessageLog).where(MessageLog.id.in_(existing_ids))
+                    result = await db.execute(delete_query)
+                    await db.commit()
+                    
+                    logger.info(f"批量删除了 {result.rowcount} 条日志")
+                    
+                    return JSONResponse(content={
+                        "success": True,
+                        "message": f"成功删除 {result.rowcount} 条日志",
+                        "deleted_count": result.rowcount
+                    })
+                    
+            except Exception as e:
+                logger.error(f"批量删除日志失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"删除失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.post("/api/logs/clear")
+        async def clear_logs(request: Request):
+            """清空日志（支持过滤条件）"""
+            try:
+                data = await request.json()
+                
+                from models import MessageLog
+                from database import get_db
+                from sqlalchemy import delete, and_, func
+                from datetime import datetime
+                
+                async for db in get_db():
+                    # 构建删除条件
+                    conditions = []
+                    
+                    # 状态过滤
+                    if data.get('status'):
+                        conditions.append(MessageLog.status == data['status'])
+                    
+                    # 日期过滤
+                    if data.get('date'):
+                        try:
+                            target_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+                            conditions.append(func.date(MessageLog.created_at) == target_date)
+                        except ValueError:
+                            logger.warning(f"无效的日期格式: {data['date']}")
+                    
+                    elif data.get('start_date') or data.get('end_date'):
+                        if data.get('start_date'):
+                            try:
+                                start_dt = datetime.strptime(data['start_date'], '%Y-%m-%d').date()
+                                conditions.append(func.date(MessageLog.created_at) >= start_dt)
+                            except ValueError:
+                                pass
+                        
+                        if data.get('end_date'):
+                            try:
+                                end_dt = datetime.strptime(data['end_date'], '%Y-%m-%d').date()
+                                conditions.append(func.date(MessageLog.created_at) <= end_dt)
+                            except ValueError:
+                                pass
+                    
+                    # 执行删除
+                    delete_query = delete(MessageLog)
+                    if conditions:
+                        delete_query = delete_query.where(and_(*conditions))
+                    
+                    result = await db.execute(delete_query)
+                    await db.commit()
+                    
+                    logger.info(f"清空了 {result.rowcount} 条日志")
+                    
+                    return JSONResponse(content={
+                        "success": True,
+                        "message": f"成功清空 {result.rowcount} 条日志",
+                        "deleted_count": result.rowcount
+                    })
+                    
+            except Exception as e:
+                logger.error(f"清空日志失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"清空失败: {str(e)}"
                 }, status_code=500)
         
         @app.post("/api/clients")
@@ -958,6 +1111,67 @@ async def main():
                 return JSONResponse(content={
                     "success": False,
                     "message": f"保存设置失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.post("/api/telegram/restart-client")
+        async def restart_telegram_client(request: Request):
+            """重启Telegram客户端以应用新配置"""
+            try:
+                # 重新加载配置
+                try:
+                    from config import Config
+                    Config.reload()
+                    logger.info("✅ 配置重新加载完成")
+                except Exception as reload_error:
+                    logger.warning(f"⚠️ 配置重新加载失败，但继续重启: {reload_error}")
+                
+                # 验证新配置（允许跳过验证失败继续重启）
+                config_valid = True
+                try:
+                    from config import validate_config
+                    validate_config()
+                    logger.info("✅ 新配置验证通过")
+                except ValueError as config_error:
+                    logger.warning(f"⚠️ 配置验证失败，但仍允许重启: {config_error}")
+                    config_valid = False
+                
+                # 重启或启动Telegram客户端
+                if enhanced_bot:
+                    if hasattr(enhanced_bot, 'multi_client_manager') and enhanced_bot.multi_client_manager:
+                        # 如果客户端管理器已存在，重启客户端
+                        if hasattr(enhanced_bot.multi_client_manager, 'restart_clients'):
+                            await enhanced_bot.multi_client_manager.restart_clients()
+                            logger.info("✅ Telegram客户端重启完成")
+                        else:
+                            # 重新初始化客户端管理器
+                            await enhanced_bot.start(web_mode=True)
+                            logger.info("✅ Telegram客户端重新初始化完成")
+                    else:
+                        # 如果之前是Web-only模式，现在启动Telegram客户端
+                        await enhanced_bot.start(web_mode=True)
+                        logger.info("✅ Telegram客户端首次启动完成")
+                    
+                    if config_valid:
+                        return JSONResponse(content={
+                            "success": True,
+                            "message": "Telegram客户端重启成功，新配置已生效"
+                        })
+                    else:
+                        return JSONResponse(content={
+                            "success": True,
+                            "message": "客户端重启成功，但配置可能不完整。请在客户端管理页面完成配置"
+                        })
+                else:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "增强版机器人未初始化"
+                    }, status_code=400)
+                
+            except Exception as e:
+                logger.error(f"❌ 重启Telegram客户端失败: {str(e)}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"重启失败: {str(e)}"
                 }, status_code=500)
         
         @app.post("/api/clients/{client_id}/login")

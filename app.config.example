@@ -1,19 +1,31 @@
-# Telegram API配置
-API_ID=21812187
-API_HASH=1721026f3d4245ab19051189609fe5a1
-BOT_TOKEN=8439453123:AAHJB40ptWIqKeOSnMGWs1ysEWXKq68PcD8
-PHONE_NUMBER=+8613081860942
-ADMIN_USER_IDS=[6478767200]
+# Telegram Message Bot v3.6 - 配置文件
+# 复制此文件为您的配置文件并填入实际值
 
-# 代理配置
-ENABLE_PROXY=true
-PROXY_TYPE=http
-PROXY_HOST=192.168.31.6
-PROXY_PORT=7890
-PROXY_USERNAME=
+# === Telegram API配置（必需）===
+API_ID=
+API_HASH=
+BOT_TOKEN=
+PHONE_NUMBER=+86
+ADMIN_USER_IDS=
 
-# 日志管理配置
+# === 代理配置（可选）===
+# 外网环境通常不需要代理，保持 ENABLE_PROXY=false 即可
+# 内网环境如需代理，取消注释下方配置并填入代理信息
+ENABLE_PROXY=false
+#PROXY_TYPE=http
+#PROXY_HOST=
+#PROXY_PORT=
+#PROXY_USERNAME=
+#PROXY_PASSWORD=
+
+# === 应用配置（可选）===
+LOG_LEVEL=INFO
+
+# === 日志管理配置（可选）===
 ENABLE_LOG_CLEANUP=false
 LOG_RETENTION_DAYS=30
 LOG_CLEANUP_TIME=02:00
 MAX_LOG_SIZE=100
+
+# === 时区配置 ===
+TZ=Asia/Shanghai

@@ -42,8 +42,8 @@ class Config:
     
     # === 应用信息 ===
     APP_NAME = os.getenv('APP_NAME', 'telegram-message')
-    APP_VERSION = os.getenv('APP_VERSION', '3.0.0')
-    APP_DESCRIPTION = os.getenv('APP_DESCRIPTION', 'Telegram消息转发机器人v3.0')
+    APP_VERSION = os.getenv('APP_VERSION', '3.6.0')
+    APP_DESCRIPTION = os.getenv('APP_DESCRIPTION', 'Telegram消息转发机器人v3.6')
     
     # === Telegram API 配置 ===
     try:
@@ -167,7 +167,8 @@ class Config:
         ConfigLoader.load_config()
         
         # 重新设置所有属性
-        cls.API_ID = int(os.getenv('API_ID', '0')) if os.getenv('API_ID', '0').isdigit() else 0
+        api_id_str = os.getenv('API_ID', '0').strip()
+        cls.API_ID = int(api_id_str) if api_id_str and api_id_str.isdigit() else 0
         cls.API_HASH = os.getenv('API_HASH', '')
         cls.BOT_TOKEN = os.getenv('BOT_TOKEN', '')
         cls.PHONE_NUMBER = os.getenv('PHONE_NUMBER', '')
@@ -177,26 +178,38 @@ class Config:
         cls.DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///data/bot.db')
         cls.LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
         cls.LOG_FILE = os.getenv('LOG_FILE', 'logs/bot.log')
-        cls.MAX_FORWARD_DELAY = int(os.getenv('MAX_FORWARD_DELAY', '5'))
+        
+        # 安全的int转换
+        max_delay = os.getenv('MAX_FORWARD_DELAY', '5').strip()
+        cls.MAX_FORWARD_DELAY = int(max_delay) if max_delay and max_delay.isdigit() else 5
+        
         cls.ENABLE_MEDIA_FORWARD = os.getenv('ENABLE_MEDIA_FORWARD', 'true').lower() == 'true'
         cls.ENABLE_KEYWORD_FILTER = os.getenv('ENABLE_KEYWORD_FILTER', 'true').lower() == 'true'
         cls.ENABLE_REGEX_REPLACE = os.getenv('ENABLE_REGEX_REPLACE', 'true').lower() == 'true'
-        cls.WEB_PORT = int(os.getenv('WEB_PORT', '9393'))
+        
+        web_port = os.getenv('WEB_PORT', '9393').strip()
+        cls.WEB_PORT = int(web_port) if web_port and web_port.isdigit() else 9393
         cls.WEB_HOST = os.getenv('WEB_HOST', '0.0.0.0')
         
         # 重载代理配置
         cls.ENABLE_PROXY = os.getenv('ENABLE_PROXY', 'false').lower() == 'true'
         cls.PROXY_TYPE = os.getenv('PROXY_TYPE', 'http')
         cls.PROXY_HOST = os.getenv('PROXY_HOST', '127.0.0.1')
-        cls.PROXY_PORT = int(os.getenv('PROXY_PORT', '1080'))
+        
+        proxy_port = os.getenv('PROXY_PORT', '1080').strip()
+        cls.PROXY_PORT = int(proxy_port) if proxy_port and proxy_port.isdigit() else 1080
         cls.PROXY_USERNAME = os.getenv('PROXY_USERNAME', '')
         cls.PROXY_PASSWORD = os.getenv('PROXY_PASSWORD', '')
         
         # 重载日志管理配置
         cls.ENABLE_LOG_CLEANUP = os.getenv('ENABLE_LOG_CLEANUP', 'true').lower() == 'true'
-        cls.LOG_RETENTION_DAYS = int(os.getenv('LOG_RETENTION_DAYS', '30'))
+        
+        retention_days = os.getenv('LOG_RETENTION_DAYS', '30').strip()
+        cls.LOG_RETENTION_DAYS = int(retention_days) if retention_days and retention_days.isdigit() else 30
         cls.LOG_CLEANUP_TIME = os.getenv('LOG_CLEANUP_TIME', '02:00')
-        cls.MAX_LOG_SIZE = int(os.getenv('MAX_LOG_SIZE', '100'))
+        
+        max_log_size = os.getenv('MAX_LOG_SIZE', '100').strip()
+        cls.MAX_LOG_SIZE = int(max_log_size) if max_log_size and max_log_size.isdigit() else 100
         
         # 重载Session配置
         cls.SESSION_SECRET = os.getenv('SESSION_SECRET', 'default-secret-key-change-in-production')

@@ -1,0 +1,523 @@
+/* 全局样式重置和基础设置 */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* 确保body也有渐变背景 */
+  background-attachment: fixed;
+}
+
+#root {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* 与测试页面完全一致的渐变 */
+  background-attachment: fixed;
+}
+
+/* 玻璃质感容器 */
+.glass-container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* 修复Modal确认对话框显示问题 */
+.ant-modal-root {
+  z-index: 10000 !important;
+}
+
+.ant-modal-mask {
+  z-index: 10000 !important;
+  background-color: rgba(0, 0, 0, 0.45) !important;
+}
+
+.ant-modal-wrap {
+  z-index: 10001 !important;
+}
+
+.ant-modal {
+  z-index: 10001 !important;
+}
+
+/* 确保Modal确认对话框的样式 */
+.ant-modal-confirm {
+  z-index: 10002 !important;
+}
+
+.ant-modal-confirm .ant-modal-content {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+}
+
+/* 玻璃质感卡片 */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* 主布局样式 - 重新设计的布局结构 */
+.main-layout-wrapper {
+  background: transparent;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+}
+
+/* 固定侧边栏样式 */
+.fixed-sidebar {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 布局顶部导航栏样式 */
+.layout-header {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 主内容区域样式 */
+.main-content-area {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  width: 100%;
+  max-width: none;
+}
+
+/* 头部内容布局 */
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  color: #ffffff;
+}
+
+/* 移除重复的响应式规则，保留下面统一的响应式设计 */
+
+/* 侧边栏菜单样式 - WCAG对比度优化 */
+.ant-menu {
+  background: transparent !important;
+  border: none !important;
+}
+
+.ant-menu-item {
+  background: transparent !important;
+  color: #ffffff !important; /* 纯白色文字，与测试页面一致 */
+  border-radius: 8px !important;
+  margin: 4px 0 !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important; /* 增强阴影，提升可读性 */
+}
+
+.ant-menu-item:hover {
+  background: rgba(255, 255, 255, 0.2) !important; /* 增强悬停背景 */
+  color: #ffffff !important;
+}
+
+.ant-menu-item-selected {
+  background: rgba(255, 255, 255, 0.3) !important; /* 选中状态背景，参照测试页面 */
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7) !important; /* 选中状态更强阴影 */
+}
+
+.ant-menu-item-selected::after {
+  display: none !important;
+}
+
+/* 头部样式优化 */
+.header-title {
+  color: #ffffff !important;
+  margin: 0 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+.user-info {
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* Ant Design 组件覆盖 - 参照测试页面样式 */
+.ant-card {
+  background: rgba(255, 255, 255, 0.1) !important; /* 参照测试页面的白色半透明背景 */
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 15px !important; /* 参照测试页面的圆角 */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important; /* 参照测试页面阴影 */
+}
+
+.ant-card-head {
+  background: rgba(255, 255, 255, 0.05) !important; /* 轻微的白色半透明背景 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.ant-card-head-title {
+  color: #ffffff !important; /* 纯白色，与测试页面一致 */
+  font-weight: 700 !important; /* 增加字体粗细 */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important; /* 更强阴影，提升可读性 */
+  font-size: 18px !important; /* 增大字体，提升层次感 */
+}
+
+.ant-card-body {
+  color: #ffffff !important; /* 纯白色文字 */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7) !important; /* 增强阴影，提升可读性 */
+}
+
+/* 统计卡片样式 - 增强可见性 */
+.ant-statistic-title {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important; /* 增强阴影 */
+  font-size: 14px !important;
+}
+
+.ant-statistic-content-value {
+  color: #ffffff !important;
+  font-weight: 800 !important; /* 最大字体粗细 */
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9) !important; /* 最强阴影 */
+  font-size: 28px !important; /* 增大字体 */
+}
+
+/* 状态指示器色彩方案 - 参照测试页面 */
+.status-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.status-online { background: #52c41a; } /* 成功/在线 - 鲜绿色 */
+.status-offline { background: #ff4d4f; } /* 错误/离线 - 鲜红色 */
+.status-warning { background: #faad14; } /* 警告 - 橙黄色 */
+.status-info { background: #1890ff; } /* 信息 - 蓝色 */
+
+/* 文字状态色彩 - 参照测试页面 */
+.text-success { color: #52c41a !important; } /* 成功 - 鲜绿色 */
+.text-error { color: #ff4d4f !important; } /* 错误 - 鲜红色 */
+.text-warning { color: #faad14 !important; } /* 警告 - 橙黄色 */
+.text-info { color: #1890ff !important; } /* 信息 - 蓝色 */
+.text-primary { color: #91d5ff !important; } /* 链接色彩，参照测试页面 */
+
+/* 链接样式 - 参照测试页面 */
+a, .ant-typography a {
+  color: #91d5ff !important; /* 与测试页面链接色彩一致 */
+  text-decoration: none !important;
+  transition: color 0.3s ease !important;
+}
+
+a:hover, .ant-typography a:hover {
+  color: #b7e7ff !important; /* 悬停时更亮 */
+  text-decoration: underline !important;
+}
+
+/* 表格样式 - 参照测试页面 */
+.ant-table {
+  background: rgba(255, 255, 255, 0.1) !important; /* 参照测试页面的白色半透明背景 */
+  border-radius: 8px !important;
+}
+
+.ant-table-thead > tr > th {
+  background: rgba(255, 255, 255, 0.2) !important; /* 增强表头背景 */
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+.ant-table-tbody > tr > td {
+  background: transparent !important;
+  color: #ffffff !important; /* 提高表格内容对比度 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: rgba(255, 255, 255, 0.15) !important; /* 增强悬停效果 */
+  color: #ffffff !important;
+}
+
+/* 按钮样式 - 参照测试页面 */
+.ant-btn-primary {
+  background: rgba(255, 255, 255, 0.2) !important; /* 完全参照测试页面 */
+  border: 1px solid rgba(255, 255, 255, 0.3) !important; /* 完全参照测试页面 */
+  color: #ffffff !important; /* 纯白色文字 */
+  font-weight: 500 !important;
+  font-size: 16px !important; /* 与测试页面一致 */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important; /* 增加文字阴影 */
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-radius: 8px !important; /* 参照测试页面圆角 */
+  transition: all 0.3s ease !important; /* 参照测试页面过渡效果 */
+}
+
+.ant-btn-primary:hover {
+  background: rgba(255, 255, 255, 0.3) !important; /* 完全参照测试页面悬停效果 */
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important; /* 参照测试页面悬停效果 */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important; /* 更柔和的阴影 */
+}
+
+.ant-btn-default {
+  background: rgba(255, 255, 255, 0.1) !important; /* 默认按钮稍微透明 */
+  border: 1px solid rgba(255, 255, 255, 0.3) !important; /* 参照测试页面边框 */
+  color: #ffffff !important; /* 纯白色文字 */
+  font-weight: 500 !important;
+  font-size: 16px !important; /* 与测试页面一致 */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important; /* 增加文字阴影 */
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-radius: 8px !important; /* 参照测试页面圆角 */
+  transition: all 0.3s ease !important; /* 参照测试页面过渡效果 */
+}
+
+.ant-btn-default:hover {
+  background: rgba(255, 255, 255, 0.3) !important; /* 参照测试页面悬停背景 */
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important; /* 参照测试页面悬停效果 */
+}
+
+/* 标签样式 */
+.ant-tag {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+}
+
+.ant-tag-blue {
+  background: rgba(24, 144, 255, 0.2) !important;
+  border-color: rgba(24, 144, 255, 0.4) !important;
+  color: #91d5ff !important;
+}
+
+.ant-tag-green {
+  background: rgba(82, 196, 26, 0.2) !important;
+  border-color: rgba(82, 196, 26, 0.4) !important;
+  color: #b7eb8f !important;
+}
+
+.ant-tag-red {
+  background: rgba(255, 77, 79, 0.2) !important;
+  border-color: rgba(255, 77, 79, 0.4) !important;
+  color: #ffadd2 !important;
+}
+
+/* 输入框样式 */
+.ant-input, 
+.ant-select-selector, 
+.ant-textarea,
+.ant-input-password,
+.ant-input-password .ant-input,
+.ant-input-number,
+.ant-input-number .ant-input-number-input {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  color: white !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.ant-input::placeholder, 
+.ant-textarea::placeholder,
+.ant-input-password .ant-input::placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.ant-input:focus, 
+.ant-select-focused .ant-select-selector, 
+.ant-textarea:focus,
+.ant-input-password:focus,
+.ant-input-password .ant-input:focus,
+.ant-input-number:focus,
+.ant-input-number-focused {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(135, 206, 235, 0.8) !important;
+  box-shadow: 0 0 0 2px rgba(135, 206, 235, 0.3) !important;
+}
+
+/* 密码输入框特殊处理 */
+.ant-input-password .ant-input-suffix {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* 模态框样式 */
+.ant-modal-content {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.ant-modal-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.ant-modal-title {
+  color: white !important;
+}
+
+.ant-modal-body {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* 开关样式 */
+.ant-switch-checked {
+  background-color: rgba(82, 196, 26, 0.8) !important;
+}
+
+/* 分页样式 */
+.ant-pagination .ant-pagination-item {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.ant-pagination .ant-pagination-item a {
+  color: white !important;
+}
+
+.ant-pagination .ant-pagination-item-active {
+  background: rgba(24, 144, 255, 0.3) !important;
+  border-color: rgba(24, 144, 255, 0.5) !important;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* 页面内容动画和间距 */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+  padding-top: 0; /* 已在content上设置了足够的padding-top，这里不需要额外间距 */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .main-content-area {
+    padding: 16px !important;
+  }
+  
+  .glass-card {
+    border-radius: 8px;
+  }
+}
+
+/* 特殊动画效果 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.floating-card {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* 渐变文字 */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: bold;
+}
+
+/* 发光效果 */
+.glow-effect {
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.glow-effect:hover {
+  box-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+}
+
+/* 搜索框输入文字样式 */
+.ant-input-affix-wrapper .ant-input {
+  color: #1a1a1a !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 500 !important;
+}
+
+.ant-input-affix-wrapper .ant-input::placeholder {
+  color: #999 !important;
+}
+
+.ant-input-affix-wrapper {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.ant-input-affix-wrapper:hover {
+  border-color: rgba(102, 126, 234, 0.6) !important;
+}
+
+.ant-input-affix-wrapper:focus-within {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+}
