@@ -1,5 +1,9 @@
 # 🚀 Telegram消息转发机器人
 
+[![Docker Hub](https://img.shields.io/docker/pulls/hav93/telegram-message-bot.svg)](https://hub.docker.com/r/hav93/telegram-message-bot)
+[![Docker Image Version](https://img.shields.io/docker/v/hav93/telegram-message-bot)](https://hub.docker.com/r/hav93/telegram-message-bot/tags)
+[![Docker Image Size](https://img.shields.io/docker/image-size/hav93/telegram-message-bot/latest)](https://hub.docker.com/r/hav93/telegram-message-bot)
+
 **版本**: v3.6.0  
 **更新时间**: 2025年9月20日
 
@@ -130,6 +134,8 @@
    ```
 
 ### 方式二：Docker Hub镜像
+
+> 🐳 **Docker Hub仓库**: [hav93/telegram-message-bot](https://hub.docker.com/r/hav93/telegram-message-bot)
 
 1. **拉取镜像**
    ```bash
