@@ -155,6 +155,12 @@ async def main():
             try:
                 from services import ForwardRuleService
                 rules = await ForwardRuleService.get_all_rules()
+                
+                # 添加调试日志
+                logger.info(f"📋 获取到 {len(rules)} 条规则")
+                for rule in rules:
+                    logger.info(f"📋 规则 {rule.id}: name='{rule.name}', type={type(rule.name)}, len={len(rule.name) if rule.name else 0}")
+                
                 # 将规则对象转换为字典，包含关联数据
                 rules_data = []
                 for rule in rules:

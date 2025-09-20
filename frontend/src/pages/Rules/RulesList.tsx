@@ -62,6 +62,9 @@ const RulesList: React.FC = () => {
       console.log('📋 规则详细数据:', rules?.map(r => ({
         id: r.id,
         name: r.name,
+        nameType: typeof r.name,
+        nameLength: r.name?.length || 0,
+        nameValue: `"${r.name}"`,
         source_chat_id: r.source_chat_id,
         source_chat_name: r.source_chat_name,
         target_chat_id: r.target_chat_id,
