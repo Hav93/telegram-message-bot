@@ -726,6 +726,70 @@ async def main():
                     "message": f"获取日志失败: {str(e)}"
                 }, status_code=500)
         
+        @app.post("/api/logs/fix-rule-association")
+        async def fix_rule_association():
+            """修复规则和消息日志的关联关系 - 添加规则名称字段"""
+            try:
+                from database import get_db
+                from models import MessageLog, ForwardRule
+                from sqlalchemy import select, delete, func, text, update
+                
+                async for db in get_db():
+                    # 1. 检查是否已有 rule_name 字段
+                    try:
+                        await db.execute(text("SELECT rule_name FROM message_logs LIMIT 1"))
+                        has_rule_name_column = True
+                        logger.info("🔧 rule_name 字段已存在")
+                    except Exception:
+                        has_rule_name_column = False
+                        logger.info("🔧 需要添加 rule_name 字段")
+                    
+                    # 2. 如果没有 rule_name 字段，则添加
+                    if not has_rule_name_column:
+                        await db.execute(text("ALTER TABLE message_logs ADD COLUMN rule_name VARCHAR(100)"))
+                        logger.info("✅ 已添加 rule_name 字段")
+                    
+                    # 3. 获取当前所有规则的ID和名称映射
+                    current_rules = await db.execute(select(ForwardRule.id, ForwardRule.name))
+                    rule_mapping = {rule[0]: rule[1] for rule in current_rules.fetchall()}
+                    
+                    logger.info(f"🔧 当前规则映射: {rule_mapping}")
+                    
+                    # 4. 更新现有日志的 rule_name
+                    for rule_id, rule_name in rule_mapping.items():
+                        update_result = await db.execute(
+                            update(MessageLog)
+                            .where(MessageLog.rule_id == rule_id)
+                            .values(rule_name=rule_name)
+                        )
+                        logger.info(f"🔧 更新规则ID {rule_id} 的日志名称为 '{rule_name}': {update_result.rowcount} 条")
+                    
+                    # 5. 删除孤立的消息日志（rule_id不在当前规则表中）
+                    valid_rule_ids = list(rule_mapping.keys())
+                    delete_result = await db.execute(
+                        delete(MessageLog).where(~MessageLog.rule_id.in_(valid_rule_ids))
+                    )
+                    deleted_count = delete_result.rowcount
+                    
+                    await db.commit()
+                    
+                    logger.info(f"✅ 修复完成: 删除了 {deleted_count} 条孤立的消息日志")
+                    
+                    return JSONResponse(content={
+                        "success": True,
+                        "message": f"修复完成，添加了rule_name字段并删除了 {deleted_count} 条孤立日志",
+                        "deleted_count": deleted_count,
+                        "rule_mapping": rule_mapping,
+                        "added_rule_name_column": not has_rule_name_column
+                    })
+                    
+            except Exception as e:
+                logger.error(f"❌ 修复规则关联失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"修复失败: {str(e)}"
+                }, status_code=500)
+        
         @app.post("/api/logs/batch-delete")
         async def batch_delete_logs(request: Request):
             """批量删除日志"""

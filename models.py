@@ -131,6 +131,7 @@ class MessageLog(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     rule_id = Column(Integer, ForeignKey('forward_rules.id'), nullable=True)
+    rule_name = Column(String(100), comment='规则名称（用于稳定关联）')
     
     # 源消息信息
     source_chat_id = Column(String(50), nullable=False, comment='源聊天ID')
