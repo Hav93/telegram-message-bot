@@ -216,6 +216,13 @@ PROXY_PORT=1080
 
 感谢所有使用和支持本项目的朋友们！您的反馈和建议让这个项目变得更好。
 
+### ☕ 请作者喝杯咖啡
+
+如果这个项目对您有帮助，欢迎请作者喝杯咖啡 ☕
+
+![微信支付](https://raw.githubusercontent.com/Hav93/telegram-message-bot/main/wechat_pay_qr.png)
+
+*微信扫码支付*
 
 ## 📄 许可证与免责声明
 
@@ -234,16 +241,3 @@ PROXY_PORT=1080
 ---
 
 ⭐ **如果这个项目对您有帮助，请给个Star支持一下！** ⭐
-
-## ☕ 请作者喝杯咖啡
-
-如果这个项目对您有帮助，欢迎请作者喝杯咖啡！您的支持是我们持续改进的动力。
-
-<div align="center">
-
-### 微信支付
-<img src="https://raw.githubusercontent.com/Hav93/telegram-message-bot/main/wechat_pay_qr.png" alt="微信支付收款码" width="300">
-
-*请使用微信扫一扫*
-
-</div>
