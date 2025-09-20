@@ -161,6 +161,37 @@ async def main():
                 for rule in rules:
                     logger.info(f"📋 规则 {rule.id}: name='{rule.name}', type={type(rule.name)}, len={len(rule.name) if rule.name else 0}")
                 
+                # 检查消息日志中的规则关联
+                from database import get_db
+                from models import MessageLog
+                from sqlalchemy import select, func
+                
+                async for db in get_db():
+                    # 统计每个规则ID的消息日志数量
+                    log_stats = await db.execute(
+                        select(MessageLog.rule_id, func.count(MessageLog.id).label('count'))
+                        .group_by(MessageLog.rule_id)
+                    )
+                    log_results = log_stats.fetchall()
+                    
+                    logger.info(f"📊 消息日志统计:")
+                    for log_stat in log_results:
+                        logger.info(f"📊 规则ID {log_stat[0]}: {log_stat[1]} 条日志")
+                    
+                    # 检查最近的几条日志记录
+                    recent_logs = await db.execute(
+                        select(MessageLog.id, MessageLog.rule_id, MessageLog.source_message_id, 
+                               MessageLog.source_chat_id, MessageLog.status)
+                        .order_by(MessageLog.created_at.desc())
+                        .limit(5)
+                    )
+                    recent_results = recent_logs.fetchall()
+                    
+                    logger.info(f"📊 最近5条消息日志:")
+                    for log in recent_results:
+                        logger.info(f"📊 日志ID={log[0]}, 规则ID={log[1]}, 消息ID={log[2]}, 源聊天={log[3]}, 状态={log[4]}")
+                    break
+                
                 # 将规则对象转换为字典，包含关联数据
                 rules_data = []
                 for rule in rules:
