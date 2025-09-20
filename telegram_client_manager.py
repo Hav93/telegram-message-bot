@@ -1302,26 +1302,37 @@ class MultiClientManager:
             from sqlalchemy import select, and_, or_
             
             async for db in get_db():
-                # 查询消息日志表，检查是否已存在相同的源消息ID和规则ID的记录
-                # 优先使用规则名称进行查询，如果没有则使用rule_id
+                # 查询消息日志表，检查是否已存在相同的源消息ID和规则名称的记录
+                # 优先使用规则名称进行查询，这样更稳定，不受规则ID变化影响
                 stmt = select(MessageLog).where(
                     and_(
                         MessageLog.source_message_id == str(message.id),
                         MessageLog.source_chat_id == str(rule.source_chat_id),
-                        or_(
-                            MessageLog.rule_name == rule.name,  # 优先使用规则名称
-                            MessageLog.rule_id == rule.id      # 兼容旧数据
-                        ),
+                        MessageLog.rule_name == rule.name,  # 主要使用规则名称
                         MessageLog.status == 'success'  # 只检查成功转发的消息
                     )
                 )
                 result = await db.execute(stmt)
                 existing_log = result.scalar_one_or_none()
                 
+                # 如果基于规则名称没找到，再尝试基于rule_id查询（兼容旧数据）
+                if not existing_log:
+                    stmt_fallback = select(MessageLog).where(
+                        and_(
+                            MessageLog.source_message_id == str(message.id),
+                            MessageLog.source_chat_id == str(rule.source_chat_id),
+                            MessageLog.rule_id == rule.id,  # 兼容旧数据
+                            MessageLog.rule_name.is_(None),  # 只查询没有rule_name的旧记录
+                            MessageLog.status == 'success'
+                        )
+                    )
+                    result_fallback = await db.execute(stmt_fallback)
+                    existing_log = result_fallback.scalar_one_or_none()
+                
                 # 添加详细的调试日志
                 is_already_forwarded = existing_log is not None
-                self.logger.info(f"🔍 消息转发状态检查: 消息ID={message.id}, 规则ID={rule.id}, 源聊天={rule.source_chat_id}")
-                self.logger.info(f"🔍 查询条件: source_message_id='{message.id}', source_chat_id='{rule.source_chat_id}', rule_id={rule.id}, status='success'")
+                self.logger.info(f"🔍 消息转发状态检查: 消息ID={message.id}, 规则名称='{rule.name}', 源聊天={rule.source_chat_id}")
+                self.logger.info(f"🔍 主查询条件: source_message_id='{message.id}', source_chat_id='{rule.source_chat_id}', rule_name='{rule.name}', status='success'")
                 self.logger.info(f"🔍 查询结果: {'已转发' if is_already_forwarded else '未转发'} (日志ID: {existing_log.id if existing_log else 'None'})")
                 
                 if is_already_forwarded:
