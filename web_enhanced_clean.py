@@ -834,14 +834,14 @@ async def main():
                             if rule.source_chat_id and (not rule.source_chat_name or rule.source_chat_name.strip() == ''):
                                 try:
                                     source_entity = await client_wrapper.client.get_entity(int(rule.source_chat_id))
-                                    # 群聊使用 title，私聊使用 first_name 或 username
+                                    # 优先使用 title 字段，这是最通用的名称字段
                                     if hasattr(source_entity, 'title') and source_entity.title:
                                         source_name = source_entity.title
+                                    elif hasattr(source_entity, 'username') and source_entity.username:
+                                        source_name = f"@{source_entity.username}"
                                     elif hasattr(source_entity, 'first_name') and source_entity.first_name:
                                         last_name = getattr(source_entity, 'last_name', '')
                                         source_name = f"{source_entity.first_name} {last_name}".strip()
-                                    elif hasattr(source_entity, 'username') and source_entity.username:
-                                        source_name = f"@{source_entity.username}"
                                     else:
                                         source_name = f"聊天 {rule.source_chat_id}"
                                     
@@ -854,14 +854,14 @@ async def main():
                             if rule.target_chat_id and (not rule.target_chat_name or rule.target_chat_name.strip() == ''):
                                 try:
                                     target_entity = await client_wrapper.client.get_entity(int(rule.target_chat_id))
-                                    # 群聊使用 title，私聊使用 first_name 或 username
+                                    # 优先使用 title 字段，这是最通用的名称字段
                                     if hasattr(target_entity, 'title') and target_entity.title:
                                         target_name = target_entity.title
+                                    elif hasattr(target_entity, 'username') and target_entity.username:
+                                        target_name = f"@{target_entity.username}"
                                     elif hasattr(target_entity, 'first_name') and target_entity.first_name:
                                         last_name = getattr(target_entity, 'last_name', '')
                                         target_name = f"{target_entity.first_name} {last_name}".strip()
-                                    elif hasattr(target_entity, 'username') and target_entity.username:
-                                        target_name = f"@{target_entity.username}"
                                     else:
                                         target_name = f"聊天 {rule.target_chat_id}"
                                     
