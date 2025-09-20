@@ -1185,24 +1185,30 @@ class MultiClientManager:
     async def _should_forward_message(self, message, rule, client_wrapper):
         """检查消息是否应该被转发（应用所有过滤规则）"""
         try:
+            self.logger.info(f"🔍 [转发检查] 开始检查消息 {message.id} (规则: {rule.name})")
+            
             # 检查消息是否已经被转发过
             if await self._is_message_already_forwarded(message, rule):
-                self.logger.debug(f"⏭️ 消息 {message.id} 已经被转发过，跳过")
+                self.logger.info(f"⏭️ [转发检查] 消息 {message.id} 已经被转发过，跳过")
                 return False
             
             # 检查消息类型过滤
             if not self._check_message_type_filter(message, rule):
+                self.logger.info(f"⏭️ [转发检查] 消息 {message.id} 不符合消息类型过滤条件，跳过")
                 return False
             
             # 检查关键词过滤
             if rule.enable_keyword_filter and hasattr(rule, 'keywords') and rule.keywords:
                 if not self._check_keyword_filter(message, rule):
+                    self.logger.info(f"⏭️ [转发检查] 消息 {message.id} 不符合关键词过滤条件，跳过")
                     return False
             
             # 检查时间过滤
             if not self._check_time_filter(message, rule):
+                self.logger.info(f"⏭️ [转发检查] 消息 {message.id} 不符合时间过滤条件，跳过")
                 return False
-                
+            
+            self.logger.info(f"✅ [转发检查] 消息 {message.id} 通过所有过滤条件，准备转发")
             return True
             
         except Exception as e:
