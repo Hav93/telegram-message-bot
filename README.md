@@ -249,7 +249,7 @@ PROXY_PORT=1080
 <div align="center">
 
 ### 微信支付
-<img src="wechat_pay_qr.png" alt="微信支付收款码" width="300">
+<img src="https://raw.githubusercontent.com/Hav93/telegram-message-bot/main/wechat_pay_qr.png" alt="微信支付收款码" width="300">
 
 *请使用微信扫一扫*
 
