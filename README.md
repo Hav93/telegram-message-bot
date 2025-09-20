@@ -216,13 +216,6 @@ PROXY_PORT=1080
 
 感谢所有使用和支持本项目的朋友们！您的反馈和建议让这个项目变得更好。
 
-### ☕ 请作者喝杯咖啡
-
-如果这个项目对您有帮助，欢迎请作者喝杯咖啡 ☕
-
-![微信支付](https://raw.githubusercontent.com/your-repo/telegram-message-bot/main/docs/wechat-pay.png)
-
-*微信扫码支付*
 
 ## 📄 许可证与免责声明
 
