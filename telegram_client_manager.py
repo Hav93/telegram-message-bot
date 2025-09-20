@@ -1297,7 +1297,12 @@ class MultiClientManager:
                 result = await db.execute(stmt)
                 existing_log = result.scalar_one_or_none()
                 
-                return existing_log is not None
+                # 添加详细的调试日志
+                is_already_forwarded = existing_log is not None
+                self.logger.debug(f"🔍 消息转发状态检查: 消息ID={message.id}, 规则ID={rule.id}, 源聊天={rule.source_chat_id}")
+                self.logger.debug(f"🔍 查询结果: {'已转发' if is_already_forwarded else '未转发'} (日志ID: {existing_log.id if existing_log else 'None'})")
+                
+                return is_already_forwarded
                 
         except Exception as e:
             self.logger.error(f"❌ 检查消息转发状态失败: {e}")

@@ -62,6 +62,10 @@ const RulesList: React.FC = () => {
       console.log('📋 规则详细数据:', rules?.map(r => ({
         id: r.id,
         name: r.name,
+        source_chat_id: r.source_chat_id,
+        source_chat_name: r.source_chat_name,
+        target_chat_id: r.target_chat_id,
+        target_chat_name: r.target_chat_name,
         is_active: r.is_active,
         idType: typeof r.id,
         hasValidId: r.id && r.id > 0
@@ -362,29 +366,42 @@ const RulesList: React.FC = () => {
       dataIndex: 'name',
       key: 'name',
       width: 150,
-      render: (text: string) => (
-        <div>
-          <div style={{ fontWeight: 'bold', color: 'white' }}>{text}</div>
-        </div>
-      ),
+      render: (text: string, record: ForwardRule) => {
+        const displayName = text || `规则 #${record.id}` || '未命名规则';
+        return (
+          <div>
+            <div style={{ fontWeight: 'bold', color: 'white' }}>{displayName}</div>
+          </div>
+        );
+      },
     },
     {
       title: '源聊天',
       dataIndex: 'source_chat_id',
       key: 'source_chat_id',
       width: 120,
-      render: (text: number) => (
-        <Tag color="blue" style={{ color: 'white' }}>{text || '未设置'}</Tag>
-      ),
+      render: (text: number, record: ForwardRule) => {
+        const displayText = record.source_chat_name || text || '未设置';
+        return (
+          <Tag color="blue" style={{ color: 'white' }}>
+            {displayText}
+          </Tag>
+        );
+      },
     },
     {
       title: '目标聊天',
       dataIndex: 'target_chat_id',
       key: 'target_chat_id',
       width: 120,
-      render: (text: number) => (
-        <Tag color="green" style={{ color: 'white' }}>{text || '未设置'}</Tag>
-      ),
+      render: (text: number, record: ForwardRule) => {
+        const displayText = record.target_chat_name || text || '未设置';
+        return (
+          <Tag color="green" style={{ color: 'white' }}>
+            {displayText}
+          </Tag>
+        );
+      },
     },
     {
       title: '状态',
