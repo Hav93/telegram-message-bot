@@ -73,12 +73,82 @@ async def auto_database_migration():
                 
                 await db.commit()
                 logger.info("✅ 自动数据库迁移完成")
+            
+            # 检查并更新聊天名称
+            await auto_update_chat_names(db)
             else:
                 logger.info("✅ 数据库结构检查完成，无需迁移")
+                # 即使不需要迁移，也检查聊天名称
+                await auto_update_chat_names(db)
             break
             
     except Exception as e:
         logger.error(f"❌ 自动数据库迁移失败: {e}")
+
+async def auto_update_chat_names(db):
+    """自动更新聊天名称"""
+    try:
+        from models import ForwardRule
+        from sqlalchemy import select, update
+        
+        logger.info("🔄 开始检查聊天名称...")
+        
+        # 获取所有聊天名称为空的规则
+        rules_to_update = await db.execute(
+            select(ForwardRule).where(
+                (ForwardRule.source_chat_name.is_(None)) | 
+                (ForwardRule.source_chat_name == '') |
+                (ForwardRule.target_chat_name.is_(None)) | 
+                (ForwardRule.target_chat_name == '')
+            )
+        )
+        rules = rules_to_update.fetchall()
+        
+        if not rules:
+            logger.info("✅ 所有规则的聊天名称都已设置")
+            return
+        
+        logger.info(f"🔄 发现 {len(rules)} 个规则需要更新聊天名称")
+        
+        # 尝试从enhanced_bot获取Telegram客户端
+        try:
+            # 这里需要从全局变量获取enhanced_bot实例
+            # 由于在函数作用域内，我们先用占位符名称
+            updated_count = 0
+            for rule_tuple in rules:
+                rule = rule_tuple[0]  # SQLAlchemy返回的是tuple
+                updated_fields = {}
+                
+                # 更新源聊天名称
+                if not rule.source_chat_name or rule.source_chat_name.strip() == '':
+                    # 暂时使用聊天ID作为占位符，后续可以通过API更新
+                    source_name = f"聊天 {rule.source_chat_id}"
+                    updated_fields['source_chat_name'] = source_name
+                
+                # 更新目标聊天名称
+                if not rule.target_chat_name or rule.target_chat_name.strip() == '':
+                    target_name = f"聊天 {rule.target_chat_id}"
+                    updated_fields['target_chat_name'] = target_name
+                
+                if updated_fields:
+                    await db.execute(
+                        update(ForwardRule)
+                        .where(ForwardRule.id == rule.id)
+                        .values(**updated_fields)
+                    )
+                    updated_count += 1
+                    logger.info(f"🔄 更新规则 {rule.name}: {updated_fields}")
+            
+            if updated_count > 0:
+                await db.commit()
+                logger.info(f"✅ 已为 {updated_count} 个规则设置占位符聊天名称")
+                logger.info("💡 提示: 启动后可调用 /api/rules/fetch-chat-info 获取真实聊天名称")
+            
+        except Exception as e:
+            logger.warning(f"⚠️ 无法获取Telegram客户端，使用占位符名称: {e}")
+            
+    except Exception as e:
+        logger.error(f"❌ 自动更新聊天名称失败: {e}")
 
 async def main():
     """主函数"""
