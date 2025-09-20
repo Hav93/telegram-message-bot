@@ -1292,18 +1292,18 @@ class MultiClientManager:
             
             async for db in get_db():
                 # 查询消息日志表，检查是否已存在相同的源消息ID和规则ID的记录
-                    # 优先使用规则名称进行查询，如果没有则使用rule_id
-                    stmt = select(MessageLog).where(
-                        and_(
-                            MessageLog.source_message_id == str(message.id),
-                            MessageLog.source_chat_id == str(rule.source_chat_id),
-                            or_(
-                                MessageLog.rule_name == rule.name,  # 优先使用规则名称
-                                MessageLog.rule_id == rule.id      # 兼容旧数据
-                            ),
-                            MessageLog.status == 'success'  # 只检查成功转发的消息
-                        )
+                # 优先使用规则名称进行查询，如果没有则使用rule_id
+                stmt = select(MessageLog).where(
+                    and_(
+                        MessageLog.source_message_id == str(message.id),
+                        MessageLog.source_chat_id == str(rule.source_chat_id),
+                        or_(
+                            MessageLog.rule_name == rule.name,  # 优先使用规则名称
+                            MessageLog.rule_id == rule.id      # 兼容旧数据
+                        ),
+                        MessageLog.status == 'success'  # 只检查成功转发的消息
                     )
+                )
                 result = await db.execute(stmt)
                 existing_log = result.scalar_one_or_none()
                 
