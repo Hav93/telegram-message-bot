@@ -249,10 +249,7 @@ PROXY_PORT=1080
 <div align="center">
 
 ### 微信支付
-*请将您的微信收款码图片保存为 `wechat_pay_qr.png` 并放在项目根目录*
-
-<!-- 临时隐藏，等待添加真实图片 -->
-<!-- <img src="wechat_pay_qr.png" alt="微信支付收款码" width="300"> -->
+<img src="wechat_pay_qr.png" alt="微信支付收款码" width="300">
 
 *请使用微信扫一扫*
 
