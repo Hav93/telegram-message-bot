@@ -4,7 +4,7 @@
 [![Docker Image Version](https://img.shields.io/docker/v/hav93/telegram-message-bot)](https://hub.docker.com/r/hav93/telegram-message-bot/tags)
 [![Docker Image Size](https://img.shields.io/docker/image-size/hav93/telegram-message-bot/latest)](https://hub.docker.com/r/hav93/telegram-message-bot)
 
-**版本**: v3.6.0  
+**版本**: v3.7.0  
 **更新时间**: 2025年9月20日
 
 一个功能强大的Telegram消息转发机器人，支持多客户端管理、智能过滤、关键词替换等高级功能。
@@ -222,7 +222,7 @@ PROXY_PORT=1080
 
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Hav93/telegram-message-bot/main/wechat_pay_qr.png" alt="微信支付收款码" width="200">
+<img src="https://raw.githubusercontent.com/Hav93/telegram-message-bot/main/wechat_pay_qr.png" alt="微信支付收款码" width="300">
 
 *微信扫码支付*
 
@@ -244,9 +244,4 @@ PROXY_PORT=1080
 
 ---
 
-<<<<<<< HEAD
 ⭐ **如果这个项目对您有帮助，请给个Star支持一下！** ⭐
-=======
-⭐ **如果这个项目对您有帮助，请给个Star支持一下！** ⭐
-
->>>>>>> 9175575b30a166b8cd79df8ca6a1677e5a6dd901

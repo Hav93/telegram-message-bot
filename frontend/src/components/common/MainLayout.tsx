@@ -188,7 +188,7 @@ const MainLayout: React.FC = () => {
             fontWeight: 500,
             textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
           }}>
-            🚀 v{systemInfo?.app_version || '3.6.0'}
+            🚀 v{systemInfo?.app_version || '3.7.0'}
           </div>
         </div>
 

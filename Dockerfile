@@ -31,10 +31,10 @@ RUN apt-get update && apt-get install -y \
     tzdata \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装Node.js用于构建前端
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
+# 注释掉Node.js安装，使用预构建的前端文件
+# RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+#     && apt-get install -y nodejs \
+#     && rm -rf /var/lib/apt/lists/*
 
 # 复制Python依赖文件
 COPY requirements.txt .
@@ -43,12 +43,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# 复制前端源码并构建
-COPY frontend/package*.json ./frontend/
-RUN cd frontend && npm ci
-
-COPY frontend/ ./frontend/
-RUN cd frontend && npm run build
+# 复制前端构建结果（需要先在本地构建）
+COPY frontend/dist ./frontend/dist
 
 # 复制应用代码 - 所有Python文件
 COPY *.py ./

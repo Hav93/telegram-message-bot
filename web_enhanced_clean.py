@@ -63,7 +63,7 @@ async def main():
         app = FastAPI(
             title="Telegram消息转发机器人 - 增强版",
             description="Telegram消息转发机器人v3.6",
-            version="3.6.0"
+            version="3.7.0"
         )
         
         # 添加CORS中间件

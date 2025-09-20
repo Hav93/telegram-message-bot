@@ -47,5 +47,5 @@ jobs:
         push: true
         tags: |
           hav93/telegram-message-bot:latest
-          hav93/telegram-message-bot:v3.6
+          hav93/telegram-message-bot:v3.7
         platforms: linux/amd64
