@@ -719,12 +719,21 @@ async def main():
                             "message": "未找到要删除的日志"
                         }, status_code=404)
                     
+                    # 记录删除前的日志信息
+                    logs_to_delete = await db.execute(
+                        select(MessageLog.id, MessageLog.source_message_id, MessageLog.source_chat_id, 
+                               MessageLog.rule_id, MessageLog.status).where(MessageLog.id.in_(existing_ids))
+                    )
+                    deleted_logs_info = logs_to_delete.fetchall()
+                    
                     # 批量删除
                     delete_query = delete(MessageLog).where(MessageLog.id.in_(existing_ids))
                     result = await db.execute(delete_query)
                     await db.commit()
                     
                     logger.info(f"批量删除了 {result.rowcount} 条日志")
+                    for log_info in deleted_logs_info:
+                        logger.info(f"🗑️ 删除日志: ID={log_info[0]}, 消息ID={log_info[1]}, 源聊天={log_info[2]}, 规则ID={log_info[3]}, 状态={log_info[4]}")
                     
                     return JSONResponse(content={
                         "success": True,

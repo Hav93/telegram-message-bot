@@ -1305,8 +1305,12 @@ class MultiClientManager:
                 
                 # 添加详细的调试日志
                 is_already_forwarded = existing_log is not None
-                self.logger.debug(f"🔍 消息转发状态检查: 消息ID={message.id}, 规则ID={rule.id}, 源聊天={rule.source_chat_id}")
-                self.logger.debug(f"🔍 查询结果: {'已转发' if is_already_forwarded else '未转发'} (日志ID: {existing_log.id if existing_log else 'None'})")
+                self.logger.info(f"🔍 消息转发状态检查: 消息ID={message.id}, 规则ID={rule.id}, 源聊天={rule.source_chat_id}")
+                self.logger.info(f"🔍 查询条件: source_message_id='{message.id}', source_chat_id='{rule.source_chat_id}', rule_id={rule.id}, status='success'")
+                self.logger.info(f"🔍 查询结果: {'已转发' if is_already_forwarded else '未转发'} (日志ID: {existing_log.id if existing_log else 'None'})")
+                
+                if is_already_forwarded:
+                    self.logger.info(f"🔍 找到的日志记录: ID={existing_log.id}, 创建时间={existing_log.created_at}, 状态={existing_log.status}")
                 
                 return is_already_forwarded
                 
