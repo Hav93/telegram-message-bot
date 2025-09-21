@@ -66,10 +66,18 @@ const RulesList: React.FC = () => {
 
   // 根据chat_id获取聊天显示名称（优先first_name）
   const getChatDisplayName = (chatId: string) => {
+    console.log(`🔍 查找聊天ID: ${chatId}, 聊天总数: ${chats.length}`);
+    console.log('📋 所有聊天数据:', chats.map(c => ({ id: c.id, type: typeof c.id, first_name: c.first_name, title: c.title })));
+    
     const chat = chats.find(chat => String(chat.id) === String(chatId));
+    console.log(`🎯 找到的聊天:`, chat);
+    
     if (chat) {
-      return chat.first_name || chat.title || chat.name || `聊天 ${chatId}`;
+      const displayName = chat.first_name || chat.title || chat.name || `聊天 ${chatId}`;
+      console.log(`✅ 显示名称: ${displayName}`);
+      return displayName;
     }
+    console.log(`❌ 未找到聊天 ${chatId}，使用占位符`);
     return `聊天 ${chatId}`;
   };
 
