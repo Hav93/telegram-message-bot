@@ -7,7 +7,7 @@ import threading
 import logging
 import time
 from typing import Dict, List, Optional, Any, Callable
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from telethon import TelegramClient, events
@@ -16,11 +16,63 @@ from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
 
 from config import Config
 from database import get_db
-from models import ForwardRule, MessageLog
+from models import ForwardRule, MessageLog, get_local_now
 from filters import KeywordFilter, RegexReplacer
 from proxy_utils import get_proxy_manager
 
 logger = logging.getLogger(__name__)
+
+def get_configured_timezone():
+    """获取配置的时区对象"""
+    try:
+        import pytz
+        import os
+        tz_name = os.environ.get('TZ', 'Asia/Shanghai')
+        
+        if tz_name == 'UTC':
+            return pytz.UTC
+        else:
+            try:
+                return pytz.timezone(tz_name)
+            except pytz.UnknownTimeZoneError:
+                logger.warning(f"未知时区 {tz_name}，使用 Asia/Shanghai")
+                return pytz.timezone('Asia/Shanghai')
+    except ImportError:
+        logger.warning("pytz 不可用，使用 UTC 时区")
+        return timezone.utc
+
+def get_current_time():
+    """获取当前配置时区的时间"""
+    try:
+        import pytz
+        import os
+        tz_name = os.environ.get('TZ', 'Asia/Shanghai')
+        
+        if tz_name == 'UTC':
+            return datetime.now(pytz.UTC)
+        else:
+            try:
+                tz = pytz.timezone(tz_name)
+                return datetime.now(tz)
+            except pytz.UnknownTimeZoneError:
+                logger.warning(f"未知时区 {tz_name}，使用 Asia/Shanghai")
+                tz = pytz.timezone('Asia/Shanghai')
+                return datetime.now(tz)
+    except ImportError:
+        logger.warning("pytz 不可用，使用系统本地时间")
+        return datetime.now()
+
+def ensure_timezone(dt):
+    """确保datetime对象有时区信息"""
+    if dt is None:
+        return None
+    
+    if dt.tzinfo is None:
+        # 如果没有时区信息，假设是配置的时区
+        configured_tz = get_configured_timezone()
+        return configured_tz.localize(dt)
+    
+    return dt
 
 class TelegramClientManager:
     """
@@ -512,17 +564,13 @@ class TelegramClientManager:
             return True
     
     def _check_time_filter(self, rule: ForwardRule, message) -> bool:
-        """检查时间过滤条件"""
+        """检查时间过滤条件 - 使用配置的时区"""
         if not hasattr(rule, 'time_filter_type'):
             return True
         
-        from datetime import datetime, timezone
-        
-        message_time = message.date
-        if message_time.tzinfo is None:
-            message_time = message_time.replace(tzinfo=timezone.utc)
-        
-        current_time = datetime.now(timezone.utc)
+        # 使用配置的时区
+        message_time = ensure_timezone(message.date)
+        current_time = get_current_time()
         
         if rule.time_filter_type == "after_start":
             # 启动后的消息都转发（实时消息处理）
@@ -534,20 +582,14 @@ class TelegramClientManager:
         elif rule.time_filter_type == "from_time":
             # 从指定时间开始
             if hasattr(rule, 'start_time') and rule.start_time:
-                start_time = rule.start_time
-                if start_time.tzinfo is None:
-                    start_time = start_time.replace(tzinfo=timezone.utc)
+                start_time = ensure_timezone(rule.start_time)
                 return message_time >= start_time
         elif rule.time_filter_type == "time_range":
             # 指定时间段内
             if hasattr(rule, 'start_time') and hasattr(rule, 'end_time'):
                 if rule.start_time and rule.end_time:
-                    start_time = rule.start_time
-                    end_time = rule.end_time
-                    if start_time.tzinfo is None:
-                        start_time = start_time.replace(tzinfo=timezone.utc)
-                    if end_time.tzinfo is None:
-                        end_time = end_time.replace(tzinfo=timezone.utc)
+                    start_time = ensure_timezone(rule.start_time)
+                    end_time = ensure_timezone(rule.end_time)
                     return start_time <= message_time <= end_time
         elif rule.time_filter_type == "all_messages":
             # 转发所有消息（无时间限制）
@@ -1142,12 +1184,10 @@ class MultiClientManager:
     async def _process_history_messages_async(self, rule, client_wrapper):
         """在客户端事件循环中处理历史消息 - 参考v3.1实现"""
         try:
-            from datetime import datetime, timedelta, timezone
-            
             self.logger.info(f"🔄 开始在客户端事件循环中处理规则 '{rule.name}' 的历史消息...")
             
             # 根据规则的时间过滤类型确定时间范围
-            now = datetime.now(timezone.utc)
+            now = get_current_time()
             
             if rule.time_filter_type == 'after_start':
                 # 仅转发启动后的消息 - 不处理历史消息
@@ -1166,12 +1206,12 @@ class MultiClientManager:
                 end_time = now
             elif rule.time_filter_type == 'from_time' and rule.start_time:
                 # 从指定时间开始
-                start_time = rule.start_time.replace(tzinfo=timezone.utc) if rule.start_time.tzinfo is None else rule.start_time
+                start_time = ensure_timezone(rule.start_time)
                 end_time = now
             elif rule.time_filter_type == 'time_range' and rule.start_time and rule.end_time:
                 # 指定时间段内
-                start_time = rule.start_time.replace(tzinfo=timezone.utc) if rule.start_time.tzinfo is None else rule.start_time
-                end_time = rule.end_time.replace(tzinfo=timezone.utc) if rule.end_time.tzinfo is None else rule.end_time
+                start_time = ensure_timezone(rule.start_time)
+                end_time = ensure_timezone(rule.end_time)
                 # 确保end_time不超过当前时间
                 if end_time > now:
                     end_time = now
