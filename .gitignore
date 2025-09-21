@@ -6,7 +6,9 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+# Python dist目录，但不影响前端dist
+/*.dist/
+dist/*.egg-info/
 downloads/
 eggs/
 .eggs/
@@ -66,7 +68,13 @@ config/config.env
 # 前端开发文件
 frontend/node_modules/
 frontend/.vite/
-frontend/dist/*.map
+# 保留前端构建文件，但忽略 source map
+frontend/dist/**/*.map
+
+# 明确包含前端构建的关键文件（覆盖之前的忽略规则）
+!frontend/dist/
+!frontend/dist/**
+frontend/dist/**/*.map
 
 # 备份文件
 *.backup
