@@ -240,7 +240,7 @@ async def main():
         
         # 创建简化的FastAPI应用
         logger.info("🌐 启动Web服务器...")
-        from fastapi import FastAPI, Request
+        from fastapi import FastAPI, Request, File, UploadFile
         from fastapi.responses import JSONResponse
         from fastapi.staticfiles import StaticFiles
         from fastapi.middleware.cors import CORSMiddleware
@@ -1495,7 +1495,6 @@ async def main():
 
         @app.post("/api/logs/import")
         async def import_logs(file: UploadFile = File(...)):
-            from fastapi import UploadFile, File
             """导入日志"""
             try:
                 from models import MessageLog
