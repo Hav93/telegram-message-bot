@@ -261,8 +261,7 @@ async def main():
         
         # 延迟更新聊天名称（避免事件循环冲突）
         if enhanced_bot:
-            import asyncio
-            asyncio.create_task(delayed_chat_names_update(enhanced_bot))
+            logger.info("⏰ 将通过API端点触发聊天名称更新，请稍后手动调用或等待自动触发")
         
         # 创建简化的FastAPI应用
         logger.info("🌐 启动Web服务器...")
@@ -276,6 +275,16 @@ async def main():
             description="Telegram消息转发机器人v3.6",
             version="3.7.0"
         )
+        
+        # 添加启动事件处理器
+        @app.on_event("startup")
+        async def startup_event():
+            """应用启动后执行的任务"""
+            if enhanced_bot:
+                logger.info("🚀 FastAPI应用启动完成，开始延迟更新聊天名称...")
+                import asyncio
+                # 创建后台任务
+                asyncio.create_task(delayed_chat_names_update(enhanced_bot))
         
         # 添加CORS中间件
         app.add_middleware(

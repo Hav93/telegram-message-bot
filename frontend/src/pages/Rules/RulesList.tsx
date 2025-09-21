@@ -55,9 +55,25 @@ const RulesList: React.FC = () => {
     queryFn: rulesApi.list,
   });
 
-  // 监听规则数据变化
+  // 自动更新聊天名称
+  const fetchChatInfoMutation = useMutation({
+    mutationFn: rulesApi.fetchChatInfo,
+    onSuccess: (response: any) => {
+      if (response.success) {
+        console.log('🔄 自动聊天名称更新成功:', response.message);
+        message.success('聊天名称已自动更新');
+        queryClient.invalidateQueries({ queryKey: ['rules'] });
+      }
+    },
+    onError: (error: any) => {
+      console.error('❌ 自动聊天名称更新失败:', error);
+      // 不显示错误消息，避免打扰用户
+    },
+  });
+
+  // 监听规则数据变化并自动更新占位符名称
   React.useEffect(() => {
-    if (rules) {
+    if (rules && rules.length > 0) {
       console.log('📋 规则列表查询成功:', rules?.length || 0, '条规则');
       console.log('📋 规则详细数据:', rules?.map(r => ({
         id: r.id,
@@ -73,8 +89,20 @@ const RulesList: React.FC = () => {
         idType: typeof r.id,
         hasValidId: r.id && r.id > 0
       })));
+
+      // 检查是否有占位符格式的聊天名称
+      const hasPlaceholderNames = rules.some(rule => 
+        (rule.source_chat_name && rule.source_chat_name.startsWith('聊天 ')) ||
+        (rule.target_chat_name && rule.target_chat_name.startsWith('聊天 '))
+      );
+
+      // 如果发现占位符名称，自动调用更新API
+      if (hasPlaceholderNames && !fetchChatInfoMutation.isPending) {
+        console.log('🔄 检测到占位符聊天名称，自动触发更新...');
+        fetchChatInfoMutation.mutate();
+      }
     }
-  }, [rules]);
+  }, [rules, fetchChatInfoMutation]);
 
   // 删除规则
   const deleteMutation = useMutation({
