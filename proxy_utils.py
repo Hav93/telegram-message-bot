@@ -119,23 +119,52 @@ class ProxyValidator:
 
 # 全局实例缓存
 _proxy_manager_instance = None
+_config_timestamp = None
 
 def get_proxy_manager():
     """获取代理管理器实例（支持配置更新后重新初始化）"""
-    global _proxy_manager_instance
+    global _proxy_manager_instance, _config_timestamp
     
-    # 如果没有实例或者配置已更新，重新创建
-    if _proxy_manager_instance is None:
+    # 检查配置文件是否有更新
+    import os
+    config_file = '.env'
+    current_timestamp = None
+    
+    try:
+        if os.path.exists(config_file):
+            current_timestamp = os.path.getmtime(config_file)
+    except Exception:
+        pass
+    
+    # 如果没有实例或者配置文件已更新，重新创建
+    if (_proxy_manager_instance is None or 
+        current_timestamp != _config_timestamp):
+        
+        # 重新加载配置模块
+        import importlib
+        import config
+        importlib.reload(config)
+        
         _proxy_manager_instance = SimpleProxyManager()
-        logger.info("✅ 代理管理器已初始化")
+        _config_timestamp = current_timestamp
+        
+        proxy_status = "启用" if _proxy_manager_instance.enabled else "禁用"
+        logger.info(f"✅ 代理管理器已初始化 - 状态: {proxy_status}")
+        
+        if _proxy_manager_instance.enabled:
+            logger.info(f"🌐 代理配置: {_proxy_manager_instance.proxy_type}://{_proxy_manager_instance.host}:{_proxy_manager_instance.port}")
+        else:
+            logger.info("🚫 代理已禁用")
     
     return _proxy_manager_instance
 
 def reload_proxy_manager():
     """重新加载代理管理器（配置更新后调用）"""
-    global _proxy_manager_instance
+    global _proxy_manager_instance, _config_timestamp
     _proxy_manager_instance = None
+    _config_timestamp = None
     logger.info("🔄 代理管理器已重置，下次获取时将重新初始化")
+    return get_proxy_manager()
 
 def validate_and_test_proxy():
     """验证并测试代理配置"""

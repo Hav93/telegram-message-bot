@@ -62,6 +62,9 @@ class DatabaseManager:
             
             logger.info(f"✅ 数据库初始化成功: {database_url}")
             
+            # 创建所有表
+            await self.create_tables()
+            
         except Exception as e:
             logger.error(f"❌ 数据库初始化失败: {e}")
             raise
@@ -101,6 +104,51 @@ class DatabaseManager:
             
         except Exception as e:
             logger.warning(f"⚠️ SQLite优化失败: {e}")
+    
+    async def create_tables(self):
+        """创建所有数据库表"""
+        try:
+            from models import Base
+            
+            # 使用 SQLAlchemy 创建所有表
+            async with self.engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            
+            logger.info("✅ 数据库表创建成功")
+            
+            # 验证表是否正确创建
+            await self.verify_tables()
+            
+        except Exception as e:
+            logger.error(f"❌ 数据库表创建失败: {e}")
+            raise
+    
+    async def verify_tables(self):
+        """验证数据库表完整性"""
+        try:
+            from models import DatabaseHelper
+            from sqlalchemy import text
+            
+            expected_tables = DatabaseHelper.get_table_names()
+            
+            async with self.engine.begin() as conn:
+                # 获取实际存在的表
+                if 'sqlite' in str(self.engine.url):
+                    result = await conn.execute(text("SELECT name FROM sqlite_master WHERE type='table'"))
+                else:
+                    result = await conn.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"))
+                
+                existing_tables = [row[0] for row in result.fetchall()]
+                
+                # 检查缺失的表
+                missing_tables = set(expected_tables) - set(existing_tables)
+                if missing_tables:
+                    logger.warning(f"⚠️ 缺失的数据库表: {missing_tables}")
+                else:
+                    logger.info(f"✅ 数据库表完整性验证通过，共 {len(existing_tables)} 个表")
+                    
+        except Exception as e:
+            logger.warning(f"⚠️ 数据库表验证失败: {e}")
     
     async def close(self):
         """关闭数据库连接"""

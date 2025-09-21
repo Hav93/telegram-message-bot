@@ -32,17 +32,29 @@ async def auto_database_migration(enhanced_bot=None):
         logger.info("🔧 开始自动数据库迁移...")
         
         async for db in get_db():
-            # 1. 检查是否已有 rule_name 字段
+            # 0. 首先检查表是否存在
             try:
-                await db.execute(text("SELECT rule_name FROM message_logs LIMIT 1"))
-                has_rule_name_column = True
-                logger.info("✅ rule_name 字段已存在")
+                await db.execute(text("SELECT 1 FROM message_logs LIMIT 1"))
+                table_exists = True
+                logger.info("✅ message_logs 表已存在")
             except Exception:
-                has_rule_name_column = False
-                logger.info("🔧 需要添加 rule_name 字段")
+                table_exists = False
+                logger.info("⚠️ message_logs 表不存在，跳过迁移")
+                # 如果表不存在，说明是全新安装，不需要迁移
+                break
             
-            # 2. 如果没有 rule_name 字段，则添加
-            if not has_rule_name_column:
+            # 1. 检查是否已有 rule_name 字段（仅在表存在时）
+            if table_exists:
+                try:
+                    await db.execute(text("SELECT rule_name FROM message_logs LIMIT 1"))
+                    has_rule_name_column = True
+                    logger.info("✅ rule_name 字段已存在")
+                except Exception:
+                    has_rule_name_column = False
+                    logger.info("🔧 需要添加 rule_name 字段")
+            
+            # 2. 如果表存在但没有 rule_name 字段，则添加
+            if table_exists and not has_rule_name_column:
                 await db.execute(text("ALTER TABLE message_logs ADD COLUMN rule_name VARCHAR(100)"))
                 logger.info("✅ 已添加 rule_name 字段")
                 
@@ -73,8 +85,10 @@ async def auto_database_migration(enhanced_bot=None):
                 
                 await db.commit()
                 logger.info("✅ 自动数据库迁移完成")
-            else:
+            elif table_exists:
                 logger.info("✅ 数据库结构检查完成，无需迁移")
+            else:
+                logger.info("✅ 全新数据库安装，无需迁移")
             
             # 检查并更新聊天名称（启动时只设置占位符，避免事件循环冲突）
             await auto_update_chat_names(db, None)  # 不传递enhanced_bot，只设置占位符
@@ -229,6 +243,16 @@ async def main():
             logger.info("💡 使用传统模式启动...")
             enhanced_bot = None
         
+        # 确保数据库初始化（无论配置是否完整）
+        logger.info("🗄️ 初始化数据库...")
+        try:
+            from database import init_database
+            await init_database()
+            logger.info("✅ 数据库初始化完成")
+        except Exception as e:
+            logger.error(f"❌ 数据库初始化失败: {e}")
+            raise
+        
         # 自动数据库迁移
         await auto_database_migration(enhanced_bot)
         
@@ -246,9 +270,28 @@ async def main():
         from fastapi.staticfiles import StaticFiles
         from fastapi.middleware.cors import CORSMiddleware
         
+        # 再次确认数据库已准备就绪
+        try:
+            from database import get_db
+            from sqlalchemy import text
+            async for db in get_db():
+                await db.execute(text("SELECT 1"))
+                logger.info("✅ 数据库连接测试成功")
+                break
+        except Exception as e:
+            logger.error(f"❌ 数据库连接测试失败: {e}")
+            logger.info("🔧 尝试修复数据库...")
+            try:
+                from database import db_manager
+                await db_manager.create_tables()
+                logger.info("✅ 数据库修复成功")
+            except Exception as repair_error:
+                logger.error(f"❌ 数据库修复失败: {repair_error}")
+                raise
+        
         app = FastAPI(
             title="Telegram消息转发机器人 - 增强版",
-            description="Telegram消息转发机器人v3.6",
+            description="Telegram消息转发机器人v3.7",
             version="3.7.0"
         )
         
@@ -1170,6 +1213,7 @@ async def main():
                     }, status_code=400)
                 
                 async for db in get_db():
+                    from sqlalchemy import select
                     imported_count = 0
                     failed_count = 0
                     errors = []
@@ -1565,6 +1609,7 @@ async def main():
                     }, status_code=400)
                 
                 async for db in get_db():
+                    from sqlalchemy import select, and_
                     imported_count = 0
                     skipped_count = 0
                     
@@ -1908,6 +1953,52 @@ async def main():
                     "message": f"获取设置失败: {str(e)}"
                 }, status_code=500)
         
+        @app.post("/api/database/repair")
+        async def repair_database():
+            """修复数据库（重新创建表和迁移）"""
+            try:
+                from database import db_manager
+                
+                # 重新创建表
+                await db_manager.create_tables()
+                
+                # 执行迁移
+                await auto_database_migration(enhanced_bot)
+                
+                return JSONResponse(content={
+                    "success": True,
+                    "message": "数据库修复完成"
+                })
+                
+            except Exception as e:
+                logger.error(f"数据库修复失败: {str(e)}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"数据库修复失败: {str(e)}"
+                }, status_code=500)
+
+        @app.get("/api/proxy/status")
+        async def get_proxy_status():
+            """获取代理状态"""
+            try:
+                from proxy_utils import get_proxy_manager
+                proxy_manager = get_proxy_manager()
+                
+                return JSONResponse(content={
+                    "success": True,
+                    "proxy_enabled": proxy_manager.enabled,
+                    "proxy_type": proxy_manager.proxy_type if proxy_manager.enabled else None,
+                    "proxy_host": proxy_manager.host if proxy_manager.enabled else None,
+                    "proxy_port": proxy_manager.port if proxy_manager.enabled else None,
+                    "has_credentials": bool(proxy_manager.username) if proxy_manager.enabled else False
+                })
+            except Exception as e:
+                logger.error(f"获取代理状态失败: {str(e)}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"获取代理状态失败: {str(e)}"
+                }, status_code=500)
+
         @app.post("/api/settings")
         async def save_settings(request: Request):
             """保存系统设置"""
@@ -1928,13 +2019,24 @@ async def main():
                 
                 # 代理配置
                 config_lines.append("# 代理配置")
-                config_lines.append(f"ENABLE_PROXY={str(data.get('enable_proxy', False)).lower()}")
-                config_lines.append(f"PROXY_TYPE={data.get('proxy_type', 'http')}")
-                config_lines.append(f"PROXY_HOST={data.get('proxy_host', '127.0.0.1')}")
-                config_lines.append(f"PROXY_PORT={data.get('proxy_port', '7890')}")
-                config_lines.append(f"PROXY_USERNAME={data.get('proxy_username', '')}")
-                if data.get('proxy_password') and data.get('proxy_password') != '***':
-                    config_lines.append(f"PROXY_PASSWORD={data.get('proxy_password', '')}")
+                enable_proxy = data.get('enable_proxy', False)
+                config_lines.append(f"ENABLE_PROXY={str(enable_proxy).lower()}")
+                
+                # 只有在启用代理时才写入代理参数
+                if enable_proxy:
+                    config_lines.append(f"PROXY_TYPE={data.get('proxy_type', 'http')}")
+                    config_lines.append(f"PROXY_HOST={data.get('proxy_host', '127.0.0.1')}")
+                    config_lines.append(f"PROXY_PORT={data.get('proxy_port', '7890')}")
+                    config_lines.append(f"PROXY_USERNAME={data.get('proxy_username', '')}")
+                    if data.get('proxy_password') and data.get('proxy_password') != '***':
+                        config_lines.append(f"PROXY_PASSWORD={data.get('proxy_password', '')}")
+                else:
+                    # 代理禁用时，显式设置空值或注释掉
+                    config_lines.append("# PROXY_TYPE=http")
+                    config_lines.append("# PROXY_HOST=127.0.0.1") 
+                    config_lines.append("# PROXY_PORT=7890")
+                    config_lines.append("# PROXY_USERNAME=")
+                    config_lines.append("# PROXY_PASSWORD=")
                 config_lines.append("")
                 
                 # 日志管理配置
@@ -1981,6 +2083,14 @@ async def main():
                         logger.info("✅ 配置重新加载成功")
                     except Exception as e:
                         logger.error(f"⚠️ 配置重新加载失败: {e}")
+                    
+                    # 重新加载代理管理器
+                    try:
+                        from proxy_utils import reload_proxy_manager
+                        reload_proxy_manager()
+                        logger.info("✅ 代理管理器已重新加载")
+                    except Exception as e:
+                        logger.error(f"⚠️ 代理管理器重新加载失败: {e}")
                     
                     return JSONResponse(content={
                         "success": True,

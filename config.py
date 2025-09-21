@@ -101,12 +101,15 @@ class Config:
     HTTP_PROXY = os.getenv('HTTP_PROXY') or os.getenv('http_proxy')
     HTTPS_PROXY = os.getenv('HTTPS_PROXY') or os.getenv('https_proxy')
     
-    # 兼容旧版配置
-    ENABLE_PROXY = (
-        os.getenv('ENABLE_PROXY', 'false').lower() == 'true' or 
-        HTTP_PROXY is not None or 
-        HTTPS_PROXY is not None
-    )
+    # 代理启用状态检查
+    # 优先检查显式的 ENABLE_PROXY 设置
+    enable_proxy_env = os.getenv('ENABLE_PROXY', '').lower()
+    if enable_proxy_env in ['true', 'false']:
+        # 如果明确设置了 ENABLE_PROXY，使用该设置
+        ENABLE_PROXY = enable_proxy_env == 'true'
+    else:
+        # 如果没有明确设置，则检查是否有代理URL环境变量
+        ENABLE_PROXY = HTTP_PROXY is not None or HTTPS_PROXY is not None
     
     # 解析代理URL或使用传统配置
     PROXY_TYPE = 'http'
@@ -115,28 +118,30 @@ class Config:
     PROXY_USERNAME = ''
     PROXY_PASSWORD = ''
     
-    if HTTP_PROXY or HTTPS_PROXY:
-        # 优先使用HTTPS_PROXY，fallback到HTTP_PROXY
-        proxy_url = HTTPS_PROXY or HTTP_PROXY
-        try:
-            from urllib.parse import urlparse
-            parsed = urlparse(proxy_url)
-            if parsed.hostname:
-                PROXY_TYPE = parsed.scheme or 'http'
-                PROXY_HOST = parsed.hostname
-                PROXY_PORT = parsed.port or (1080 if PROXY_TYPE in ['socks4', 'socks5'] else 8080)
-                PROXY_USERNAME = parsed.username or ''
-                PROXY_PASSWORD = parsed.password or ''
-        except Exception:
-            # 解析失败，使用传统配置
-            pass
-    else:
-        # 使用传统配置方式
-        PROXY_TYPE = os.getenv('PROXY_TYPE', 'http').lower()
-        PROXY_HOST = os.getenv('PROXY_HOST', '127.0.0.1')
-        PROXY_PORT = int(os.getenv('PROXY_PORT', '1080'))
-        PROXY_USERNAME = os.getenv('PROXY_USERNAME', '')
-        PROXY_PASSWORD = os.getenv('PROXY_PASSWORD', '')
+    # 只有在启用代理的情况下才设置代理参数
+    if ENABLE_PROXY:
+        if HTTP_PROXY or HTTPS_PROXY:
+            # 优先使用HTTPS_PROXY，fallback到HTTP_PROXY
+            proxy_url = HTTPS_PROXY or HTTP_PROXY
+            try:
+                from urllib.parse import urlparse
+                parsed = urlparse(proxy_url)
+                if parsed.hostname:
+                    PROXY_TYPE = parsed.scheme or 'http'
+                    PROXY_HOST = parsed.hostname
+                    PROXY_PORT = parsed.port or (1080 if PROXY_TYPE in ['socks4', 'socks5'] else 8080)
+                    PROXY_USERNAME = parsed.username or ''
+                    PROXY_PASSWORD = parsed.password or ''
+            except Exception:
+                # 解析失败，使用传统配置
+                pass
+        else:
+            # 使用传统配置方式（仅在启用代理时）
+            PROXY_TYPE = os.getenv('PROXY_TYPE', 'http').lower()
+            PROXY_HOST = os.getenv('PROXY_HOST', '127.0.0.1')
+            PROXY_PORT = int(os.getenv('PROXY_PORT', '1080'))
+            PROXY_USERNAME = os.getenv('PROXY_USERNAME', '')
+            PROXY_PASSWORD = os.getenv('PROXY_PASSWORD', '')
     
     # === Docker配置 ===
     TZ = os.getenv('TZ', 'Asia/Shanghai')
