@@ -210,21 +210,6 @@ async def auto_update_chat_names(db, enhanced_bot=None):
     except Exception as e:
         logger.error(f"❌ 自动更新聊天名称失败: {e}")
 
-async def delayed_chat_names_update(enhanced_bot, delay_seconds=10):
-    """延迟更新聊天名称，避免事件循环冲突"""
-    try:
-        import asyncio
-        logger.info(f"⏰ 将在 {delay_seconds} 秒后尝试更新聊天名称...")
-        await asyncio.sleep(delay_seconds)
-        
-        from database import get_db
-        async for db in get_db():
-            await auto_update_chat_names(db, enhanced_bot)
-            break
-            
-    except Exception as e:
-        logger.error(f"❌ 延迟更新聊天名称失败: {e}")
-
 async def main():
     """主函数"""
     try:
@@ -259,9 +244,11 @@ async def main():
         # 自动数据库迁移
         await auto_database_migration(enhanced_bot)
         
-        # 延迟更新聊天名称（避免事件循环冲突）
+        # 聊天名称更新提示
         if enhanced_bot:
-            logger.info("⏰ 将通过API端点触发聊天名称更新，请稍后手动调用或等待自动触发")
+            logger.info("💡 聊天名称更新方式:")
+            logger.info("   1. 访问规则列表页面时自动更新")
+            logger.info("   2. 手动调用: curl -X POST http://localhost:8000/api/rules/fetch-chat-info")
         
         # 创建简化的FastAPI应用
         logger.info("🌐 启动Web服务器...")
@@ -281,10 +268,9 @@ async def main():
         async def startup_event():
             """应用启动后执行的任务"""
             if enhanced_bot:
-                logger.info("🚀 FastAPI应用启动完成，开始延迟更新聊天名称...")
-                import asyncio
-                # 创建后台任务
-                asyncio.create_task(delayed_chat_names_update(enhanced_bot))
+                logger.info("🚀 FastAPI应用启动完成，聊天名称将通过前端自动更新或手动调用API")
+                logger.info("💡 提示: 访问规则列表页面时会自动检测并更新占位符聊天名称")
+                logger.info("🔧 手动更新命令: curl -X POST http://localhost:8000/api/rules/fetch-chat-info")
         
         # 添加CORS中间件
         app.add_middleware(
