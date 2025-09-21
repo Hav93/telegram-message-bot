@@ -153,10 +153,29 @@ const RuleForm: React.FC = () => {
   const handleSubmit = async (values: any) => {
     setLoading(true);
     try {
+      // 从聊天列表中查找对应的聊天名称
+      const sourceChat = chats.find(chat => chat.id === values.source_chat_id);
+      const targetChat = chats.find(chat => chat.id === values.target_chat_id);
+      
+      const sourceChatName = sourceChat ? (sourceChat.title || sourceChat.first_name || sourceChat.name || '') : '';
+      const targetChatName = targetChat ? (targetChat.title || targetChat.first_name || targetChat.name || '') : '';
+
+      console.log('🔍 创建规则 - 聊天信息:', {
+        source_chat_id: values.source_chat_id,
+        target_chat_id: values.target_chat_id,
+        sourceChat,
+        targetChat,
+        sourceChatName,
+        targetChatName,
+        totalChats: chats.length
+      });
+
       const ruleData = {
         name: values.name,
         source_chat_id: values.source_chat_id,
+        source_chat_name: sourceChatName,
         target_chat_id: values.target_chat_id,
+        target_chat_name: targetChatName,
         
         // 功能开关
         enable_keyword_filter: values.enable_keyword_filter || false,
