@@ -91,13 +91,15 @@ async def auto_update_chat_names(db, enhanced_bot=None):
         
         logger.info("🔄 开始检查聊天名称...")
         
-        # 获取所有聊天名称为空的规则
+        # 获取所有聊天名称为空或占位符格式的规则
         rules_to_update = await db.execute(
             select(ForwardRule).where(
                 (ForwardRule.source_chat_name.is_(None)) | 
                 (ForwardRule.source_chat_name == '') |
+                (ForwardRule.source_chat_name.like('聊天 %')) |  # 识别占位符格式
                 (ForwardRule.target_chat_name.is_(None)) | 
-                (ForwardRule.target_chat_name == '')
+                (ForwardRule.target_chat_name == '') |
+                (ForwardRule.target_chat_name.like('聊天 %'))    # 识别占位符格式
             )
         )
         rules = rules_to_update.fetchall()
@@ -129,8 +131,14 @@ async def auto_update_chat_names(db, enhanced_bot=None):
             rule = rule_tuple[0]  # SQLAlchemy返回的是tuple
             updated_fields = {}
             
-            # 更新源聊天名称
-            if not rule.source_chat_name or rule.source_chat_name.strip() == '':
+            # 更新源聊天名称（包括占位符格式的名称）
+            needs_source_update = (
+                not rule.source_chat_name or 
+                rule.source_chat_name.strip() == '' or
+                rule.source_chat_name.startswith('聊天 ')  # 检查占位符格式
+            )
+            
+            if needs_source_update:
                 source_name = f"聊天 {rule.source_chat_id}"  # 默认占位符
                 
                 if client_wrapper and rule.source_chat_id:
@@ -152,8 +160,14 @@ async def auto_update_chat_names(db, enhanced_bot=None):
                 
                 updated_fields['source_chat_name'] = source_name
             
-            # 更新目标聊天名称
-            if not rule.target_chat_name or rule.target_chat_name.strip() == '':
+            # 更新目标聊天名称（包括占位符格式的名称）
+            needs_target_update = (
+                not rule.target_chat_name or 
+                rule.target_chat_name.strip() == '' or
+                rule.target_chat_name.startswith('聊天 ')  # 检查占位符格式
+            )
+            
+            if needs_target_update:
                 target_name = f"聊天 {rule.target_chat_id}"  # 默认占位符
                 
                 if client_wrapper and rule.target_chat_id:
