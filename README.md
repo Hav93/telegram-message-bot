@@ -204,7 +204,7 @@ PROXY_PORT=1080
 ## 💬 交流与支持
 
 ### 🔗 社区交流
-- **Telegram群组**: [https://t.me/+a-1QAurcpxZhZThl](https://t.me/+a-1QAurcpxZhZThl)
+- **Telegram群组**: (https://t.me/tg_message93)
 
 ### 🤝 支持方式
 - ⭐ **GitHub Star**: 给项目点个星星
