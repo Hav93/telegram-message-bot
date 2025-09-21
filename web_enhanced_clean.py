@@ -76,8 +76,8 @@ async def auto_database_migration(enhanced_bot=None):
             else:
                 logger.info("✅ 数据库结构检查完成，无需迁移")
             
-            # 检查并更新聊天名称（无论是否需要迁移都执行）
-            await auto_update_chat_names(db, enhanced_bot)
+            # 检查并更新聊天名称（启动时只设置占位符，避免事件循环冲突）
+            await auto_update_chat_names(db, None)  # 不传递enhanced_bot，只设置占位符
             break
             
     except Exception as e:
@@ -210,6 +210,21 @@ async def auto_update_chat_names(db, enhanced_bot=None):
     except Exception as e:
         logger.error(f"❌ 自动更新聊天名称失败: {e}")
 
+async def delayed_chat_names_update(enhanced_bot, delay_seconds=10):
+    """延迟更新聊天名称，避免事件循环冲突"""
+    try:
+        import asyncio
+        logger.info(f"⏰ 将在 {delay_seconds} 秒后尝试更新聊天名称...")
+        await asyncio.sleep(delay_seconds)
+        
+        from database import get_db
+        async for db in get_db():
+            await auto_update_chat_names(db, enhanced_bot)
+            break
+            
+    except Exception as e:
+        logger.error(f"❌ 延迟更新聊天名称失败: {e}")
+
 async def main():
     """主函数"""
     try:
@@ -243,6 +258,11 @@ async def main():
         
         # 自动数据库迁移
         await auto_database_migration(enhanced_bot)
+        
+        # 延迟更新聊天名称（避免事件循环冲突）
+        if enhanced_bot:
+            import asyncio
+            asyncio.create_task(delayed_chat_names_update(enhanced_bot))
         
         # 创建简化的FastAPI应用
         logger.info("🌐 启动Web服务器...")
