@@ -45,7 +45,7 @@ Thumbs.db
 
 # 日志文件
 *.log
-logs/
+/logs/
 *.log.*
 
 # 数据文件

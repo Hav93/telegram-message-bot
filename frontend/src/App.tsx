@@ -10,7 +10,7 @@ import MainLayout from './components/common/MainLayout';
 // Pages
 import Dashboard from './pages/Dashboard';
 import RulesPage from './pages/Rules';
-import LogsPage from './pages/Logs';
+import LogsPage from './pages/Logs/index';
 import SettingsPage from './pages/Settings';
 import ChatsPage from './pages/Chats';
 import ClientManagement from './pages/ClientManagement';
