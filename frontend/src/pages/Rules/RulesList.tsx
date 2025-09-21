@@ -37,6 +37,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { rulesApi } from '../../services/rules';
+import { chatsApi } from '../../services/chats';
 import type { ForwardRule } from '../../types/rule';
 import { useCustomModal } from '../../hooks/useCustomModal';
 
@@ -54,6 +55,23 @@ const RulesList: React.FC = () => {
     queryKey: ['rules'],
     queryFn: rulesApi.list,
   });
+
+  // 获取聊天列表
+  const { data: chatsData } = useQuery({
+    queryKey: ['chats'],
+    queryFn: chatsApi.getChats
+  });
+
+  const chats = chatsData?.chats || [];
+
+  // 根据chat_id获取聊天显示名称（优先first_name）
+  const getChatDisplayName = (chatId: string) => {
+    const chat = chats.find(chat => String(chat.id) === String(chatId));
+    if (chat) {
+      return chat.first_name || chat.title || chat.name || `聊天 ${chatId}`;
+    }
+    return `聊天 ${chatId}`;
+  };
 
   // 自动更新聊天名称
   const fetchChatInfoMutation = useMutation({
@@ -412,10 +430,10 @@ const RulesList: React.FC = () => {
       key: 'source_chat_id',
       width: 120,
       render: (text: number, record: ForwardRule) => {
-        const displayText = record.source_chat_name || text || '未设置';
+        const displayName = getChatDisplayName(record.source_chat_id || '');
         return (
           <Tag color="blue" style={{ color: 'white' }}>
-            {displayText}
+            {displayName}
           </Tag>
         );
       },
@@ -426,10 +444,10 @@ const RulesList: React.FC = () => {
       key: 'target_chat_id',
       width: 120,
       render: (text: number, record: ForwardRule) => {
-        const displayText = record.target_chat_name || text || '未设置';
+        const displayName = getChatDisplayName(record.target_chat_id || '');
         return (
           <Tag color="green" style={{ color: 'white' }}>
-            {displayText}
+            {displayName}
           </Tag>
         );
       },
