@@ -584,6 +584,10 @@ class TelegramClientManager:
             if hasattr(rule, 'start_time') and rule.start_time:
                 start_time = ensure_timezone(rule.start_time)
                 return message_time >= start_time
+            else:
+                # 未设置开始时间，默认允许所有实时消息
+                self.logger.warning(f"⚠️ 规则 '{rule.name}' 设置为from_time但未配置start_time，默认允许实时消息")
+                return True
         elif rule.time_filter_type == "time_range":
             # 指定时间段内
             if hasattr(rule, 'start_time') and hasattr(rule, 'end_time'):
@@ -591,6 +595,14 @@ class TelegramClientManager:
                     start_time = ensure_timezone(rule.start_time)
                     end_time = ensure_timezone(rule.end_time)
                     return start_time <= message_time <= end_time
+                else:
+                    # 时间配置不完整，默认允许所有实时消息
+                    self.logger.warning(f"⚠️ 规则 '{rule.name}' 设置为time_range但时间配置不完整，默认允许实时消息")
+                    return True
+            else:
+                # 缺少时间属性，默认允许所有实时消息
+                self.logger.warning(f"⚠️ 规则 '{rule.name}' 设置为time_range但缺少时间属性，默认允许实时消息")
+                return True
         elif rule.time_filter_type == "all_messages":
             # 转发所有消息（无时间限制）
             return True
@@ -1204,16 +1216,28 @@ class MultiClientManager:
                 today = now.replace(hour=0, minute=0, second=0, microsecond=0)
                 start_time = today
                 end_time = now
-            elif rule.time_filter_type == 'from_time' and rule.start_time:
+            elif rule.time_filter_type == 'from_time':
                 # 从指定时间开始
-                start_time = ensure_timezone(rule.start_time)
-                end_time = now
-            elif rule.time_filter_type == 'time_range' and rule.start_time and rule.end_time:
+                if hasattr(rule, 'start_time') and rule.start_time:
+                    start_time = ensure_timezone(rule.start_time)
+                    end_time = now
+                    self.logger.info(f"📝 规则 '{rule.name}' 从指定时间开始: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                else:
+                    self.logger.warning(f"⚠️ 规则 '{rule.name}' 设置为从指定时间开始，但未设置开始时间，改为处理最近24小时")
+                    start_time = now - timedelta(hours=24)
+                    end_time = now
+            elif rule.time_filter_type == 'time_range':
                 # 指定时间段内
-                start_time = ensure_timezone(rule.start_time)
-                end_time = ensure_timezone(rule.end_time)
-                # 确保end_time不超过当前时间
-                if end_time > now:
+                if hasattr(rule, 'start_time') and hasattr(rule, 'end_time') and rule.start_time and rule.end_time:
+                    start_time = ensure_timezone(rule.start_time)
+                    end_time = ensure_timezone(rule.end_time)
+                    # 确保end_time不超过当前时间
+                    if end_time > now:
+                        end_time = now
+                    self.logger.info(f"📝 规则 '{rule.name}' 时间段: {start_time.strftime('%Y-%m-%d %H:%M:%S')} 到 {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                else:
+                    self.logger.warning(f"⚠️ 规则 '{rule.name}' 设置为指定时间段，但时间配置不完整，改为处理最近24小时")
+                    start_time = now - timedelta(hours=24)
                     end_time = now
             elif rule.time_filter_type == 'all_messages':
                 # 转发所有消息 - 不限制时间范围，获取所有可访问的历史消息
@@ -1221,7 +1245,8 @@ class MultiClientManager:
                 end_time = now
                 self.logger.info(f"📝 规则 '{rule.name}' 设置为转发所有消息，将获取所有可访问的历史消息（无时间限制）")
             else:
-                # 默认处理最近24小时
+                # 未知或未配置的时间过滤类型，默认处理最近24小时
+                self.logger.warning(f"⚠️ 规则 '{rule.name}' 时间过滤类型未识别或未配置: {getattr(rule, 'time_filter_type', 'None')}，使用默认24小时")
                 start_time = now - timedelta(hours=24)
                 end_time = now
             
