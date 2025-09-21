@@ -73,7 +73,7 @@ const RulesList: React.FC = () => {
     console.log(`🎯 找到的聊天:`, chat);
     
     if (chat) {
-      const displayName = chat.first_name || chat.title || chat.name || `聊天 ${chatId}`;
+      const displayName = chat.title || chat.first_name || chat.name || `聊天 ${chatId}`;
       console.log(`✅ 显示名称: ${displayName}`);
       return displayName;
     }
