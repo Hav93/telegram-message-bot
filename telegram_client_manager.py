@@ -1216,10 +1216,10 @@ class MultiClientManager:
                 if end_time > now:
                     end_time = now
             elif rule.time_filter_type == 'all_messages':
-                # 转发所有消息 - 获取更长的历史消息（最近30天）
-                start_time = now - timedelta(days=30)
+                # 转发所有消息 - 不限制时间范围，获取所有可访问的历史消息
+                start_time = None  # 不设置开始时间限制
                 end_time = now
-                self.logger.info(f"📝 规则 '{rule.name}' 设置为转发所有消息，将获取最近30天的历史消息")
+                self.logger.info(f"📝 规则 '{rule.name}' 设置为转发所有消息，将获取所有可访问的历史消息（无时间限制）")
             else:
                 # 默认处理最近24小时
                 start_time = now - timedelta(hours=24)
@@ -1227,7 +1227,7 @@ class MultiClientManager:
             
             # 根据时间过滤类型调整消息限制
             if rule.time_filter_type == 'all_messages':
-                message_limit = 1000  # all_messages 模式获取更多消息
+                message_limit = None  # all_messages 模式不限制消息数量
             elif rule.time_filter_type in ['time_range', 'from_time']:
                 message_limit = 500   # 指定时间范围获取中等数量
             else:
@@ -1239,7 +1239,10 @@ class MultiClientManager:
                 'limit': message_limit
             }
             
-            self.logger.info(f"📅 时间过滤范围: {start_time.strftime('%Y-%m-%d %H:%M:%S')} 到 {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            if start_time is not None:
+                self.logger.info(f"📅 时间过滤范围: {start_time.strftime('%Y-%m-%d %H:%M:%S')} 到 {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            else:
+                self.logger.info(f"📅 时间过滤范围: 无开始时间限制 到 {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
             
             # 获取历史消息
             try:
@@ -1344,7 +1347,13 @@ class MultiClientManager:
             messages = []
             count = 0
             max_messages = time_filter.get('limit', 50)
-            self.logger.info(f"📊 消息获取限制: {max_messages} 条")
+            
+            if max_messages is None:
+                self.logger.info(f"📊 消息获取限制: 无限制（获取所有可访问消息）")
+                # 为了避免内存问题，设置一个合理的上限
+                max_messages = 10000
+            else:
+                self.logger.info(f"📊 消息获取限制: {max_messages} 条")
             
             async for message in client_wrapper.client.iter_messages(
                 entity=chat_entity,
@@ -1352,8 +1361,14 @@ class MultiClientManager:
                 offset_date=time_filter.get('end_time')
             ):
                 # 应用时间过滤
-                if 'start_time' in time_filter and 'end_time' in time_filter:
-                    if not (time_filter['start_time'] <= message.date.replace(tzinfo=message.date.tzinfo or timezone.utc) <= time_filter['end_time']):
+                if 'start_time' in time_filter and 'end_time' in time_filter and time_filter['start_time'] is not None:
+                    message_time = message.date.replace(tzinfo=message.date.tzinfo or timezone.utc)
+                    if not (time_filter['start_time'] <= message_time <= time_filter['end_time']):
+                        continue
+                elif 'end_time' in time_filter and time_filter['start_time'] is None:
+                    # 只有结束时间限制，没有开始时间限制（all_messages模式）
+                    message_time = message.date.replace(tzinfo=message.date.tzinfo or timezone.utc)
+                    if message_time > time_filter['end_time']:
                         continue
                 
                 messages.append(message)
