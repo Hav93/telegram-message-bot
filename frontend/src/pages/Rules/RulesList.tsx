@@ -73,7 +73,7 @@ const RulesList: React.FC = () => {
     console.log(`🎯 找到的聊天:`, chat);
     
     if (chat) {
-      const displayName = chat.title || chat.first_name || chat.name || `聊天 ${chatId}`;
+      const displayName = chat.title || chat.id;
       console.log(`✅ 显示名称: ${displayName}`);
       return displayName;
     }
@@ -437,7 +437,7 @@ const RulesList: React.FC = () => {
       dataIndex: 'source_chat_id',
       key: 'source_chat_id',
       width: 120,
-      render: (text: number, record: ForwardRule) => {
+      render: (_: number, record: ForwardRule) => {
         const displayName = getChatDisplayName(record.source_chat_id || '');
         return (
           <Tag color="blue" style={{ color: 'white' }}>
@@ -451,7 +451,7 @@ const RulesList: React.FC = () => {
       dataIndex: 'target_chat_id',
       key: 'target_chat_id',
       width: 120,
-      render: (text: number, record: ForwardRule) => {
+      render: (_: number, record: ForwardRule) => {
         const displayName = getChatDisplayName(record.target_chat_id || '');
         return (
           <Tag color="green" style={{ color: 'white' }}>

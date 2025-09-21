@@ -157,8 +157,8 @@ const RuleForm: React.FC = () => {
       const sourceChat = chats.find(chat => String(chat.id) === String(values.source_chat_id));
       const targetChat = chats.find(chat => String(chat.id) === String(values.target_chat_id));
       
-      const sourceChatName = sourceChat ? (sourceChat.title || sourceChat.first_name || sourceChat.name || '') : '';
-      const targetChatName = targetChat ? (targetChat.title || targetChat.first_name || targetChat.name || '') : '';
+      const sourceChatName = sourceChat ? (sourceChat.title || sourceChat.id) : '';
+      const targetChatName = targetChat ? (targetChat.title || targetChat.id) : '';
 
       console.log('🔍 创建规则 - 聊天信息:', {
         source_chat_id: values.source_chat_id,

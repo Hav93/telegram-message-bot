@@ -1172,6 +1172,184 @@ async def main():
                     "message": f"删除失败: {str(e)}"
                 }, status_code=500)
         
+        @app.post("/api/logs/export")
+        async def export_logs(request: Request):
+            """导出日志"""
+            try:
+                from models import MessageLog
+                from sqlalchemy import select, and_, func
+                from database import get_db
+                from datetime import datetime
+                import json
+                from fastapi.responses import Response
+                
+                # 获取过滤条件
+                try:
+                    filters = await request.json()
+                except:
+                    filters = {}
+                
+                async for db in get_db():
+                    # 构建查询
+                    query = select(MessageLog)
+                    
+                    # 应用过滤条件
+                    if filters.get('status'):
+                        query = query.where(MessageLog.status == filters['status'])
+                    
+                    if filters.get('date'):
+                        try:
+                            target_date = datetime.strptime(filters['date'], '%Y-%m-%d').date()
+                            query = query.where(func.date(MessageLog.created_at) == target_date)
+                        except ValueError:
+                            pass
+                    
+                    if filters.get('start_date') and filters.get('end_date'):
+                        try:
+                            start_date = datetime.strptime(filters['start_date'], '%Y-%m-%d')
+                            end_date = datetime.strptime(filters['end_date'], '%Y-%m-%d')
+                            query = query.where(and_(
+                                MessageLog.created_at >= start_date,
+                                MessageLog.created_at <= end_date
+                            ))
+                        except ValueError:
+                            pass
+                    
+                    # 执行查询
+                    result = await db.execute(query)
+                    logs = result.fetchall()
+                    
+                    # 转换为字典格式
+                    export_data = []
+                    for log_tuple in logs:
+                        log = log_tuple[0]
+                        export_data.append({
+                            'id': log.id,
+                            'rule_id': log.rule_id,
+                            'rule_name': log.rule_name,
+                            'source_chat_id': log.source_chat_id,
+                            'source_chat_name': log.source_chat_name,
+                            'target_chat_id': log.target_chat_id,
+                            'target_chat_name': log.target_chat_name,
+                            'message_id': log.message_id,
+                            'forwarded_message_id': log.forwarded_message_id,
+                            'message_type': log.message_type,
+                            'message_text': log.message_text,
+                            'media_info': log.media_info,
+                            'status': log.status,
+                            'error_message': log.error_message,
+                            'created_at': log.created_at.isoformat() if log.created_at else None,
+                            'updated_at': log.updated_at.isoformat() if log.updated_at else None
+                        })
+                    
+                    # 返回JSON文件
+                    json_str = json.dumps(export_data, ensure_ascii=False, indent=2)
+                    
+                    return Response(
+                        content=json_str,
+                        media_type='application/json',
+                        headers={
+                            'Content-Disposition': f'attachment; filename="logs_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
+                        }
+                    )
+                    
+            except Exception as e:
+                logger.error(f"导出日志失败: {e}")
+                return JSONResponse({
+                    "success": False,
+                    "message": f"导出失败: {str(e)}"
+                }, status_code=500)
+
+        @app.post("/api/logs/import")
+        async def import_logs(file: UploadFile = File(...)):
+            from fastapi import UploadFile, File
+            """导入日志"""
+            try:
+                from models import MessageLog
+                from database import get_db
+                import json
+                from datetime import datetime
+                
+                # 读取上传的文件
+                content = await file.read()
+                try:
+                    import_data = json.loads(content.decode('utf-8'))
+                except json.JSONDecodeError as e:
+                    return JSONResponse({
+                        "success": False,
+                        "message": f"JSON格式错误: {str(e)}"
+                    }, status_code=400)
+                
+                if not isinstance(import_data, list):
+                    return JSONResponse({
+                        "success": False,
+                        "message": "导入数据必须是数组格式"
+                    }, status_code=400)
+                
+                async for db in get_db():
+                    imported_count = 0
+                    skipped_count = 0
+                    
+                    for log_data in import_data:
+                        try:
+                            # 检查是否已存在相同的日志
+                            existing_log = await db.execute(
+                                select(MessageLog).where(
+                                    and_(
+                                        MessageLog.rule_id == log_data.get('rule_id'),
+                                        MessageLog.message_id == log_data.get('message_id'),
+                                        MessageLog.source_chat_id == log_data.get('source_chat_id')
+                                    )
+                                )
+                            )
+                            
+                            if existing_log.fetchone():
+                                skipped_count += 1
+                                continue
+                            
+                            # 创建新的日志记录
+                            new_log = MessageLog(
+                                rule_id=log_data.get('rule_id'),
+                                rule_name=log_data.get('rule_name'),
+                                source_chat_id=log_data.get('source_chat_id'),
+                                source_chat_name=log_data.get('source_chat_name'),
+                                target_chat_id=log_data.get('target_chat_id'),
+                                target_chat_name=log_data.get('target_chat_name'),
+                                message_id=log_data.get('message_id'),
+                                forwarded_message_id=log_data.get('forwarded_message_id'),
+                                message_type=log_data.get('message_type'),
+                                message_text=log_data.get('message_text'),
+                                media_info=log_data.get('media_info'),
+                                status=log_data.get('status', 'success'),
+                                error_message=log_data.get('error_message'),
+                                created_at=datetime.fromisoformat(log_data['created_at'].replace('Z', '+00:00')) if log_data.get('created_at') else datetime.now(),
+                                updated_at=datetime.fromisoformat(log_data['updated_at'].replace('Z', '+00:00')) if log_data.get('updated_at') else datetime.now()
+                            )
+                            
+                            db.add(new_log)
+                            imported_count += 1
+                            
+                        except Exception as e:
+                            logger.warning(f"导入单条日志失败: {e}")
+                            skipped_count += 1
+                            continue
+                    
+                    await db.commit()
+                    
+                    return JSONResponse({
+                        "success": True,
+                        "message": f"导入完成：成功 {imported_count} 条，跳过 {skipped_count} 条",
+                        "imported": imported_count,
+                        "skipped": skipped_count
+                    })
+                    
+            except Exception as e:
+                logger.error(f"导入日志失败: {e}")
+                return JSONResponse({
+                    "success": False,
+                    "message": f"导入失败: {str(e)}"
+                }, status_code=500)
+
         @app.post("/api/logs/clear")
         async def clear_logs(request: Request):
             """清空日志（支持过滤条件）"""
