@@ -58,8 +58,24 @@ export const logsApi = {
 
   // 导出日志
   export: async (filters?: LogFilters): Promise<Blob> => {
-    const response = await api.post('/api/logs/export', filters);
-    return response as unknown as Blob;
+    try {
+      const response = await fetch('/api/logs/export', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(filters || {}),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`导出失败: ${response.status}`);
+      }
+      
+      return await response.blob();
+    } catch (error) {
+      console.error('导出日志失败:', error);
+      throw error;
+    }
   },
 
   // 导入日志
