@@ -68,8 +68,6 @@
 
 2. **创建配置文件**
    ```bash
-   # 创建 docker-compose.yml
-   cat > docker-compose.yml << 'EOF'
    version: '3.8'
    
    services:
@@ -81,42 +79,26 @@
          - "9393:9393"
        environment:
          - TZ=Asia/Shanghai
+      # Telegram API配置（可网页添加）
          - API_ID=${API_ID}
          - API_HASH=${API_HASH}
          - BOT_TOKEN=${BOT_TOKEN}
          - PHONE_NUMBER=${PHONE_NUMBER}
          - ADMIN_USER_IDS=${ADMIN_USER_IDS}
-         - ENABLE_PROXY=${ENABLE_PROXY:-false}
-         - PROXY_TYPE=${PROXY_TYPE:-http}
-         - PROXY_HOST=${PROXY_HOST:-127.0.0.1}
-         - PROXY_PORT=${PROXY_PORT:-1080}
+      # 代理配置（可选，外网环境通常不需要）
+         - ENABLE_PROXY=false
+         #- PROXY_TYPE=http
+         #- PROXY_HOST=127.0.0.1
+         #- PROXY_PORT=1080
          - DATABASE_URL=sqlite:///data/bot.db
-         - WEB_HOST=0.0.0.0
-         - WEB_PORT=9393
-         - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # 日志级别
+         - LOG_LEVEL=INFO
        volumes:
          - ./data:/app/data
          - ./logs:/app/logs
          - ./sessions:/app/sessions
          - ./temp:/app/temp
-   EOF
-
-   # Telegram API配置（必需）
-   API_ID=your_api_id
-   API_HASH=your_api_hash
-   BOT_TOKEN=your_bot_token
-   PHONE_NUMBER=+86your_phone
-   ADMIN_USER_IDS=your_user_id
    
-   # 代理配置（可选，外网环境通常不需要）
-   ENABLE_PROXY=false
-   #PROXY_TYPE=http
-   #PROXY_HOST=127.0.0.1
-   #PROXY_PORT=1080
-   
-   # 日志级别
-   LOG_LEVEL=INFO
-   EOF
    ```
 
 3. **启动服务**
