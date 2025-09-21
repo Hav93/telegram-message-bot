@@ -990,6 +990,239 @@ async def main():
                     "message": f"更新失败: {str(e)}"
                 }, status_code=500)
         
+        @app.post("/api/rules/export")
+        async def export_rules(request: Request):
+            """导出规则"""
+            try:
+                from models import ForwardRule, Keyword, ReplaceRule
+                from sqlalchemy import select
+                from database import get_db
+                import json
+                
+                # 获取请求参数
+                try:
+                    request_data = await request.json()
+                    rule_ids = request_data.get('ids', [])
+                except:
+                    rule_ids = []
+                
+                async for db in get_db():
+                    # 构建查询
+                    query = select(ForwardRule)
+                    if rule_ids:
+                        query = query.where(ForwardRule.id.in_(rule_ids))
+                    
+                    # 获取规则
+                    result = await db.execute(query)
+                    rules = result.fetchall()
+                    
+                    export_data = []
+                    for rule_tuple in rules:
+                        rule = rule_tuple[0]
+                        
+                        # 获取关键词
+                        keywords_result = await db.execute(
+                            select(Keyword).where(Keyword.rule_id == rule.id)
+                        )
+                        keywords = [
+                            {
+                                'keyword': kw_tuple[0].keyword,
+                                'keyword_type': kw_tuple[0].keyword_type,
+                                'is_active': kw_tuple[0].is_active
+                            }
+                            for kw_tuple in keywords_result.fetchall()
+                        ]
+                        
+                        # 获取替换规则
+                        replacements_result = await db.execute(
+                            select(ReplaceRule).where(ReplaceRule.rule_id == rule.id)
+                        )
+                        replacements = [
+                            {
+                                'pattern': rep_tuple[0].pattern,
+                                'replacement': rep_tuple[0].replacement,
+                                'is_regex': rep_tuple[0].is_regex,
+                                'is_active': rep_tuple[0].is_active
+                            }
+                            for rep_tuple in replacements_result.fetchall()
+                        ]
+                        
+                        # 构造规则数据
+                        rule_data = {
+                            'id': rule.id,
+                            'name': rule.name,
+                            'source_chat_id': rule.source_chat_id,
+                            'source_chat_name': rule.source_chat_name,
+                            'target_chat_id': rule.target_chat_id,
+                            'target_chat_name': rule.target_chat_name,
+                            'is_active': rule.is_active,
+                            'enable_keyword_filter': rule.enable_keyword_filter,
+                            'enable_regex_replace': rule.enable_regex_replace,
+                            'client_id': rule.client_id,
+                            'client_type': rule.client_type,
+                            'enable_text': rule.enable_text,
+                            'enable_media': rule.enable_media,
+                            'enable_photo': rule.enable_photo,
+                            'enable_video': rule.enable_video,
+                            'enable_document': rule.enable_document,
+                            'enable_audio': rule.enable_audio,
+                            'enable_voice': rule.enable_voice,
+                            'enable_sticker': rule.enable_sticker,
+                            'enable_animation': rule.enable_animation,
+                            'enable_webpage': rule.enable_webpage,
+                            'forward_delay': rule.forward_delay,
+                            'max_message_length': rule.max_message_length,
+                            'enable_link_preview': rule.enable_link_preview,
+                            'time_filter_type': rule.time_filter_type,
+                            'start_time': rule.start_time.isoformat() if rule.start_time else None,
+                            'end_time': rule.end_time.isoformat() if rule.end_time else None,
+                            'created_at': rule.created_at.isoformat() if rule.created_at else None,
+                            'updated_at': rule.updated_at.isoformat() if rule.updated_at else None,
+                            'keywords': keywords,
+                            'replacements': replacements
+                        }
+                        export_data.append(rule_data)
+                    
+                    return JSONResponse({
+                        "success": True,
+                        "data": export_data,
+                        "count": len(export_data),
+                        "filename": f"rules_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                        "message": f"成功导出 {len(export_data)} 个规则"
+                    })
+                    
+            except Exception as e:
+                logger.error(f"导出规则失败: {e}")
+                return JSONResponse({
+                    "success": False,
+                    "message": f"导出失败: {str(e)}"
+                }, status_code=500)
+
+        @app.post("/api/rules/import")
+        async def import_rules(request: Request):
+            """导入规则"""
+            try:
+                from models import ForwardRule, Keyword, ReplaceRule
+                from database import get_db
+                from datetime import datetime
+                import json
+                
+                # 获取导入数据
+                try:
+                    request_data = await request.json()
+                    import_data = request_data.get('data', [])
+                except Exception as e:
+                    return JSONResponse({
+                        "success": False,
+                        "message": f"请求数据格式错误: {str(e)}"
+                    }, status_code=400)
+                
+                if not isinstance(import_data, list):
+                    return JSONResponse({
+                        "success": False,
+                        "message": "导入数据必须是数组格式"
+                    }, status_code=400)
+                
+                async for db in get_db():
+                    imported_count = 0
+                    failed_count = 0
+                    errors = []
+                    
+                    for rule_data in import_data:
+                        try:
+                            # 检查是否已存在相同名称的规则
+                            existing_rule = await db.execute(
+                                select(ForwardRule).where(ForwardRule.name == rule_data.get('name'))
+                            )
+                            
+                            if existing_rule.fetchone():
+                                failed_count += 1
+                                errors.append(f"规则 '{rule_data.get('name')}' 已存在，跳过导入")
+                                continue
+                            
+                            # 创建新规则（不包括id字段）
+                            new_rule = ForwardRule(
+                                name=rule_data.get('name'),
+                                source_chat_id=rule_data.get('source_chat_id'),
+                                source_chat_name=rule_data.get('source_chat_name'),
+                                target_chat_id=rule_data.get('target_chat_id'),
+                                target_chat_name=rule_data.get('target_chat_name'),
+                                is_active=rule_data.get('is_active', True),
+                                enable_keyword_filter=rule_data.get('enable_keyword_filter', False),
+                                enable_regex_replace=rule_data.get('enable_regex_replace', False),
+                                client_id=rule_data.get('client_id'),
+                                client_type=rule_data.get('client_type'),
+                                enable_text=rule_data.get('enable_text', True),
+                                enable_media=rule_data.get('enable_media', True),
+                                enable_photo=rule_data.get('enable_photo', True),
+                                enable_video=rule_data.get('enable_video', True),
+                                enable_document=rule_data.get('enable_document', True),
+                                enable_audio=rule_data.get('enable_audio', True),
+                                enable_voice=rule_data.get('enable_voice', True),
+                                enable_sticker=rule_data.get('enable_sticker', False),
+                                enable_animation=rule_data.get('enable_animation', False),
+                                enable_webpage=rule_data.get('enable_webpage', True),
+                                forward_delay=rule_data.get('forward_delay', 0),
+                                max_message_length=rule_data.get('max_message_length'),
+                                enable_link_preview=rule_data.get('enable_link_preview', True),
+                                time_filter_type=rule_data.get('time_filter_type', 'none'),
+                                start_time=datetime.fromisoformat(rule_data['start_time'].replace('Z', '+00:00')) if rule_data.get('start_time') else None,
+                                end_time=datetime.fromisoformat(rule_data['end_time'].replace('Z', '+00:00')) if rule_data.get('end_time') else None,
+                                created_at=datetime.now(),
+                                updated_at=datetime.now()
+                            )
+                            
+                            db.add(new_rule)
+                            await db.flush()  # 获取新规则的ID
+                            
+                            # 导入关键词
+                            if rule_data.get('keywords'):
+                                for keyword_data in rule_data['keywords']:
+                                    new_keyword = Keyword(
+                                        rule_id=new_rule.id,
+                                        keyword=keyword_data.get('keyword'),
+                                        keyword_type=keyword_data.get('keyword_type', 'contains'),
+                                        is_active=keyword_data.get('is_active', True)
+                                    )
+                                    db.add(new_keyword)
+                            
+                            # 导入替换规则
+                            if rule_data.get('replacements'):
+                                for replacement_data in rule_data['replacements']:
+                                    new_replacement = ReplaceRule(
+                                        rule_id=new_rule.id,
+                                        pattern=replacement_data.get('pattern'),
+                                        replacement=replacement_data.get('replacement'),
+                                        is_regex=replacement_data.get('is_regex', False),
+                                        is_active=replacement_data.get('is_active', True)
+                                    )
+                                    db.add(new_replacement)
+                            
+                            imported_count += 1
+                            
+                        except Exception as e:
+                            failed_count += 1
+                            errors.append(f"导入规则 '{rule_data.get('name', '未知')}' 失败: {str(e)}")
+                            logger.warning(f"导入单个规则失败: {e}")
+                            continue
+                    
+                    await db.commit()
+                    
+                    return JSONResponse({
+                        "success": True,
+                        "message": f"导入完成：成功 {imported_count} 个，失败 {failed_count} 个",
+                        "imported_count": imported_count,
+                        "failed_count": failed_count,
+                        "errors": errors
+                    })
+                    
+            except Exception as e:
+                logger.error(f"导入规则失败: {e}")
+                return JSONResponse({
+                    "success": False,
+                    "message": f"导入失败: {str(e)}"
+                }, status_code=500)
+
         @app.post("/api/rules/fetch-chat-info")
         async def fetch_chat_info():
             """触发聊天名称更新 - 简化版本"""
