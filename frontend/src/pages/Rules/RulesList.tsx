@@ -90,10 +90,10 @@ const RulesList: React.FC = () => {
         hasValidId: r.id && r.id > 0
       })));
 
-      // 检查是否有占位符格式的聊天名称
+      // 检查是否有占位符格式的聊天名称或空名称
       const hasPlaceholderNames = rules.some(rule => 
-        (rule.source_chat_name && rule.source_chat_name.startsWith('聊天 ')) ||
-        (rule.target_chat_name && rule.target_chat_name.startsWith('聊天 '))
+        (!rule.source_chat_name || rule.source_chat_name.trim() === '' || rule.source_chat_name.startsWith('聊天 ')) ||
+        (!rule.target_chat_name || rule.target_chat_name.trim() === '' || rule.target_chat_name.startsWith('聊天 '))
       );
 
       // 如果发现占位符名称，自动调用更新API

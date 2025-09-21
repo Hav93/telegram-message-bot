@@ -141,21 +141,13 @@ async def auto_update_chat_names(db, enhanced_bot=None):
             if needs_source_update:
                 source_name = f"聊天 {rule.source_chat_id}"  # 默认占位符
                 
-                # 暂时跳过真实名称获取，避免事件循环冲突
-                # TODO: 需要在正确的事件循环中执行 get_entity 调用
-                if client_wrapper and rule.source_chat_id and False:  # 临时禁用
+                # 使用线程安全的方法获取真实聊天名称
+                if client_wrapper and rule.source_chat_id:
                     try:
-                        source_entity = await client_wrapper.client.get_entity(int(rule.source_chat_id))
-                        # 优先使用 title 字段，这是最通用的名称字段
-                        if hasattr(source_entity, 'title') and source_entity.title:
-                            source_name = source_entity.title
-                            real_names_count += 1
-                        elif hasattr(source_entity, 'username') and source_entity.username:
-                            source_name = f"@{source_entity.username}"
-                            real_names_count += 1
-                        elif hasattr(source_entity, 'first_name') and source_entity.first_name:
-                            last_name = getattr(source_entity, 'last_name', '')
-                            source_name = f"{source_entity.first_name} {last_name}".strip()
+                        # 使用新的线程安全方法
+                        source_title = client_wrapper.get_chat_title_sync(rule.source_chat_id)
+                        if not source_title.startswith("聊天 "):
+                            source_name = source_title
                             real_names_count += 1
                     except Exception as e:
                         logger.warning(f"⚠️ 无法获取源聊天 {rule.source_chat_id} 的信息: {e}")
@@ -172,21 +164,13 @@ async def auto_update_chat_names(db, enhanced_bot=None):
             if needs_target_update:
                 target_name = f"聊天 {rule.target_chat_id}"  # 默认占位符
                 
-                # 暂时跳过真实名称获取，避免事件循环冲突
-                # TODO: 需要在正确的事件循环中执行 get_entity 调用
-                if client_wrapper and rule.target_chat_id and False:  # 临时禁用
+                # 使用线程安全的方法获取真实聊天名称
+                if client_wrapper and rule.target_chat_id:
                     try:
-                        target_entity = await client_wrapper.client.get_entity(int(rule.target_chat_id))
-                        # 优先使用 title 字段，这是最通用的名称字段
-                        if hasattr(target_entity, 'title') and target_entity.title:
-                            target_name = target_entity.title
-                            real_names_count += 1
-                        elif hasattr(target_entity, 'username') and target_entity.username:
-                            target_name = f"@{target_entity.username}"
-                            real_names_count += 1
-                        elif hasattr(target_entity, 'first_name') and target_entity.first_name:
-                            last_name = getattr(target_entity, 'last_name', '')
-                            target_name = f"{target_entity.first_name} {last_name}".strip()
+                        # 使用新的线程安全方法
+                        target_title = client_wrapper.get_chat_title_sync(rule.target_chat_id)
+                        if not target_title.startswith("聊天 "):
+                            target_name = target_title
                             real_names_count += 1
                     except Exception as e:
                         logger.warning(f"⚠️ 无法获取目标聊天 {rule.target_chat_id} 的信息: {e}")

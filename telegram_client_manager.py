@@ -809,6 +809,57 @@ class TelegramClientManager:
             self.logger.warning(f"获取聊天列表失败: {e}")
             return []
     
+    def get_chat_title_sync(self, chat_id: str) -> str:
+        """同步获取特定聊天的标题（线程安全）"""
+        if not self.loop or not self.running or not self.connected:
+            return f"聊天 {chat_id}"
+        
+        try:
+            # 使用 run_coroutine_threadsafe 在客户端的事件循环中执行
+            future = asyncio.run_coroutine_threadsafe(
+                self._get_chat_title_async(chat_id),
+                self.loop
+            )
+            # 等待结果，超时时间5秒
+            return future.result(timeout=5)
+        except Exception as e:
+            self.logger.warning(f"获取聊天 {chat_id} 标题失败: {e}")
+            return f"聊天 {chat_id}"
+    
+    async def _get_chat_title_async(self, chat_id: str) -> str:
+        """在客户端事件循环中异步获取特定聊天标题"""
+        try:
+            if not self.client or not self.client.is_connected():
+                return f"聊天 {chat_id}"
+            
+            # 转换聊天ID
+            try:
+                chat_id_int = int(chat_id)
+            except ValueError:
+                chat_id_int = chat_id
+            
+            # 获取聊天实体
+            entity = await self.client.get_entity(chat_id_int)
+            
+            # 提取标题
+            if hasattr(entity, 'title') and entity.title:
+                title = entity.title
+            elif hasattr(entity, 'username') and entity.username:
+                title = f"@{entity.username}"
+            elif hasattr(entity, 'first_name'):
+                first_name = getattr(entity, 'first_name', '')
+                last_name = getattr(entity, 'last_name', '')
+                title = f"{first_name} {last_name}".strip()
+            else:
+                title = f"聊天 {chat_id}"
+            
+            self.logger.info(f"✅ 获取聊天 {chat_id} 标题: {title}")
+            return title
+            
+        except Exception as e:
+            self.logger.warning(f"⚠️ 无法获取聊天 {chat_id} 标题: {e}")
+            return f"聊天 {chat_id}"
+    
     async def _get_chats_async(self) -> List[Dict[str, Any]]:
         """在客户端事件循环中异步获取聊天列表"""
         try:
