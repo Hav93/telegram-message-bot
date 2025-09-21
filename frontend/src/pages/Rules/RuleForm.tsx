@@ -198,7 +198,7 @@ const RuleForm: React.FC = () => {
         enable_link_preview: values.enable_link_preview !== false,
         
         // 时间过滤
-        time_filter_type: values.time_filter_type || 'always',
+        time_filter_type: values.time_filter_type || 'after_start',
         start_time: values.start_time,
         end_time: values.end_time,
         
@@ -272,7 +272,7 @@ const RuleForm: React.FC = () => {
           forward_delay: 0,
           client_id: 'main_user',
           client_type: 'user',
-          time_filter_type: 'always'
+          time_filter_type: 'after_start'
         }}
       >
         <Row gutter={24}>

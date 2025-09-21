@@ -516,15 +516,42 @@ class TelegramClientManager:
         if not hasattr(rule, 'time_filter_type'):
             return True
         
+        from datetime import datetime, timezone
+        
         message_time = message.date
-        current_time = datetime.now()
+        if message_time.tzinfo is None:
+            message_time = message_time.replace(tzinfo=timezone.utc)
+        
+        current_time = datetime.now(timezone.utc)
         
         if rule.time_filter_type == "after_start":
-            return True  # 启动后的消息都转发
+            # 启动后的消息都转发（实时消息处理）
+            return True
+        elif rule.time_filter_type == "today_only":
+            # 仅转发当天消息
+            today_start = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
+            return message_time >= today_start
+        elif rule.time_filter_type == "from_time":
+            # 从指定时间开始
+            if hasattr(rule, 'start_time') and rule.start_time:
+                start_time = rule.start_time
+                if start_time.tzinfo is None:
+                    start_time = start_time.replace(tzinfo=timezone.utc)
+                return message_time >= start_time
         elif rule.time_filter_type == "time_range":
+            # 指定时间段内
             if hasattr(rule, 'start_time') and hasattr(rule, 'end_time'):
                 if rule.start_time and rule.end_time:
-                    return rule.start_time <= message_time <= rule.end_time
+                    start_time = rule.start_time
+                    end_time = rule.end_time
+                    if start_time.tzinfo is None:
+                        start_time = start_time.replace(tzinfo=timezone.utc)
+                    if end_time.tzinfo is None:
+                        end_time = end_time.replace(tzinfo=timezone.utc)
+                    return start_time <= message_time <= end_time
+        elif rule.time_filter_type == "all_messages":
+            # 转发所有消息（无时间限制）
+            return True
         
         return True
     
@@ -1119,15 +1146,47 @@ class MultiClientManager:
             
             self.logger.info(f"🔄 开始在客户端事件循环中处理规则 '{rule.name}' 的历史消息...")
             
-            # 确定时间范围（最近24小时）
+            # 根据规则的时间过滤类型确定时间范围
             now = datetime.now(timezone.utc)
-            end_time = now
-            start_time = end_time - timedelta(hours=24)
+            
+            if rule.time_filter_type == 'after_start':
+                # 仅转发启动后的消息 - 不处理历史消息
+                self.logger.info(f"📝 规则 '{rule.name}' 设置为仅转发启动后消息，跳过历史消息处理")
+                return {
+                    "success": True,
+                    "message": "规则设置为仅转发启动后消息，不处理历史消息",
+                    "processed": 0,
+                    "forwarded": 0,
+                    "errors": 0
+                }
+            elif rule.time_filter_type == 'today_only':
+                # 仅转发当天消息
+                today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+                start_time = today
+                end_time = now
+            elif rule.time_filter_type == 'from_time' and rule.start_time:
+                # 从指定时间开始
+                start_time = rule.start_time.replace(tzinfo=timezone.utc) if rule.start_time.tzinfo is None else rule.start_time
+                end_time = now
+            elif rule.time_filter_type == 'time_range' and rule.start_time and rule.end_time:
+                # 指定时间段内
+                start_time = rule.start_time.replace(tzinfo=timezone.utc) if rule.start_time.tzinfo is None else rule.start_time
+                end_time = rule.end_time.replace(tzinfo=timezone.utc) if rule.end_time.tzinfo is None else rule.end_time
+                # 确保end_time不超过当前时间
+                if end_time > now:
+                    end_time = now
+            else:
+                # 默认处理最近24小时 (all_messages或其他情况)
+                start_time = now - timedelta(hours=24)
+                end_time = now
+            
             time_filter = {
                 'start_time': start_time,
                 'end_time': end_time,
                 'limit': 500  # 根据时间范围获取更多消息
             }
+            
+            self.logger.info(f"📅 时间过滤范围: {start_time.strftime('%Y-%m-%d %H:%M:%S')} 到 {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
             
             # 获取历史消息
             try:
@@ -1338,8 +1397,49 @@ class MultiClientManager:
     def _check_time_filter(self, message, rule):
         """检查时间过滤"""
         try:
-            # 这里可以添加更复杂的时间过滤逻辑
-            # 暂时返回True，因为我们已经在获取消息时应用了时间过滤
+            from datetime import datetime, timezone
+            
+            # 如果规则没有时间过滤设置，则通过
+            if not hasattr(rule, 'time_filter_type'):
+                return True
+            
+            message_time = message.date
+            if message_time.tzinfo is None:
+                message_time = message_time.replace(tzinfo=timezone.utc)
+            
+            current_time = datetime.now(timezone.utc)
+            
+            if rule.time_filter_type == "after_start":
+                # 启动后的消息 - 历史消息处理中通常不会命中这个分支
+                # 因为在历史消息处理开始时就会被过滤掉
+                return True
+            elif rule.time_filter_type == "today_only":
+                # 仅转发当天消息
+                today_start = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
+                return message_time >= today_start
+            elif rule.time_filter_type == "from_time":
+                # 从指定时间开始
+                if hasattr(rule, 'start_time') and rule.start_time:
+                    start_time = rule.start_time
+                    if start_time.tzinfo is None:
+                        start_time = start_time.replace(tzinfo=timezone.utc)
+                    return message_time >= start_time
+            elif rule.time_filter_type == "time_range":
+                # 指定时间段内
+                if hasattr(rule, 'start_time') and hasattr(rule, 'end_time'):
+                    if rule.start_time and rule.end_time:
+                        start_time = rule.start_time
+                        end_time = rule.end_time
+                        if start_time.tzinfo is None:
+                            start_time = start_time.replace(tzinfo=timezone.utc)
+                        if end_time.tzinfo is None:
+                            end_time = end_time.replace(tzinfo=timezone.utc)
+                        return start_time <= message_time <= end_time
+            elif rule.time_filter_type == "all_messages":
+                # 转发所有消息（无时间限制）
+                return True
+            
+            # 默认通过
             return True
             
         except Exception as e:
