@@ -1215,15 +1215,28 @@ class MultiClientManager:
                 # 确保end_time不超过当前时间
                 if end_time > now:
                     end_time = now
+            elif rule.time_filter_type == 'all_messages':
+                # 转发所有消息 - 获取更长的历史消息（最近30天）
+                start_time = now - timedelta(days=30)
+                end_time = now
+                self.logger.info(f"📝 规则 '{rule.name}' 设置为转发所有消息，将获取最近30天的历史消息")
             else:
-                # 默认处理最近24小时 (all_messages或其他情况)
+                # 默认处理最近24小时
                 start_time = now - timedelta(hours=24)
                 end_time = now
+            
+            # 根据时间过滤类型调整消息限制
+            if rule.time_filter_type == 'all_messages':
+                message_limit = 1000  # all_messages 模式获取更多消息
+            elif rule.time_filter_type in ['time_range', 'from_time']:
+                message_limit = 500   # 指定时间范围获取中等数量
+            else:
+                message_limit = 100   # 其他情况限制较少
             
             time_filter = {
                 'start_time': start_time,
                 'end_time': end_time,
-                'limit': 500  # 根据时间范围获取更多消息
+                'limit': message_limit
             }
             
             self.logger.info(f"📅 时间过滤范围: {start_time.strftime('%Y-%m-%d %H:%M:%S')} 到 {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -1331,6 +1344,7 @@ class MultiClientManager:
             messages = []
             count = 0
             max_messages = time_filter.get('limit', 50)
+            self.logger.info(f"📊 消息获取限制: {max_messages} 条")
             
             async for message in client_wrapper.client.iter_messages(
                 entity=chat_entity,
