@@ -242,6 +242,7 @@ async def main():
         logger.info("🌐 启动Web服务器...")
         from fastapi import FastAPI, Request, File, UploadFile
         from fastapi.responses import JSONResponse
+        from datetime import datetime
         from fastapi.staticfiles import StaticFiles
         from fastapi.middleware.cors import CORSMiddleware
         
@@ -806,6 +807,50 @@ async def main():
                 return JSONResponse(content={
                     "success": False,
                     "message": f"刷新聊天列表失败: {str(e)}"
+                }, status_code=500)
+
+        @app.post("/api/chats/export")
+        async def export_chats():
+            """导出聊天列表"""
+            try:
+                from fastapi.responses import Response
+                import json
+                
+                # 从增强版机器人获取聊天列表
+                if enhanced_bot and enhanced_bot.multi_client_manager:
+                    all_chats = []
+                    
+                    for client_id, client_wrapper in enhanced_bot.multi_client_manager.clients.items():
+                        if client_wrapper.connected:
+                            try:
+                                # 使用线程安全方法获取聊天列表
+                                client_chats = client_wrapper.get_chats_sync()
+                                all_chats.extend(client_chats)
+                            except Exception as e:
+                                logger.warning(f"获取客户端 {client_id} 聊天列表失败: {e}")
+                                continue
+                    
+                    # 返回JSON文件
+                    json_str = json.dumps(all_chats, ensure_ascii=False, indent=2)
+                    
+                    return Response(
+                        content=json_str,
+                        media_type='application/json',
+                        headers={
+                            'Content-Disposition': f'attachment; filename="chats_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
+                        }
+                    )
+                
+                return JSONResponse({
+                    "success": False,
+                    "message": "无可用的客户端"
+                }, status_code=503)
+                
+            except Exception as e:
+                logger.error(f"导出聊天列表失败: {e}")
+                return JSONResponse({
+                    "success": False,
+                    "message": f"导出失败: {str(e)}"
                 }, status_code=500)
         
         @app.get("/api/logs")
@@ -1464,15 +1509,15 @@ async def main():
                             'source_chat_name': log.source_chat_name,
                             'target_chat_id': log.target_chat_id,
                             'target_chat_name': log.target_chat_name,
-                            'message_id': log.message_id,
-                            'forwarded_message_id': log.forwarded_message_id,
-                            'message_type': log.message_type,
-                            'message_text': log.message_text,
-                            'media_info': log.media_info,
+                            'source_message_id': log.source_message_id,
+                            'target_message_id': log.target_message_id,
+                            'original_text': log.original_text,
+                            'processed_text': log.processed_text,
+                            'media_type': log.media_type,
                             'status': log.status,
                             'error_message': log.error_message,
-                            'created_at': log.created_at.isoformat() if log.created_at else None,
-                            'updated_at': log.updated_at.isoformat() if log.updated_at else None
+                            'processing_time': log.processing_time,
+                            'created_at': log.created_at.isoformat() if log.created_at else None
                         })
                     
                     # 返回JSON文件
@@ -1529,7 +1574,7 @@ async def main():
                                 select(MessageLog).where(
                                     and_(
                                         MessageLog.rule_id == log_data.get('rule_id'),
-                                        MessageLog.message_id == log_data.get('message_id'),
+                                        MessageLog.source_message_id == log_data.get('source_message_id'),
                                         MessageLog.source_chat_id == log_data.get('source_chat_id')
                                     )
                                 )
@@ -1547,15 +1592,15 @@ async def main():
                                 source_chat_name=log_data.get('source_chat_name'),
                                 target_chat_id=log_data.get('target_chat_id'),
                                 target_chat_name=log_data.get('target_chat_name'),
-                                message_id=log_data.get('message_id'),
-                                forwarded_message_id=log_data.get('forwarded_message_id'),
-                                message_type=log_data.get('message_type'),
-                                message_text=log_data.get('message_text'),
-                                media_info=log_data.get('media_info'),
+                                source_message_id=log_data.get('source_message_id'),
+                                target_message_id=log_data.get('target_message_id'),
+                                original_text=log_data.get('original_text'),
+                                processed_text=log_data.get('processed_text'),
+                                media_type=log_data.get('media_type'),
                                 status=log_data.get('status', 'success'),
                                 error_message=log_data.get('error_message'),
-                                created_at=datetime.fromisoformat(log_data['created_at'].replace('Z', '+00:00')) if log_data.get('created_at') else datetime.now(),
-                                updated_at=datetime.fromisoformat(log_data['updated_at'].replace('Z', '+00:00')) if log_data.get('updated_at') else datetime.now()
+                                processing_time=log_data.get('processing_time'),
+                                created_at=datetime.fromisoformat(log_data['created_at'].replace('Z', '+00:00')) if log_data.get('created_at') else datetime.now()
                             )
                             
                             db.add(new_log)
