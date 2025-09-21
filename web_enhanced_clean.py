@@ -260,7 +260,7 @@ async def main():
         if enhanced_bot:
             logger.info("💡 聊天名称更新方式:")
             logger.info("   1. 访问规则列表页面时自动更新")
-            logger.info("   2. 手动调用: curl -X POST http://localhost:8000/api/rules/fetch-chat-info")
+            logger.info("   2. 手动调用: curl -X POST http://localhost:9393/api/rules/fetch-chat-info")
         
         # 创建简化的FastAPI应用
         logger.info("🌐 启动Web服务器...")
