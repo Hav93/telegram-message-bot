@@ -1381,5 +1381,110 @@ class MultiClientManager:
     
 
 
+    def request_chat_names_update(self, rules):
+        """请求更新聊天名称 - 跨线程安全的方式"""
+        import queue
+        import concurrent.futures
+        
+        # 创建结果队列
+        result_queue = queue.Queue()
+        
+        # 在客户端线程中执行任务
+        def execute_in_client_thread():
+            try:
+                # 这个函数将在客户端的事件循环中运行
+                async def get_chat_names():
+                    if not self.client_wrappers:
+                        return []
+                    
+                    # 获取第一个可用的客户端
+                    client_wrapper = next(iter(self.client_wrappers.values()))
+                    if not client_wrapper or not client_wrapper.client or not client_wrapper.client.is_connected():
+                        return []
+                    
+                    updated_rules = []
+                    
+                    for rule in rules:
+                        updated_fields = {}
+                        
+                        # 获取源聊天名称
+                        if rule.source_chat_id and (not rule.source_chat_name or rule.source_chat_name.startswith('聊天 ')):
+                            try:
+                                source_entity = await client_wrapper.client.get_entity(int(rule.source_chat_id))
+                                if hasattr(source_entity, 'title') and source_entity.title:
+                                    source_name = source_entity.title
+                                elif hasattr(source_entity, 'username') and source_entity.username:
+                                    source_name = f"@{source_entity.username}"
+                                elif hasattr(source_entity, 'first_name') and source_entity.first_name:
+                                    last_name = getattr(source_entity, 'last_name', '')
+                                    source_name = f"{source_entity.first_name} {last_name}".strip()
+                                else:
+                                    source_name = f"聊天 {rule.source_chat_id}"
+                                
+                                updated_fields['source_chat_name'] = source_name
+                                self.logger.info(f"🔄 获取到源聊天名称: {rule.source_chat_id} -> {source_name}")
+                            except Exception as e:
+                                self.logger.warning(f"⚠️ 无法获取源聊天 {rule.source_chat_id} 的信息: {e}")
+                        
+                        # 获取目标聊天名称
+                        if rule.target_chat_id and (not rule.target_chat_name or rule.target_chat_name.startswith('聊天 ')):
+                            try:
+                                target_entity = await client_wrapper.client.get_entity(int(rule.target_chat_id))
+                                if hasattr(target_entity, 'title') and target_entity.title:
+                                    target_name = target_entity.title
+                                elif hasattr(target_entity, 'username') and target_entity.username:
+                                    target_name = f"@{target_entity.username}"
+                                elif hasattr(target_entity, 'first_name') and target_entity.first_name:
+                                    last_name = getattr(target_entity, 'last_name', '')
+                                    target_name = f"{target_entity.first_name} {last_name}".strip()
+                                else:
+                                    target_name = f"聊天 {rule.target_chat_id}"
+                                
+                                updated_fields['target_chat_name'] = target_name
+                                self.logger.info(f"🔄 获取到目标聊天名称: {rule.target_chat_id} -> {target_name}")
+                            except Exception as e:
+                                self.logger.warning(f"⚠️ 无法获取目标聊天 {rule.target_chat_id} 的信息: {e}")
+                        
+                        if updated_fields:
+                            updated_rules.append({
+                                "rule_id": rule.id,
+                                "rule_name": rule.name,
+                                "updates": updated_fields
+                            })
+                    
+                    return updated_rules
+                
+                # 获取客户端的事件循环并运行任务
+                if self.client_wrappers:
+                    client_wrapper = next(iter(self.client_wrappers.values()))
+                    if hasattr(client_wrapper, 'loop') and client_wrapper.loop:
+                        # 在客户端的事件循环中运行
+                        future = asyncio.run_coroutine_threadsafe(get_chat_names(), client_wrapper.loop)
+                        result = future.result(timeout=30)  # 30秒超时
+                        result_queue.put(('success', result))
+                    else:
+                        result_queue.put(('error', '客户端事件循环不可用'))
+                else:
+                    result_queue.put(('error', '没有可用的客户端'))
+                    
+            except Exception as e:
+                result_queue.put(('error', str(e)))
+        
+        # 在线程池中执行
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.submit(execute_in_client_thread)
+        
+        # 等待结果
+        try:
+            status, result = result_queue.get(timeout=35)  # 35秒总超时
+            if status == 'success':
+                return result
+            else:
+                self.logger.error(f"❌ 获取聊天名称失败: {result}")
+                return []
+        except queue.Empty:
+            self.logger.error("❌ 获取聊天名称超时")
+            return []
+
 # 全局多客户端管理器实例
 multi_client_manager = MultiClientManager()

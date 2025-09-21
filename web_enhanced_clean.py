@@ -1004,12 +1004,12 @@ async def main():
         
         @app.post("/api/rules/fetch-chat-info")
         async def fetch_chat_info():
-            """从Telegram获取真实的聊天信息"""
+            """从Telegram获取真实的聊天信息 - 跨线程安全版本"""
             try:
                 from services import ForwardRuleService
                 from database import get_db
                 from models import ForwardRule
-                from sqlalchemy import select, update
+                from sqlalchemy import update
                 
                 # 检查是否有可用的Telegram客户端
                 if not enhanced_bot or not hasattr(enhanced_bot, 'multi_client_manager'):
@@ -1025,73 +1025,32 @@ async def main():
                         "message": "没有可用的Telegram客户端"
                     }, status_code=400)
                 
-                # 获取第一个可用的客户端
-                client_wrapper = next(iter(client_manager.client_wrappers.values()))
-                
+                # 获取所有规则
                 rules = await ForwardRuleService.get_all_rules()
-                updated_rules = []
+                if not rules:
+                    return JSONResponse(content={
+                        "success": True,
+                        "message": "没有规则需要更新",
+                        "updated_rules": []
+                    })
                 
+                # 使用跨线程安全的方法获取聊天名称
+                logger.info("🔄 开始从Telegram获取聊天名称...")
+                updated_rules = client_manager.request_chat_names_update(rules)
+                
+                # 更新数据库
                 async for db in get_db():
-                    for rule in rules:
-                        updated_fields = {}
+                    for update_info in updated_rules:
+                        rule_id = update_info["rule_id"]
+                        updates = update_info["updates"]
                         
-                        try:
-                            # 获取源聊天信息
-                            if rule.source_chat_id and (not rule.source_chat_name or rule.source_chat_name.strip() == ''):
-                                try:
-                                    source_entity = await client_wrapper.client.get_entity(int(rule.source_chat_id))
-                                    # 优先使用 title 字段，这是最通用的名称字段
-                                    if hasattr(source_entity, 'title') and source_entity.title:
-                                        source_name = source_entity.title
-                                    elif hasattr(source_entity, 'username') and source_entity.username:
-                                        source_name = f"@{source_entity.username}"
-                                    elif hasattr(source_entity, 'first_name') and source_entity.first_name:
-                                        last_name = getattr(source_entity, 'last_name', '')
-                                        source_name = f"{source_entity.first_name} {last_name}".strip()
-                                    else:
-                                        source_name = f"聊天 {rule.source_chat_id}"
-                                    
-                                    updated_fields['source_chat_name'] = source_name
-                                    logger.info(f"🔄 获取到源聊天名称: {rule.source_chat_id} -> {source_name}")
-                                except Exception as e:
-                                    logger.warning(f"⚠️ 无法获取源聊天 {rule.source_chat_id} 的信息: {e}")
-                            
-                            # 获取目标聊天信息
-                            if rule.target_chat_id and (not rule.target_chat_name or rule.target_chat_name.strip() == ''):
-                                try:
-                                    target_entity = await client_wrapper.client.get_entity(int(rule.target_chat_id))
-                                    # 优先使用 title 字段，这是最通用的名称字段
-                                    if hasattr(target_entity, 'title') and target_entity.title:
-                                        target_name = target_entity.title
-                                    elif hasattr(target_entity, 'username') and target_entity.username:
-                                        target_name = f"@{target_entity.username}"
-                                    elif hasattr(target_entity, 'first_name') and target_entity.first_name:
-                                        last_name = getattr(target_entity, 'last_name', '')
-                                        target_name = f"{target_entity.first_name} {last_name}".strip()
-                                    else:
-                                        target_name = f"聊天 {rule.target_chat_id}"
-                                    
-                                    updated_fields['target_chat_name'] = target_name
-                                    logger.info(f"🔄 获取到目标聊天名称: {rule.target_chat_id} -> {target_name}")
-                                except Exception as e:
-                                    logger.warning(f"⚠️ 无法获取目标聊天 {rule.target_chat_id} 的信息: {e}")
-                            
-                            # 如果有字段需要更新
-                            if updated_fields:
-                                await db.execute(
-                                    update(ForwardRule)
-                                    .where(ForwardRule.id == rule.id)
-                                    .values(**updated_fields)
-                                )
-                                updated_rules.append({
-                                    "rule_id": rule.id,
-                                    "rule_name": rule.name,
-                                    "updates": updated_fields
-                                })
+                        await db.execute(
+                            update(ForwardRule)
+                            .where(ForwardRule.id == rule_id)
+                            .values(**updates)
+                        )
                         
-                        except Exception as e:
-                            logger.error(f"❌ 处理规则 {rule.id} 时出错: {e}")
-                            continue
+                        logger.info(f"🔄 数据库更新完成: 规则ID={rule_id}, 更新字段={list(updates.keys())}")
                     
                     await db.commit()
                     break
