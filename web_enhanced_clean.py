@@ -22,7 +22,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-async def auto_database_migration():
+async def auto_database_migration(enhanced_bot=None):
     """自动数据库迁移和修复"""
     try:
         from database import get_db
@@ -77,14 +77,14 @@ async def auto_database_migration():
                 logger.info("✅ 数据库结构检查完成，无需迁移")
             
             # 检查并更新聊天名称（无论是否需要迁移都执行）
-            await auto_update_chat_names(db)
+            await auto_update_chat_names(db, enhanced_bot)
             break
             
     except Exception as e:
         logger.error(f"❌ 自动数据库迁移失败: {e}")
 
-async def auto_update_chat_names(db):
-    """自动更新聊天名称"""
+async def auto_update_chat_names(db, enhanced_bot=None):
+    """自动更新聊天名称 - 直接从Telegram获取真实名称"""
     try:
         from models import ForwardRule
         from sqlalchemy import select, update
@@ -108,43 +108,91 @@ async def auto_update_chat_names(db):
         
         logger.info(f"🔄 发现 {len(rules)} 个规则需要更新聊天名称")
         
-        # 尝试从enhanced_bot获取Telegram客户端
-        try:
-            # 这里需要从全局变量获取enhanced_bot实例
-            # 由于在函数作用域内，我们先用占位符名称
-            updated_count = 0
-            for rule_tuple in rules:
-                rule = rule_tuple[0]  # SQLAlchemy返回的是tuple
-                updated_fields = {}
-                
-                # 更新源聊天名称
-                if not rule.source_chat_name or rule.source_chat_name.strip() == '':
-                    # 暂时使用聊天ID作为占位符，后续可以通过API更新
-                    source_name = f"聊天 {rule.source_chat_id}"
-                    updated_fields['source_chat_name'] = source_name
-                
-                # 更新目标聊天名称
-                if not rule.target_chat_name or rule.target_chat_name.strip() == '':
-                    target_name = f"聊天 {rule.target_chat_id}"
-                    updated_fields['target_chat_name'] = target_name
-                
-                if updated_fields:
-                    await db.execute(
-                        update(ForwardRule)
-                        .where(ForwardRule.id == rule.id)
-                        .values(**updated_fields)
-                    )
-                    updated_count += 1
-                    logger.info(f"🔄 更新规则 {rule.name}: {updated_fields}")
+        # 尝试从Telegram客户端直接获取真实聊天名称
+        updated_count = 0
+        real_names_count = 0
+        
+        # 检查是否有可用的Telegram客户端
+        client_wrapper = None
+        if enhanced_bot and hasattr(enhanced_bot, 'multi_client_manager') and enhanced_bot.multi_client_manager:
+            client_manager = enhanced_bot.multi_client_manager
+            if hasattr(client_manager, 'client_wrappers') and client_manager.client_wrappers:
+                # 获取第一个可用的客户端
+                client_wrapper = next(iter(client_manager.client_wrappers.values()))
+                logger.info("🔗 找到可用的Telegram客户端，将获取真实聊天名称")
+            elif hasattr(client_manager, 'clients') and client_manager.clients:
+                # 兼容旧版本的属性名
+                client_wrapper = next(iter(client_manager.clients.values()))
+                logger.info("🔗 找到可用的Telegram客户端，将获取真实聊天名称")
+        
+        for rule_tuple in rules:
+            rule = rule_tuple[0]  # SQLAlchemy返回的是tuple
+            updated_fields = {}
             
-            if updated_count > 0:
-                await db.commit()
+            # 更新源聊天名称
+            if not rule.source_chat_name or rule.source_chat_name.strip() == '':
+                source_name = f"聊天 {rule.source_chat_id}"  # 默认占位符
+                
+                if client_wrapper and rule.source_chat_id:
+                    try:
+                        source_entity = await client_wrapper.client.get_entity(int(rule.source_chat_id))
+                        # 优先使用 title 字段，这是最通用的名称字段
+                        if hasattr(source_entity, 'title') and source_entity.title:
+                            source_name = source_entity.title
+                            real_names_count += 1
+                        elif hasattr(source_entity, 'username') and source_entity.username:
+                            source_name = f"@{source_entity.username}"
+                            real_names_count += 1
+                        elif hasattr(source_entity, 'first_name') and source_entity.first_name:
+                            last_name = getattr(source_entity, 'last_name', '')
+                            source_name = f"{source_entity.first_name} {last_name}".strip()
+                            real_names_count += 1
+                    except Exception as e:
+                        logger.warning(f"⚠️ 无法获取源聊天 {rule.source_chat_id} 的信息: {e}")
+                
+                updated_fields['source_chat_name'] = source_name
+            
+            # 更新目标聊天名称
+            if not rule.target_chat_name or rule.target_chat_name.strip() == '':
+                target_name = f"聊天 {rule.target_chat_id}"  # 默认占位符
+                
+                if client_wrapper and rule.target_chat_id:
+                    try:
+                        target_entity = await client_wrapper.client.get_entity(int(rule.target_chat_id))
+                        # 优先使用 title 字段，这是最通用的名称字段
+                        if hasattr(target_entity, 'title') and target_entity.title:
+                            target_name = target_entity.title
+                            real_names_count += 1
+                        elif hasattr(target_entity, 'username') and target_entity.username:
+                            target_name = f"@{target_entity.username}"
+                            real_names_count += 1
+                        elif hasattr(target_entity, 'first_name') and target_entity.first_name:
+                            last_name = getattr(target_entity, 'last_name', '')
+                            target_name = f"{target_entity.first_name} {last_name}".strip()
+                            real_names_count += 1
+                    except Exception as e:
+                        logger.warning(f"⚠️ 无法获取目标聊天 {rule.target_chat_id} 的信息: {e}")
+                
+                updated_fields['target_chat_name'] = target_name
+            
+            if updated_fields:
+                await db.execute(
+                    update(ForwardRule)
+                    .where(ForwardRule.id == rule.id)
+                    .values(**updated_fields)
+                )
+                updated_count += 1
+                logger.info(f"🔄 更新规则 {rule.name}: {updated_fields}")
+        
+        if updated_count > 0:
+            await db.commit()
+            if real_names_count > 0:
+                logger.info(f"✅ 已为 {updated_count} 个规则更新聊天名称，其中 {real_names_count} 个获取了真实名称")
+            else:
                 logger.info(f"✅ 已为 {updated_count} 个规则设置占位符聊天名称")
-                logger.info("💡 提示: 启动后可调用 /api/rules/fetch-chat-info 获取真实聊天名称")
-            
-        except Exception as e:
-            logger.warning(f"⚠️ 无法获取Telegram客户端，使用占位符名称: {e}")
-            
+                if not client_wrapper:
+                    logger.info("💡 提示: Telegram客户端未配置，使用了占位符名称")
+        
     except Exception as e:
         logger.error(f"❌ 自动更新聊天名称失败: {e}")
 
@@ -180,7 +228,7 @@ async def main():
             enhanced_bot = None
         
         # 自动数据库迁移
-        await auto_database_migration()
+        await auto_database_migration(enhanced_bot)
         
         # 创建简化的FastAPI应用
         logger.info("🌐 启动Web服务器...")
