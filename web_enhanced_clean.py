@@ -458,8 +458,9 @@ async def main():
                             "message": f"缺少必需字段: {field}"
                         }, status_code=400)
                 
-                # 提取参数，允许可选字段
-                kwargs = {k: v for k, v in data.items() if k not in required_fields}
+                # 提取参数，排除必需字段和已明确传递的字段
+                excluded_fields = required_fields + ['source_chat_name', 'target_chat_name']
+                kwargs = {k: v for k, v in data.items() if k not in excluded_fields}
                 
                 rule = await ForwardRuleService.create_rule(
                     name=data['name'],
