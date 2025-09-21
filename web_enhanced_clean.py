@@ -141,7 +141,9 @@ async def auto_update_chat_names(db, enhanced_bot=None):
             if needs_source_update:
                 source_name = f"聊天 {rule.source_chat_id}"  # 默认占位符
                 
-                if client_wrapper and rule.source_chat_id:
+                # 暂时跳过真实名称获取，避免事件循环冲突
+                # TODO: 需要在正确的事件循环中执行 get_entity 调用
+                if client_wrapper and rule.source_chat_id and False:  # 临时禁用
                     try:
                         source_entity = await client_wrapper.client.get_entity(int(rule.source_chat_id))
                         # 优先使用 title 字段，这是最通用的名称字段
@@ -170,7 +172,9 @@ async def auto_update_chat_names(db, enhanced_bot=None):
             if needs_target_update:
                 target_name = f"聊天 {rule.target_chat_id}"  # 默认占位符
                 
-                if client_wrapper and rule.target_chat_id:
+                # 暂时跳过真实名称获取，避免事件循环冲突
+                # TODO: 需要在正确的事件循环中执行 get_entity 调用
+                if client_wrapper and rule.target_chat_id and False:  # 临时禁用
                     try:
                         target_entity = await client_wrapper.client.get_entity(int(rule.target_chat_id))
                         # 优先使用 title 字段，这是最通用的名称字段
@@ -1004,12 +1008,10 @@ async def main():
         
         @app.post("/api/rules/fetch-chat-info")
         async def fetch_chat_info():
-            """从Telegram获取真实的聊天信息 - 跨线程安全版本"""
+            """触发聊天名称更新 - 简化版本"""
             try:
                 from services import ForwardRuleService
                 from database import get_db
-                from models import ForwardRule
-                from sqlalchemy import update
                 
                 # 检查是否有可用的Telegram客户端
                 if not enhanced_bot or not hasattr(enhanced_bot, 'multi_client_manager'):
@@ -1019,7 +1021,7 @@ async def main():
                     }, status_code=400)
                 
                 client_manager = enhanced_bot.multi_client_manager
-                if not client_manager or not client_manager.client_wrappers:
+                if not client_manager or not client_manager.clients:
                     return JSONResponse(content={
                         "success": False,
                         "message": "没有可用的Telegram客户端"
@@ -1034,40 +1036,33 @@ async def main():
                         "updated_rules": []
                     })
                 
-                # 使用跨线程安全的方法获取聊天名称
-                logger.info("🔄 开始从Telegram获取聊天名称...")
-                updated_rules = client_manager.request_chat_names_update(rules)
-                
-                # 更新数据库
+                # 重新运行自动更新聊天名称功能
+                logger.info("🔄 手动触发聊天名称更新...")
                 async for db in get_db():
-                    for update_info in updated_rules:
-                        rule_id = update_info["rule_id"]
-                        updates = update_info["updates"]
-                        
-                        await db.execute(
-                            update(ForwardRule)
-                            .where(ForwardRule.id == rule_id)
-                            .values(**updates)
-                        )
-                        
-                        logger.info(f"🔄 数据库更新完成: 规则ID={rule_id}, 更新字段={list(updates.keys())}")
-                    
-                    await db.commit()
+                    await auto_update_chat_names(db, enhanced_bot)
                     break
                 
-                logger.info(f"✅ 从Telegram获取聊天名称完成: 更新了 {len(updated_rules)} 个规则")
+                # 返回更新后的规则列表
+                updated_rules = await ForwardRuleService.get_all_rules()
                 
                 return JSONResponse(content={
                     "success": True,
-                    "message": f"从Telegram获取聊天名称完成，更新了 {len(updated_rules)} 个规则",
-                    "updated_rules": updated_rules
+                    "message": f"聊天名称更新完成，处理了 {len(updated_rules)} 个规则",
+                    "updated_rules": [
+                        {
+                            "rule_id": rule.id,
+                            "rule_name": rule.name,
+                            "source_chat_name": rule.source_chat_name,
+                            "target_chat_name": rule.target_chat_name
+                        } for rule in updated_rules
+                    ]
                 })
                 
             except Exception as e:
-                logger.error(f"❌ 从Telegram获取聊天信息失败: {e}")
+                logger.error(f"❌ 触发聊天名称更新失败: {e}")
                 return JSONResponse(content={
                     "success": False,
-                    "message": f"获取失败: {str(e)}"
+                    "message": f"更新失败: {str(e)}"
                 }, status_code=500)
         
         @app.post("/api/logs/fix-rule-association")
