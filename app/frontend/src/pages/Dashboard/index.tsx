@@ -748,25 +748,27 @@ const Dashboard: React.FC = () => {
             tooltip={{
               showTitle: true,
               showMarkers: true,
-              title: (title: any, data: any) => {
+              title: (title: string, data: unknown) => {
                 console.log('🔍 Title调试 - title:', title, 'data:', data);
                 return title;
               },
-              customItems: (originalItems: any[]) => {
+              customItems: (originalItems: unknown[]) => {
                 console.log('🔍 CustomItems调试 - originalItems:', originalItems);
                 console.log('🔍 完整originalItems结构:', JSON.stringify(originalItems, null, 2));
                 
-                return originalItems.map((item: any) => {
-                  console.log('🔍 Item调试:', item);
+                return originalItems.map((item: unknown) => {
+                  const typedItem = item as Record<string, unknown>;
+                  console.log('🔍 Item调试:', typedItem);
                   
                   // 尝试多种方式获取数值
-                  const value = item.value || item.count || item.y || item.data?.count || 0;
-                  const name = item.name || item.seriesName || item.data?.type || '未知';
+                  const itemData = typedItem.data as Record<string, unknown> | undefined;
+                  const value = typedItem.value || typedItem.count || typedItem.y || itemData?.count || 0;
+                  const name = typedItem.name || typedItem.seriesName || itemData?.type || '未知';
                   
                   console.log(`🔍 解析结果 - name: ${name}, value: ${value}`);
                   
                   return {
-                    ...item,
+                    ...typedItem,
                     name: name,
                     value: `${value}条`
                   };
