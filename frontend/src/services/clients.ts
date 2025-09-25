@@ -75,4 +75,12 @@ export const clientsApi = {
     const response = await api.post(`/api/clients/${clientId}/login`, loginData) as any;
     return response; // 直接返回response，因为api.post已经返回了response.data
   },
+
+  // 切换自动启动
+  toggleAutoStart: async (clientId: string, autoStart: boolean): Promise<{ success: boolean; message: string }> => {
+    const response = await api.post(`/api/clients/${clientId}/auto-start`, {
+      auto_start: autoStart
+    }) as any;
+    return response;
+  },
 };

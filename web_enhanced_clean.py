@@ -329,6 +329,30 @@ async def main():
             try:
                 if enhanced_bot:
                     clients_status = enhanced_bot.get_client_status()
+                    
+                    # 从数据库获取auto_start信息
+                    try:
+                        from models import TelegramClient
+                        from database import db_manager
+                        from sqlalchemy import select
+                        
+                        async with db_manager.async_session() as session:
+                            result = await session.execute(select(TelegramClient))
+                            db_clients = result.scalars().all()
+                            
+                            # 创建client_id到auto_start的映射
+                            auto_start_mapping = {client.client_id: client.auto_start for client in db_clients}
+                            
+                            # 合并auto_start信息到客户端状态
+                            for client_id, client_info in clients_status.items():
+                                client_info['auto_start'] = auto_start_mapping.get(client_id, False)
+                                
+                    except Exception as db_error:
+                        logger.warning(f"获取auto_start信息失败: {db_error}")
+                        # 如果数据库查询失败，给所有客户端设置默认值
+                        for client_id, client_info in clients_status.items():
+                            client_info['auto_start'] = False
+                    
                     return JSONResponse(content={
                         "success": True,
                         "clients": clients_status
@@ -1914,6 +1938,47 @@ async def main():
                 return JSONResponse(content={
                     "success": False,
                     "message": f"删除客户端失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.post("/api/clients/{client_id}/auto-start")
+        async def toggle_auto_start(client_id: str, request: Request):
+            """切换客户端自动启动状态"""
+            try:
+                data = await request.json()
+                auto_start = data.get('auto_start', False)
+                
+                # 更新数据库
+                from models import TelegramClient
+                from database import db_manager
+                from sqlalchemy import select
+                
+                async with db_manager.async_session() as session:
+                    result = await session.execute(
+                        select(TelegramClient).where(TelegramClient.client_id == client_id)
+                    )
+                    db_client = result.scalar_one_or_none()
+                    
+                    if not db_client:
+                        return JSONResponse(content={
+                            "success": False,
+                            "message": f"客户端 {client_id} 不存在"
+                        }, status_code=404)
+                    
+                    db_client.auto_start = auto_start
+                    await session.commit()
+                    
+                    logger.info(f"✅ 客户端 {client_id} 自动启动状态已更新: {auto_start}")
+                
+                return JSONResponse(content={
+                    "success": True,
+                    "message": f"客户端 {client_id} 自动启动已{'启用' if auto_start else '禁用'}"
+                })
+                
+            except Exception as e:
+                logger.error(f"切换自动启动状态失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"切换自动启动状态失败: {str(e)}"
                 }, status_code=500)
         
         # 系统设置API

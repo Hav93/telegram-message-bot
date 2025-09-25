@@ -180,6 +180,35 @@ class UserSession(Base):
     def __repr__(self):
         return f"<UserSession(id={self.id}, user_id={self.user_id})>"
 
+class TelegramClient(Base):
+    """Telegram客户端配置模型"""
+    __tablename__ = 'telegram_clients'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    client_id = Column(String(100), unique=True, nullable=False, comment='客户端ID')
+    client_type = Column(String(20), nullable=False, comment='客户端类型: user/bot')
+    
+    # 机器人客户端配置
+    bot_token = Column(String(500), comment='机器人Token')
+    admin_user_id = Column(String(50), comment='管理员用户ID')
+    
+    # 用户客户端配置
+    api_id = Column(String(50), comment='Telegram API ID')
+    api_hash = Column(String(100), comment='Telegram API Hash')
+    phone = Column(String(20), comment='手机号')
+    
+    # 状态字段
+    is_active = Column(Boolean, default=True, comment='是否启用')
+    auto_start = Column(Boolean, default=False, comment='是否自动启动')
+    last_connected = Column(DateTime, comment='最后连接时间')
+    
+    # 时间戳
+    created_at = Column(DateTime, default=get_local_now, comment='创建时间')
+    updated_at = Column(DateTime, default=get_local_now, onupdate=get_local_now, comment='更新时间')
+    
+    def __repr__(self):
+        return f"<TelegramClient(id={self.id}, client_id='{self.client_id}', type='{self.client_type}')>"
+
 class BotSettings(Base):
     """机器人设置模型"""
     __tablename__ = 'bot_settings'
@@ -252,5 +281,6 @@ class DatabaseHelper:
             'replace_rules',
             'message_logs',
             'user_sessions',
+            'telegram_clients',
             'bot_settings'
         ]

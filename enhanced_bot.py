@@ -48,6 +48,63 @@ class EnhancedTelegramBot:
             except Exception as e:
                 self.logger.error(f"状态回调执行失败: {e}")
     
+    async def _auto_start_clients(self):
+        """自动启动设置了auto_start=True的客户端"""
+        try:
+            from models import TelegramClient
+            from database import get_db
+            from sqlalchemy import select
+            
+            async for db in get_db():
+                # 查询所有启用自动启动的客户端
+                result = await db.execute(
+                    select(TelegramClient).where(
+                        TelegramClient.auto_start == True,
+                        TelegramClient.is_active == True
+                    )
+                )
+                auto_start_clients = result.scalars().all()
+                
+                if auto_start_clients:
+                    self.logger.info(f"🔄 发现 {len(auto_start_clients)} 个需要自动启动的客户端")
+                    
+                    for db_client in auto_start_clients:
+                        try:
+                            # 准备配置数据
+                            config_data = {}
+                            if db_client.client_type == 'bot':
+                                config_data = {
+                                    'bot_token': db_client.bot_token,
+                                    'admin_user_id': db_client.admin_user_id
+                                }
+                            elif db_client.client_type == 'user':
+                                config_data = {
+                                    'api_id': db_client.api_id,
+                                    'api_hash': db_client.api_hash,
+                                    'phone': db_client.phone
+                                }
+                            
+                            # 添加到运行时管理器
+                            client = self.multi_client_manager.add_client_with_config(
+                                db_client.client_id,
+                                db_client.client_type,
+                                config_data=config_data
+                            )
+                            client.add_status_callback(self._notify_status_change)
+                            
+                            # 启动客户端
+                            client.start()
+                            self.logger.info(f"✅ 自动启动客户端: {db_client.client_id} ({db_client.client_type})")
+                            
+                        except Exception as client_error:
+                            self.logger.error(f"❌ 自动启动客户端 {db_client.client_id} 失败: {client_error}")
+                else:
+                    self.logger.info("💡 没有设置自动启动的客户端")
+                break
+                
+        except Exception as e:
+            self.logger.error(f"❌ 自动启动客户端失败: {e}")
+    
     async def start(self, web_mode: bool = False, skip_config_validation: bool = False):
         """启动机器人"""
         try:
@@ -74,6 +131,9 @@ class EnhancedTelegramBot:
             # 初始化数据库
             await init_database()
             self.logger.info("✅ 数据库初始化完成")
+            
+            # 自动启动设置了auto_start=True的客户端
+            await self._auto_start_clients()
             
             # 添加默认用户客户端（带配置）
             user_config = {

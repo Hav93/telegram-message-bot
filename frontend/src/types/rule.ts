@@ -185,6 +185,7 @@ export interface TelegramClient {
   };
   monitored_chats: string[];
   thread_alive: boolean;
+  auto_start?: boolean;
 }
 
 export interface ClientsResponse {

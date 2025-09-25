@@ -14,7 +14,8 @@ import {
   Typography,
   Row,
   Col,
-  Statistic
+  Statistic,
+  Switch
 } from 'antd';
 import {
   PlayCircleOutlined,
@@ -26,7 +27,8 @@ import {
   RobotOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  LoginOutlined
+  LoginOutlined,
+  PoweroffOutlined
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -48,6 +50,7 @@ interface ClientInfo {
   };
   monitored_chats: number[];
   thread_alive: boolean;
+  auto_start?: boolean;
 }
 
 interface SystemStatus {
@@ -168,6 +171,23 @@ const ClientManagement: React.FC = () => {
     },
   });
 
+  // 切换自动启动
+  const toggleAutoStartMutation = useMutation({
+    mutationFn: async ({ clientId, autoStart }: { clientId: string; autoStart: boolean }) => {
+      const response = await axios.post(`/api/clients/${clientId}/auto-start`, {
+        auto_start: autoStart
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      message.success(data.message);
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+    },
+    onError: (error: any) => {
+      message.error(error.response?.data?.message || '设置失败');
+    },
+  });
+
   const handleAddClient = () => {
     form.validateFields().then(values => {
       addClientMutation.mutate(values);
@@ -267,6 +287,24 @@ const ClientManagement: React.FC = () => {
         <Tag color={alive ? 'success' : 'error'}>
           {alive ? '活跃' : '停止'}
         </Tag>
+      ),
+    },
+    {
+      title: '自动启动',
+      key: 'auto_start',
+      render: (record: ClientInfo) => (
+        <Switch
+          checked={record.auto_start || false}
+          onChange={(checked) => {
+            toggleAutoStartMutation.mutate({
+              clientId: record.client_id,
+              autoStart: checked
+            });
+          }}
+          checkedChildren={<PoweroffOutlined />}
+          unCheckedChildren={<PoweroffOutlined />}
+          loading={toggleAutoStartMutation.isPending}
+        />
       ),
     },
     {
