@@ -114,27 +114,25 @@ class EnhancedTelegramBot:
             from config import Config
             
             async for db in get_db():
-                # 定义传统客户端
+                # 定义传统客户端 - 无论配置如何都创建基本记录
                 legacy_clients = []
                 
-                # 主用户客户端
-                if hasattr(Config, 'API_ID') and Config.API_ID:
-                    legacy_clients.append({
-                        'client_id': 'main_user',
-                        'client_type': 'user',
-                        'api_id': str(Config.API_ID),
-                        'api_hash': Config.API_HASH,
-                        'phone': Config.PHONE_NUMBER
-                    })
+                # 主用户客户端 - 始终创建记录
+                legacy_clients.append({
+                    'client_id': 'main_user',
+                    'client_type': 'user',
+                    'api_id': str(Config.API_ID) if hasattr(Config, 'API_ID') and Config.API_ID else None,
+                    'api_hash': Config.API_HASH if hasattr(Config, 'API_HASH') and Config.API_HASH else None,
+                    'phone': Config.PHONE_NUMBER if hasattr(Config, 'PHONE_NUMBER') and Config.PHONE_NUMBER else None
+                })
                 
-                # 主机器人客户端
-                if hasattr(Config, 'BOT_TOKEN') and Config.BOT_TOKEN:
-                    legacy_clients.append({
-                        'client_id': 'main_bot',
-                        'client_type': 'bot',
-                        'bot_token': Config.BOT_TOKEN,
-                        'admin_user_id': Config.ADMIN_USER_IDS
-                    })
+                # 主机器人客户端 - 始终创建记录
+                legacy_clients.append({
+                    'client_id': 'main_bot',
+                    'client_type': 'bot',
+                    'bot_token': Config.BOT_TOKEN if hasattr(Config, 'BOT_TOKEN') and Config.BOT_TOKEN else None,
+                    'admin_user_id': Config.ADMIN_USER_IDS if hasattr(Config, 'ADMIN_USER_IDS') and Config.ADMIN_USER_IDS else None
+                })
                 
                 # 检查并迁移每个传统客户端
                 for client_data in legacy_clients:
