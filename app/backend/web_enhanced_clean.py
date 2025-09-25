@@ -811,6 +811,347 @@ async def main():
                     "message": f"删除规则失败: {str(e)}"
                 }, status_code=500)
         
+        # 关键词管理API
+        @app.get("/api/rules/{rule_id}/keywords")
+        async def get_keywords(rule_id: int):
+            """获取规则的关键词列表"""
+            try:
+                from models import Keyword
+                from database import get_db
+                from sqlalchemy import select
+                
+                async for db in get_db():
+                    result = await db.execute(
+                        select(Keyword).where(Keyword.rule_id == rule_id)
+                    )
+                    keywords = result.scalars().all()
+                    
+                    keywords_data = []
+                    for kw in keywords:
+                        keywords_data.append({
+                            "id": kw.id,
+                            "rule_id": kw.rule_id,
+                            "keyword": kw.keyword,
+                            "is_blacklist": getattr(kw, 'is_exclude', False),
+                            "created_at": kw.created_at.isoformat() if kw.created_at else None
+                        })
+                    
+                    return JSONResponse({
+                        "success": True,
+                        "keywords": keywords_data
+                    })
+                    
+            except Exception as e:
+                logger.error(f"获取关键词列表失败: {e}")
+                return JSONResponse(
+                    status_code=500,
+                    content={"success": False, "message": f"获取关键词列表失败: {str(e)}"}
+                )
+
+        @app.post("/api/rules/{rule_id}/keywords")
+        async def create_keyword(rule_id: int, request: Request):
+            """创建关键词"""
+            try:
+                from models import Keyword
+                from database import get_db
+                
+                data = await request.json()
+                
+                async for db in get_db():
+                    keyword = Keyword(
+                        rule_id=rule_id,
+                        keyword=data.get('keyword'),
+                        is_exclude=data.get('is_blacklist', False)
+                    )
+                    
+                    db.add(keyword)
+                    await db.commit()
+                    await db.refresh(keyword)
+                    
+                    return JSONResponse({
+                        "success": True,
+                        "message": "关键词创建成功",
+                        "keyword": {
+                            "id": keyword.id,
+                            "rule_id": keyword.rule_id,
+                            "keyword": keyword.keyword,
+                            "is_blacklist": keyword.is_exclude,
+                            "created_at": keyword.created_at.isoformat() if keyword.created_at else None
+                        }
+                    })
+                    
+            except Exception as e:
+                logger.error(f"创建关键词失败: {e}")
+                return JSONResponse(
+                    status_code=500,
+                    content={"success": False, "message": f"创建关键词失败: {str(e)}"}
+                )
+
+        @app.put("/api/keywords/{keyword_id}")
+        async def update_keyword(keyword_id: int, request: Request):
+            """更新关键词"""
+            try:
+                from models import Keyword
+                from database import get_db
+                from sqlalchemy import select
+                
+                data = await request.json()
+                
+                async for db in get_db():
+                    result = await db.execute(
+                        select(Keyword).where(Keyword.id == keyword_id)
+                    )
+                    keyword = result.scalar_one_or_none()
+                    
+                    if not keyword:
+                        return JSONResponse(
+                            status_code=404,
+                            content={"success": False, "message": "关键词不存在"}
+                        )
+                    
+                    # 更新字段
+                    if 'keyword' in data:
+                        keyword.keyword = data['keyword']
+                    if 'is_blacklist' in data:
+                        keyword.is_exclude = data['is_blacklist']
+                    
+                    await db.commit()
+                    await db.refresh(keyword)
+                    
+                    return JSONResponse({
+                        "success": True,
+                        "message": "关键词更新成功",
+                        "keyword": {
+                            "id": keyword.id,
+                            "rule_id": keyword.rule_id,
+                            "keyword": keyword.keyword,
+                            "is_blacklist": keyword.is_exclude,
+                            "created_at": keyword.created_at.isoformat() if keyword.created_at else None
+                        }
+                    })
+                    
+            except Exception as e:
+                logger.error(f"更新关键词失败: {e}")
+                return JSONResponse(
+                    status_code=500,
+                    content={"success": False, "message": f"更新关键词失败: {str(e)}"}
+                )
+
+        @app.delete("/api/keywords/{keyword_id}")
+        async def delete_keyword(keyword_id: int):
+            """删除关键词"""
+            try:
+                from models import Keyword
+                from database import get_db
+                from sqlalchemy import select, delete
+                
+                async for db in get_db():
+                    result = await db.execute(
+                        delete(Keyword).where(Keyword.id == keyword_id)
+                    )
+                    await db.commit()
+                    
+                    if result.rowcount > 0:
+                        return JSONResponse({
+                            "success": True,
+                            "message": "关键词删除成功"
+                        })
+                    else:
+                        return JSONResponse(
+                            status_code=404,
+                            content={"success": False, "message": "关键词不存在"}
+                        )
+                    
+            except Exception as e:
+                logger.error(f"删除关键词失败: {e}")
+                return JSONResponse(
+                    status_code=500,
+                    content={"success": False, "message": f"删除关键词失败: {str(e)}"}
+                )
+
+        # 替换规则管理API
+        @app.get("/api/rules/{rule_id}/replacements")
+        async def get_replacements(rule_id: int):
+            """获取规则的替换规则列表"""
+            try:
+                from models import ReplaceRule
+                from database import get_db
+                from sqlalchemy import select
+                
+                async for db in get_db():
+                    result = await db.execute(
+                        select(ReplaceRule).where(ReplaceRule.rule_id == rule_id)
+                        .order_by(ReplaceRule.priority)
+                    )
+                    replacements = result.scalars().all()
+                    
+                    replacements_data = []
+                    for rr in replacements:
+                        replacements_data.append({
+                            "id": rr.id,
+                            "rule_id": rr.rule_id,
+                            "name": rr.name,
+                            "pattern": rr.pattern,
+                            "replacement": rr.replacement,
+                            "priority": rr.priority,
+                            "is_regex": rr.is_regex,
+                            "is_active": rr.is_active,
+                            "created_at": rr.created_at.isoformat() if rr.created_at else None
+                        })
+                    
+                    return JSONResponse({
+                        "success": True,
+                        "replacements": replacements_data
+                    })
+                    
+            except Exception as e:
+                logger.error(f"获取替换规则列表失败: {e}")
+                return JSONResponse(
+                    status_code=500,
+                    content={"success": False, "message": f"获取替换规则列表失败: {str(e)}"}
+                )
+
+        @app.post("/api/rules/{rule_id}/replacements")
+        async def create_replacement(rule_id: int, request: Request):
+            """创建替换规则"""
+            try:
+                from models import ReplaceRule
+                from database import get_db
+                
+                data = await request.json()
+                
+                async for db in get_db():
+                    replacement = ReplaceRule(
+                        rule_id=rule_id,
+                        name=data.get('name'),
+                        pattern=data.get('pattern'),
+                        replacement=data.get('replacement'),
+                        priority=data.get('priority', 1),
+                        is_regex=data.get('is_regex', True),
+                        is_active=data.get('is_active', True)
+                    )
+                    
+                    db.add(replacement)
+                    await db.commit()
+                    await db.refresh(replacement)
+                    
+                    return JSONResponse({
+                        "success": True,
+                        "message": "替换规则创建成功",
+                        "replacement": {
+                            "id": replacement.id,
+                            "rule_id": replacement.rule_id,
+                            "name": replacement.name,
+                            "pattern": replacement.pattern,
+                            "replacement": replacement.replacement,
+                            "priority": replacement.priority,
+                            "is_regex": getattr(replacement, 'is_regex', True),
+                            "is_active": replacement.is_active,
+                            "created_at": replacement.created_at.isoformat() if replacement.created_at else None
+                        }
+                    })
+                    
+            except Exception as e:
+                logger.error(f"创建替换规则失败: {e}")
+                return JSONResponse(
+                    status_code=500,
+                    content={"success": False, "message": f"创建替换规则失败: {str(e)}"}
+                )
+
+        @app.put("/api/replacements/{replacement_id}")
+        async def update_replacement(replacement_id: int, request: Request):
+            """更新替换规则"""
+            try:
+                from models import ReplaceRule
+                from database import get_db
+                from sqlalchemy import select
+                
+                data = await request.json()
+                
+                async for db in get_db():
+                    result = await db.execute(
+                        select(ReplaceRule).where(ReplaceRule.id == replacement_id)
+                    )
+                    replacement = result.scalar_one_or_none()
+                    
+                    if not replacement:
+                        return JSONResponse(
+                            status_code=404,
+                            content={"success": False, "message": "替换规则不存在"}
+                        )
+                    
+                    # 更新字段
+                    if 'name' in data:
+                        replacement.name = data['name']
+                    if 'pattern' in data:
+                        replacement.pattern = data['pattern']
+                    if 'replacement' in data:
+                        replacement.replacement = data['replacement']
+                    if 'priority' in data:
+                        replacement.priority = data['priority']
+                    if 'is_regex' in data:
+                        replacement.is_regex = data['is_regex']
+                    if 'is_active' in data:
+                        replacement.is_active = data['is_active']
+                    
+                    await db.commit()
+                    await db.refresh(replacement)
+                    
+                    return JSONResponse({
+                        "success": True,
+                        "message": "替换规则更新成功",
+                        "replacement": {
+                            "id": replacement.id,
+                            "rule_id": replacement.rule_id,
+                            "name": replacement.name,
+                            "pattern": replacement.pattern,
+                            "replacement": replacement.replacement,
+                            "priority": replacement.priority,
+                            "is_regex": getattr(replacement, 'is_regex', True),
+                            "is_active": replacement.is_active,
+                            "created_at": replacement.created_at.isoformat() if replacement.created_at else None
+                        }
+                    })
+                    
+            except Exception as e:
+                logger.error(f"更新替换规则失败: {e}")
+                return JSONResponse(
+                    status_code=500,
+                    content={"success": False, "message": f"更新替换规则失败: {str(e)}"}
+                )
+
+        @app.delete("/api/replacements/{replacement_id}")
+        async def delete_replacement(replacement_id: int):
+            """删除替换规则"""
+            try:
+                from models import ReplaceRule
+                from database import get_db
+                from sqlalchemy import select, delete
+                
+                async for db in get_db():
+                    result = await db.execute(
+                        delete(ReplaceRule).where(ReplaceRule.id == replacement_id)
+                    )
+                    await db.commit()
+                    
+                    if result.rowcount > 0:
+                        return JSONResponse({
+                            "success": True,
+                            "message": "替换规则删除成功"
+                        })
+                    else:
+                        return JSONResponse(
+                            status_code=404,
+                            content={"success": False, "message": "替换规则不存在"}
+                        )
+                    
+            except Exception as e:
+                logger.error(f"删除替换规则失败: {e}")
+                return JSONResponse(
+                    status_code=500,
+                    content={"success": False, "message": f"删除替换规则失败: {str(e)}"}
+                )
+        
         @app.get("/api/chats")
         async def get_chats():
             """获取聊天列表"""

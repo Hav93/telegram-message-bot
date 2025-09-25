@@ -1,0 +1,19 @@
+/* 修复Tooltip层级问题 */
+.ant-tooltip {
+  z-index: 9999 !important;
+}
+
+/* 确保Modal内的Tooltip也有正确的层级 */
+.ant-modal .ant-tooltip {
+  z-index: 10001 !important;
+}
+
+/* 修复Form.Item的tooltip层级 */
+.ant-form-item-tooltip .ant-tooltip {
+  z-index: 10002 !important;
+}
+
+/* 修复Table内的Tooltip层级 */
+.ant-table .ant-tooltip {
+  z-index: 9998 !important;
+}

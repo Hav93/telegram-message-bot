@@ -115,6 +115,7 @@ class ReplaceRule(Base):
     pattern = Column(Text, nullable=False, comment='正则表达式模式')
     replacement = Column(Text, nullable=False, comment='替换内容')
     priority = Column(Integer, default=0, comment='优先级，数字越小优先级越高')
+    is_regex = Column(Boolean, default=True, comment='是否为正则表达式')
     is_active = Column(Boolean, default=True, comment='是否启用')
     is_global = Column(Boolean, default=False, comment='是否全局替换')
     created_at = Column(DateTime, default=get_local_now, comment='创建时间')

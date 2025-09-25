@@ -14,6 +14,7 @@ import {
   message,
   Tooltip
 } from 'antd';
+import '../../components/common/TooltipFix.css';
 import {
   PlusOutlined,
   EditOutlined,
