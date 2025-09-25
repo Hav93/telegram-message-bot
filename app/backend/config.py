@@ -23,14 +23,14 @@ class ConfigLoader:
         loaded_files = []
         for config_file in reversed(config_files):  # 反向加载，让高优先级的文件最后加载
             if os.path.exists(config_file):
-                print(f"📄 加载配置文件: {config_file}")
+                print(f"[CONFIG] 加载配置文件: {config_file}")
                 load_dotenv(config_file, override=True)  # 允许覆盖，实现优先级
                 loaded_files.append(config_file)
         
         if not loaded_files:
-            print("⚠️  未找到配置文件，使用默认配置")
+            print("[WARNING] 未找到配置文件，使用默认配置")
         else:
-            print(f"✅ 已加载 {len(loaded_files)} 个配置文件，最终优先级: {' > '.join(reversed(loaded_files))}")
+            print(f"[CONFIG] 已加载 {len(loaded_files)} 个配置文件，最终优先级: {' > '.join(reversed(loaded_files))}")
         
         # 环境变量已经在系统中，优先级最高
 
