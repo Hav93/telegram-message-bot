@@ -40,6 +40,7 @@ import { rulesApi } from '../../services/rules';
 import { chatsApi } from '../../services/chats';
 import type { ForwardRule } from '../../types/rule';
 import { useCustomModal } from '../../hooks/useCustomModal';
+import '../../components/common/TooltipFix.css';
 
 const { Title } = Typography;
 const { Search } = Input;

@@ -27,6 +27,7 @@ import { rulesApi } from '../../services/rules';
 import { chatsApi } from '../../services/chats';
 import { clientsApi } from '../../services/clients';
 import type { CreateRuleDto, UpdateRuleDto } from '../../types/rule';
+import '../../components/common/TooltipFix.css';
 
 const { Title } = Typography;
 const { Option } = Select;

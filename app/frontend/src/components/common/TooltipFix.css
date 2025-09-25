@@ -1,19 +1,61 @@
-/* 修复Tooltip层级问题 */
+/* 修复Tooltip层级问题 - 全局最高优先级 */
 .ant-tooltip {
-  z-index: 9999 !important;
+  z-index: 99999 !important;
+}
+
+/* Tooltip内容层 */
+.ant-tooltip-content {
+  z-index: 99999 !important;
+}
+
+/* Tooltip箭头 */
+.ant-tooltip-arrow {
+  z-index: 99998 !important;
 }
 
 /* 确保Modal内的Tooltip也有正确的层级 */
-.ant-modal .ant-tooltip {
-  z-index: 10001 !important;
+.ant-modal .ant-tooltip,
+.ant-modal .ant-tooltip-content {
+  z-index: 100001 !important;
 }
 
 /* 修复Form.Item的tooltip层级 */
-.ant-form-item-tooltip .ant-tooltip {
-  z-index: 10002 !important;
+.ant-form-item-tooltip .ant-tooltip,
+.ant-form-item-tooltip .ant-tooltip-content,
+.ant-form-item-label .ant-tooltip,
+.ant-form-item-label .ant-tooltip-content {
+  z-index: 100002 !important;
 }
 
 /* 修复Table内的Tooltip层级 */
-.ant-table .ant-tooltip {
-  z-index: 9998 !important;
+.ant-table .ant-tooltip,
+.ant-table .ant-tooltip-content {
+  z-index: 99999 !important;
+}
+
+/* 修复Card内的Tooltip层级 */
+.ant-card .ant-tooltip,
+.ant-card .ant-tooltip-content {
+  z-index: 99999 !important;
+}
+
+/* 修复所有可能的遮挡情况 */
+div[role="tooltip"],
+.ant-tooltip-inner,
+.ant-tooltip-placement-top,
+.ant-tooltip-placement-bottom,
+.ant-tooltip-placement-left,
+.ant-tooltip-placement-right {
+  z-index: 99999 !important;
+}
+
+/* 确保Tooltip在所有组件之上 */
+.ant-tooltip-hidden {
+  z-index: -1 !important;
+}
+
+/* 特殊处理：问号图标的tooltip */
+.anticon-question-circle + .ant-tooltip,
+.ant-form-item-tooltip + .ant-tooltip {
+  z-index: 100003 !important;
 }
