@@ -1951,6 +1951,7 @@ async def main():
                 from models import TelegramClient
                 from database import db_manager
                 from sqlalchemy import select
+                from config import Config
                 
                 async with db_manager.async_session() as session:
                     result = await session.execute(
@@ -1959,12 +1960,49 @@ async def main():
                     db_client = result.scalar_one_or_none()
                     
                     if not db_client:
-                        return JSONResponse(content={
-                            "success": False,
-                            "message": f"客户端 {client_id} 不存在"
-                        }, status_code=404)
+                        # 如果客户端不存在，尝试创建一个默认记录
+                        logger.info(f"💡 客户端 {client_id} 不存在，尝试创建默认记录")
+                        
+                        # 判断客户端类型并创建相应的配置
+                        if client_id == 'main_user' or 'user' in client_id:
+                            client_type = 'user'
+                            # 创建用户客户端记录
+                            db_client = TelegramClient(
+                                client_id=client_id,
+                                client_type=client_type,
+                                api_id=str(Config.API_ID) if hasattr(Config, 'API_ID') and Config.API_ID else None,
+                                api_hash=Config.API_HASH if hasattr(Config, 'API_HASH') else None,
+                                phone=Config.PHONE_NUMBER if hasattr(Config, 'PHONE_NUMBER') else None,
+                                is_active=True,
+                                auto_start=auto_start
+                            )
+                        elif client_id == 'main_bot' or 'bot' in client_id:
+                            client_type = 'bot'
+                            # 创建机器人客户端记录
+                            db_client = TelegramClient(
+                                client_id=client_id,
+                                client_type=client_type,
+                                bot_token=Config.BOT_TOKEN if hasattr(Config, 'BOT_TOKEN') else None,
+                                admin_user_id=Config.ADMIN_USER_IDS if hasattr(Config, 'ADMIN_USER_IDS') else None,
+                                is_active=True,
+                                auto_start=auto_start
+                            )
+                        else:
+                            # 未知类型，默认创建用户类型
+                            client_type = 'user'
+                            db_client = TelegramClient(
+                                client_id=client_id,
+                                client_type=client_type,
+                                is_active=True,
+                                auto_start=auto_start
+                            )
+                        
+                        session.add(db_client)
+                        logger.info(f"✅ 已为客户端 {client_id} 创建数据库记录")
+                    else:
+                        # 更新现有记录
+                        db_client.auto_start = auto_start
                     
-                    db_client.auto_start = auto_start
                     await session.commit()
                     
                     logger.info(f"✅ 客户端 {client_id} 自动启动状态已更新: {auto_start}")
