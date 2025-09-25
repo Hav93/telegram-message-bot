@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import CustomModal from '../components/CustomModal';
+import CustomModal from '../components/CustomModal/index.tsx';
 
 interface ModalConfig {
   title: string;

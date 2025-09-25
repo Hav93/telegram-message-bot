@@ -3,8 +3,8 @@ import { Card, List, Tag, Space, Typography, Button, Switch, message } from 'ant
 import { SettingOutlined, EyeOutlined, MessageOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { rulesApi } from '../../../services/rules';
-import type { ForwardRule } from '../../../types/rule';
+import { rulesApi } from '../../../services/rules.ts';
+import type { ForwardRule } from '../../../types/rule.ts';
 
 const { Text } = Typography;
 

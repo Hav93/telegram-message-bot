@@ -18,7 +18,7 @@ import {
   ExperimentOutlined
 } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { settingsApi } from '../../services/settings';
+import { settingsApi } from '../../services/settings.ts';
 
 const { Title } = Typography;
 const { TabPane } = Tabs;

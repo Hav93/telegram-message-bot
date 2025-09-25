@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Steps, Form, Input, Button, message, Alert, Space } from 'antd';
 import { LoginOutlined, SafetyCertificateOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
-import { clientsApi } from '../../services/clients';
+import { clientsApi } from '../../services/clients.ts';
 
 const { Step } = Steps;
 

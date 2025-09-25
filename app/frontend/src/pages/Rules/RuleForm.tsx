@@ -23,10 +23,10 @@ import {
   ArrowLeftOutlined
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { rulesApi } from '../../services/rules';
-import { chatsApi } from '../../services/chats';
-import { clientsApi } from '../../services/clients';
-import type { CreateRuleDto, UpdateRuleDto } from '../../types/rule';
+import { rulesApi } from '../../services/rules.ts';
+import { chatsApi } from '../../services/chats.ts';
+import { clientsApi } from '../../services/clients.ts';
+import type { CreateRuleDto, UpdateRuleDto } from '../../types/rule.ts';
 
 const { Title } = Typography;
 const { Option } = Select;

@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api } from './api.ts';
 import type {
   ForwardRule,
   CreateRuleDto,
@@ -7,8 +7,8 @@ import type {
   CreateKeywordDto,
   ReplaceRule,
   CreateReplaceRuleDto,
-} from '../types/rule';
-// import type { PaginatedResponse } from '../types/api';
+} from '../types/rule.ts';
+// import type { PaginatedResponse } from '../types/api.ts';
 
 // 转发规则API
 export const rulesApi = {

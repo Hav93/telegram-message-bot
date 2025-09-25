@@ -5,7 +5,7 @@ import zhCN from 'antd/locale/zh_CN';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Layout
-import MainLayout from './components/common/MainLayout';
+import MainLayout from './components/common/MainLayout.tsx';
 
 // Pages
 import Dashboard from './pages/Dashboard/index.tsx';

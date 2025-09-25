@@ -1,6 +1,6 @@
-import { api } from './api';
-import type { MessageLog, LogFilters } from '../types/rule';
-import type { PaginatedResponse } from '../types/api';
+import { api } from './api.ts';
+import type { MessageLog, LogFilters } from '../types/rule.ts';
+import type { PaginatedResponse } from '../types/api.ts';
 
 // 消息日志API
 export const logsApi = {

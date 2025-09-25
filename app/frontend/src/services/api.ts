@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
-// import type { ApiResponse, PaginatedResponse } from '../types/api';
+// import type { ApiResponse, PaginatedResponse } from '../types/api.ts';
 
 // 创建axios实例 - 简化版（参考v3.1）
 const createApiClient = (): AxiosInstance => {

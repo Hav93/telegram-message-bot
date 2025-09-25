@@ -31,8 +31,8 @@ import {
   PoweroffOutlined
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ClientLoginModal } from './ClientLoginModal';
-import { clientsApi } from '../../services/clients';
+import { ClientLoginModal } from './ClientLoginModal.tsx';
+import { clientsApi } from '../../services/clients.ts';
 
 const { Title, Text } = Typography;
 const { Option } = Select;

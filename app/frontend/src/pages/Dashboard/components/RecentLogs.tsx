@@ -3,7 +3,7 @@ import { Card, Table, Tag, Space, Typography, Button } from 'antd';
 import { FileTextOutlined, EyeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-import type { MessageLog } from '../../../types/rule';
+import type { MessageLog } from '../../../types/rule.ts';
 
 const { Text } = Typography;
 

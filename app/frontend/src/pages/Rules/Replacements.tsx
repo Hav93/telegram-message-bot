@@ -21,8 +21,8 @@ import {
   ArrowLeftOutlined
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCustomModal } from '../../hooks/useCustomModal';
-import { replaceRulesApi } from '../../services/rules';
+import { useCustomModal } from '../../hooks/useCustomModal.tsx';
+import { replaceRulesApi } from '../../services/rules.ts';
 
 const { Title } = Typography;
 const { TextArea } = Input;
