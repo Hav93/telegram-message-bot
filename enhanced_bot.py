@@ -105,6 +105,71 @@ class EnhancedTelegramBot:
         except Exception as e:
             self.logger.error(f"❌ 自动启动客户端失败: {e}")
     
+    async def _migrate_legacy_clients(self):
+        """迁移传统客户端到数据库"""
+        try:
+            from models import TelegramClient
+            from database import get_db
+            from sqlalchemy import select
+            from config import Config
+            
+            async for db in get_db():
+                # 定义传统客户端
+                legacy_clients = []
+                
+                # 主用户客户端
+                if hasattr(Config, 'API_ID') and Config.API_ID:
+                    legacy_clients.append({
+                        'client_id': 'main_user',
+                        'client_type': 'user',
+                        'api_id': str(Config.API_ID),
+                        'api_hash': Config.API_HASH,
+                        'phone': Config.PHONE_NUMBER
+                    })
+                
+                # 主机器人客户端
+                if hasattr(Config, 'BOT_TOKEN') and Config.BOT_TOKEN:
+                    legacy_clients.append({
+                        'client_id': 'main_bot',
+                        'client_type': 'bot',
+                        'bot_token': Config.BOT_TOKEN,
+                        'admin_user_id': Config.ADMIN_USER_IDS
+                    })
+                
+                # 检查并迁移每个传统客户端
+                for client_data in legacy_clients:
+                    result = await db.execute(
+                        select(TelegramClient).where(
+                            TelegramClient.client_id == client_data['client_id']
+                        )
+                    )
+                    existing_client = result.scalar_one_or_none()
+                    
+                    if not existing_client:
+                        # 创建新的客户端记录
+                        db_client = TelegramClient(
+                            client_id=client_data['client_id'],
+                            client_type=client_data['client_type'],
+                            api_id=client_data.get('api_id'),
+                            api_hash=client_data.get('api_hash'),
+                            phone=client_data.get('phone'),
+                            bot_token=client_data.get('bot_token'),
+                            admin_user_id=client_data.get('admin_user_id'),
+                            is_active=True,
+                            auto_start=False  # 默认不自动启动
+                        )
+                        db.add(db_client)
+                        self.logger.info(f"📥 迁移传统客户端到数据库: {client_data['client_id']} ({client_data['client_type']})")
+                    else:
+                        self.logger.info(f"✅ 传统客户端已存在: {client_data['client_id']}")
+                
+                await db.commit()
+                self.logger.info("✅ 传统客户端迁移完成")
+                break
+                
+        except Exception as e:
+            self.logger.error(f"❌ 传统客户端迁移失败: {e}")
+    
     async def start(self, web_mode: bool = False, skip_config_validation: bool = False):
         """启动机器人"""
         try:
@@ -131,6 +196,9 @@ class EnhancedTelegramBot:
             # 初始化数据库
             await init_database()
             self.logger.info("✅ 数据库初始化完成")
+            
+            # 迁移传统客户端到数据库（如果不存在）
+            await self._migrate_legacy_clients()
             
             # 自动启动设置了auto_start=True的客户端
             await self._auto_start_clients()
