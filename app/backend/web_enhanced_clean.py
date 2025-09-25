@@ -327,41 +327,53 @@ async def main():
         async def get_all_clients():
             """获取所有客户端状态"""
             try:
+                clients_status = {}
+                
                 if enhanced_bot:
-                    clients_status = enhanced_bot.get_client_status()
+                    # 获取运行时客户端状态
+                    runtime_clients = enhanced_bot.get_client_status()
+                    clients_status.update(runtime_clients)
+                
+                # 从数据库获取所有配置的客户端
+                try:
+                    from models import TelegramClient
+                    from database import db_manager
+                    from sqlalchemy import select
                     
-                    # 从数据库获取auto_start信息
-                    try:
-                        from models import TelegramClient
-                        from database import db_manager
-                        from sqlalchemy import select
+                    async with db_manager.async_session() as session:
+                        result = await session.execute(select(TelegramClient))
+                        db_clients = result.scalars().all()
                         
-                        async with db_manager.async_session() as session:
-                            result = await session.execute(select(TelegramClient))
-                            db_clients = result.scalars().all()
-                            
-                            # 创建client_id到auto_start的映射
-                            auto_start_mapping = {client.client_id: client.auto_start for client in db_clients}
-                            
-                            # 合并auto_start信息到客户端状态
-                            for client_id, client_info in clients_status.items():
-                                client_info['auto_start'] = auto_start_mapping.get(client_id, False)
+                        # 为每个数据库客户端创建状态信息
+                        for db_client in db_clients:
+                            if db_client.client_id in clients_status:
+                                # 运行时客户端已存在，只添加auto_start信息
+                                clients_status[db_client.client_id]['auto_start'] = db_client.auto_start
+                            else:
+                                # 运行时客户端不存在，创建基础状态信息
+                                clients_status[db_client.client_id] = {
+                                    "client_id": db_client.client_id,
+                                    "client_type": db_client.client_type,
+                                    "running": False,
+                                    "connected": False,
+                                    "login_state": "idle",
+                                    "user_info": None,
+                                    "monitored_chats": [],
+                                    "thread_alive": False,
+                                    "auto_start": db_client.auto_start
+                                }
                                 
-                    except Exception as db_error:
-                        logger.warning(f"获取auto_start信息失败: {db_error}")
-                        # 如果数据库查询失败，给所有客户端设置默认值
-                        for client_id, client_info in clients_status.items():
+                except Exception as db_error:
+                    logger.warning(f"获取数据库客户端信息失败: {db_error}")
+                    # 如果数据库查询失败，给运行时客户端设置默认auto_start值
+                    for client_id, client_info in clients_status.items():
+                        if 'auto_start' not in client_info:
                             client_info['auto_start'] = False
-                    
-                    return JSONResponse(content={
-                        "success": True,
-                        "clients": clients_status
-                    })
-                else:
-                    return JSONResponse(content={
-                        "success": False,
-                        "message": "增强版机器人不可用，运行在传统模式"
-                    })
+                
+                return JSONResponse(content={
+                    "success": True,
+                    "clients": clients_status
+                })
             except Exception as e:
                 logger.error(f"获取客户端状态失败: {e}")
                 return JSONResponse(content={
