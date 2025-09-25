@@ -35,6 +35,12 @@ else
     echo "📄 配置文件示例存在"
 fi
 
+# 构建前端
+echo "🎨 构建前端..."
+cd app/frontend
+npm ci && npm run build
+cd ../..
+
 # 构建镜像
 echo "🔨 构建 Docker 镜像..."
 docker build -t telegram-message-bot:v3.0 .

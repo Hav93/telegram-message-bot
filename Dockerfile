@@ -44,10 +44,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # 复制前端构建结果（需要先在本地构建）
-COPY frontend/dist ./frontend/dist
+COPY app/frontend/dist ./frontend/dist
 
-# 复制应用代码 - 所有Python文件
-COPY *.py ./
+# 复制应用代码 - 后端Python文件
+COPY app/backend ./
 
 # 创建必要的目录
 RUN mkdir -p /app/data /app/logs /app/temp /app/sessions

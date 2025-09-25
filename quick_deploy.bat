@@ -23,6 +23,12 @@ REM 停止旧容器
 echo 🛑 停止旧容器...
 docker-compose down >nul 2>&1
 
+REM 构建前端
+echo 🎨 构建前端...
+cd app\frontend
+call npm ci && call npm run build
+cd ..\..
+
 REM 构建新镜像
 echo 🔨 构建Docker镜像...
 docker build -t telegram-message-bot:v3.6 .

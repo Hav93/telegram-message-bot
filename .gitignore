@@ -66,15 +66,15 @@ config/config.env
 .dockerignore
 
 # 前端开发文件
-frontend/node_modules/
-frontend/.vite/
+app/frontend/node_modules/
+app/frontend/.vite/
 # 保留前端构建文件，但忽略 source map
-frontend/dist/**/*.map
+app/frontend/dist/**/*.map
 
 # 明确包含前端构建的关键文件（覆盖之前的忽略规则）
-!frontend/dist/
-!frontend/dist/**
-frontend/dist/**/*.map
+!app/frontend/dist/
+!app/frontend/dist/**
+app/frontend/dist/**/*.map
 
 # 备份文件
 *.backup
