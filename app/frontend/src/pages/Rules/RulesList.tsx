@@ -36,10 +36,10 @@ import {
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { rulesApi } from '../../services/rules.ts';
-import { chatsApi } from '../../services/chats.ts';
-import type { ForwardRule } from '../../types/rule.ts';
-import { useCustomModal } from '../../hooks/useCustomModal.tsx';
+import { rulesApi } from '../../services/rules';
+import { chatsApi } from '../../services/chats';
+import type { ForwardRule } from '../../types/rule';
+import { useCustomModal } from '../../hooks/useCustomModal';
 
 const { Title } = Typography;
 const { Search } = Input;

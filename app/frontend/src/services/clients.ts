@@ -1,5 +1,5 @@
-import { api } from './api.ts';
-import type { ClientsResponse } from '../types/rule.ts';
+import { api } from './api';
+import type { ClientsResponse } from '../types/rule';
 
 export const clientsApi = {
   // 获取所有客户端

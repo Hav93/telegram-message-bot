@@ -20,8 +20,8 @@ import {
   ArrowLeftOutlined
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { keywordsApi } from '../../services/rules.ts';
-import { useCustomModal } from '../../hooks/useCustomModal.tsx';
+import { keywordsApi } from '../../services/rules';
+import { useCustomModal } from '../../hooks/useCustomModal';
 
 const { Title } = Typography;
 

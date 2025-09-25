@@ -28,9 +28,9 @@ import {
   UserAddOutlined
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { chatsApi } from '../../services/chats.ts';
-import { useCustomModal } from '../../hooks/useCustomModal.tsx';
-import type { Chat } from '../../types/api.ts';
+import { chatsApi } from '../../services/chats';
+import { useCustomModal } from '../../hooks/useCustomModal';
+import type { Chat } from '../../types/api';
 
 const { Title } = Typography;
 const { Search } = Input;

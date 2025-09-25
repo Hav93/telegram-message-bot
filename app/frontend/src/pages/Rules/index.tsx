@@ -1,9 +1,9 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import RulesList from './RulesList.tsx';
-import RuleForm from './RuleForm.tsx';
-import KeywordsPage from './Keywords.tsx';
-import ReplacementsPage from './Replacements.tsx';
+import RulesList from './RulesList';
+import RuleForm from './RuleForm';
+import KeywordsPage from './Keywords';
+import ReplacementsPage from './Replacements';
 
 const RulesPage: React.FC = () => {
   return (

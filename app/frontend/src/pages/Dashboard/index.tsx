@@ -15,13 +15,13 @@ import { Column, Bar } from '@ant-design/plots';
 import dayjs from 'dayjs';
 
 // Services
-// import { systemApi } from '../../services/system.ts';
-// import { dashboardApi } from '../../services/dashboard.ts';
-import { rulesApi } from '../../services/rules.ts';
-import { logsApi } from '../../services/logs.ts';
+// import { systemApi } from '../../services/system';
+// import { dashboardApi } from '../../services/dashboard';
+import { rulesApi } from '../../services/rules';
+import { logsApi } from '../../services/logs';
 
 // Components
-import StatsCard from './components/StatsCard.tsx';
+import StatsCard from './components/StatsCard';
 
 const { Title, Text } = Typography;
 

@@ -1,4 +1,4 @@
-import { api } from './api.ts';
+import { api } from './api';
 import type {
   Chat,
   SystemStatus,
@@ -6,7 +6,7 @@ import type {
   TelegramConfig,
   ProxyConfig,
   BotSettings,
-} from '../types/api.ts';
+} from '../types/api';
 
 // 系统管理API
 export const systemApi = {

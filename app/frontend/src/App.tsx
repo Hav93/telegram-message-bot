@@ -5,16 +5,16 @@ import zhCN from 'antd/locale/zh_CN';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Layout
-import MainLayout from './components/common/MainLayout.tsx';
+import MainLayout from './components/common/MainLayout';
 
 // Pages
-import Dashboard from './pages/Dashboard/index.tsx';
-import RulesPage from './pages/Rules/index.tsx';
-import LogsPage from './pages/Logs/index.tsx';
-import SettingsPage from './pages/Settings/index.tsx';
-import ChatsPage from './pages/Chats/index.tsx';
-import ClientManagement from './pages/ClientManagement/index.tsx';
-import LoginPage from './pages/Login/index.tsx';
+import Dashboard from './pages/Dashboard';
+import RulesPage from './pages/Rules';
+import LogsPage from './pages/Logs';
+import SettingsPage from './pages/Settings';
+import ChatsPage from './pages/Chats';
+import ClientManagement from './pages/ClientManagement';
+import LoginPage from './pages/Login';
 
 // Styles
 import './App.css';

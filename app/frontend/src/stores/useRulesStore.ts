@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ForwardRule, RuleFilters } from '../types/rule.ts';
+import type { ForwardRule, RuleFilters } from '../types/rule';
 
 // 规则管理状态
 interface RulesState {

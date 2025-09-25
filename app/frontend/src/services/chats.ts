@@ -1,5 +1,5 @@
-import { api } from './api.ts';
-import type { Chat, ChatsResponse } from '../types/api.ts';
+import { api } from './api';
+import type { Chat, ChatsResponse } from '../types/api';
 
 export interface ChatGroups {
   [key: string]: Chat[];

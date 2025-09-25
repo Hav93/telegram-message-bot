@@ -6,7 +6,7 @@ import {
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import type { SystemStatus as SystemStatusType } from '../../../types/api.ts';
+import type { SystemStatus as SystemStatusType } from '../../../types/api';
 
 const { Text } = Typography;
 

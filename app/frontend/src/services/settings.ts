@@ -1,4 +1,4 @@
-import { api } from './api.ts';
+import { api } from './api';
 
 export interface BotSettings {
   api_id: string;
