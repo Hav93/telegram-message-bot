@@ -31,8 +31,8 @@ import {
   PoweroffOutlined
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
 import { ClientLoginModal } from './ClientLoginModal';
+import { clientsApi } from '../../services/clients';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -43,24 +43,18 @@ interface ClientInfo {
   running: boolean;
   connected: boolean;
   user_info?: {
-    id: number;
-    username: string;
-    first_name: string;
-    phone: string;
+    id?: number;
+    username?: string;
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    bot?: boolean;
   };
-  monitored_chats: number[];
+  monitored_chats: string[];
   thread_alive: boolean;
   auto_start?: boolean;
 }
 
-interface SystemStatus {
-  success: boolean;
-  enhanced_mode: boolean;
-  clients: Record<string, ClientInfo>;
-  total_clients: number;
-  running_clients: number;
-  connected_clients: number;
-}
 
 const ClientManagement: React.FC = () => {
   const [addModalVisible, setAddModalVisible] = useState(false);
@@ -71,24 +65,19 @@ const ClientManagement: React.FC = () => {
   const queryClient = useQueryClient();
 
   // 获取客户端列表
-  const { data: clientsData, isLoading, refetch } = useQuery<{
-    success: boolean;
-    clients: Record<string, ClientInfo>;
-  }>({
+  const { data: clientsData, isLoading, refetch } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
-      const response = await axios.get('/api/clients');
-      return response.data;
+      return await clientsApi.getClients();
     },
     refetchInterval: 5000, // 5秒刷新一次
   });
 
   // 获取系统状态
-  const { data: systemStatus } = useQuery<SystemStatus>({
+  const { data: systemStatus } = useQuery({
     queryKey: ['system-enhanced-status'],
     queryFn: async () => {
-      const response = await axios.get('/api/system/enhanced-status');
-      return response.data;
+      return await clientsApi.getEnhancedStatus();
     },
     refetchInterval: 5000,
   });
@@ -96,8 +85,7 @@ const ClientManagement: React.FC = () => {
   // 启动客户端
   const startClientMutation = useMutation({
     mutationFn: async (clientId: string) => {
-      const response = await axios.post(`/api/clients/${clientId}/start`);
-      return response.data;
+      return await clientsApi.startClient(clientId);
     },
     onSuccess: (data) => {
       message.success(data.message);
@@ -111,8 +99,7 @@ const ClientManagement: React.FC = () => {
   // 停止客户端
   const stopClientMutation = useMutation({
     mutationFn: async (clientId: string) => {
-      const response = await axios.post(`/api/clients/${clientId}/stop`);
-      return response.data;
+      return await clientsApi.stopClient(clientId);
     },
     onSuccess: (data) => {
       message.success(data.message);
@@ -126,8 +113,7 @@ const ClientManagement: React.FC = () => {
   // 添加客户端
   const addClientMutation = useMutation({
     mutationFn: async (values: any) => {
-      const response = await axios.post('/api/clients', values);
-      return response.data;
+      return await clientsApi.addClient(values);
     },
     onSuccess: (data) => {
       console.log('🎯 添加客户端API响应:', data);
@@ -159,8 +145,7 @@ const ClientManagement: React.FC = () => {
   // 删除客户端
   const removeClientMutation = useMutation({
     mutationFn: async (clientId: string) => {
-      const response = await axios.delete(`/api/clients/${clientId}`);
-      return response.data;
+      return await clientsApi.removeClient(clientId);
     },
     onSuccess: (data) => {
       message.success(data.message);
@@ -174,10 +159,7 @@ const ClientManagement: React.FC = () => {
   // 切换自动启动
   const toggleAutoStartMutation = useMutation({
     mutationFn: async ({ clientId, autoStart }: { clientId: string; autoStart: boolean }) => {
-      const response = await axios.post(`/api/clients/${clientId}/auto-start`, {
-        auto_start: autoStart
-      });
-      return response.data;
+      return await clientsApi.toggleAutoStart(clientId, autoStart);
     },
     onSuccess: (data) => {
       message.success(data.message);
