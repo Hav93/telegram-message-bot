@@ -164,6 +164,8 @@ async def init_database():
     await db_manager.init_db()
     # 确保所有表都被创建
     await db_manager.create_tables()
+    # 执行自动数据库迁移
+    await _auto_migrate_database()
 
 async def get_db():
     """获取数据库会话"""
@@ -178,3 +180,39 @@ async def get_db():
             raise
         finally:
             await session.close()
+
+async def _auto_migrate_database():
+    """自动数据库迁移 - 添加缺失的字段"""
+    try:
+        from sqlalchemy import text
+        logger.info("🔄 开始自动数据库迁移...")
+        
+        async with db_manager.async_session() as session:
+            # 检查replace_rules表是否存在is_regex字段
+            try:
+                result = await session.execute(text("PRAGMA table_info(replace_rules)"))
+                columns = [row[1] for row in result.fetchall()]
+                
+                if 'is_regex' not in columns:
+                    logger.info("🔧 添加is_regex字段到replace_rules表...")
+                    await session.execute(text("ALTER TABLE replace_rules ADD COLUMN is_regex BOOLEAN DEFAULT 1"))
+                    await session.commit()
+                    logger.info("✅ is_regex字段已添加")
+                else:
+                    logger.debug("✅ is_regex字段已存在")
+                    
+            except Exception as e:
+                # 如果表不存在，跳过迁移（表会在create_tables中创建）
+                if "no such table" in str(e).lower():
+                    logger.debug("replace_rules表不存在，跳过迁移")
+                else:
+                    logger.warning(f"⚠️ 迁移replace_rules表时出错: {e}")
+            
+            # 可以在这里添加更多的迁移逻辑
+            # 例如：添加其他缺失的字段、索引等
+            
+            logger.info("✅ 自动数据库迁移完成")
+            
+    except Exception as e:
+        logger.error(f"❌ 自动数据库迁移失败: {e}")
+        # 不抛出异常，避免影响正常启动
