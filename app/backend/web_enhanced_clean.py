@@ -2007,9 +2007,57 @@ async def main():
                     
                     logger.info(f"✅ 客户端 {client_id} 自动启动状态已更新: {auto_start}")
                 
+                # 根据自动启动状态控制客户端运行状态
+                if enhanced_bot and hasattr(enhanced_bot, 'multi_client_manager'):
+                    if auto_start:
+                        # 启用自动启动：如果客户端未运行，则启动它
+                        client = enhanced_bot.multi_client_manager.get_client(client_id)
+                        if not client:
+                            # 客户端不存在，需要添加并启动
+                            try:
+                                config_data = {}
+                                if db_client.client_type == 'bot':
+                                    config_data = {
+                                        'bot_token': db_client.bot_token,
+                                        'admin_user_id': db_client.admin_user_id
+                                    }
+                                elif db_client.client_type == 'user':
+                                    config_data = {
+                                        'api_id': db_client.api_id,
+                                        'api_hash': db_client.api_hash,
+                                        'phone': db_client.phone
+                                    }
+                                
+                                client = enhanced_bot.multi_client_manager.add_client_with_config(
+                                    client_id,
+                                    db_client.client_type,
+                                    config_data=config_data
+                                )
+                                client.add_status_callback(enhanced_bot._notify_status_change)
+                                client.start()
+                                logger.info(f"🔄 启用自动启动，已启动客户端: {client_id}")
+                            except Exception as start_error:
+                                logger.error(f"❌ 启动客户端 {client_id} 失败: {start_error}")
+                        elif not client.running:
+                            # 客户端存在但未运行，启动它
+                            try:
+                                client.start()
+                                logger.info(f"🔄 启用自动启动，已启动客户端: {client_id}")
+                            except Exception as start_error:
+                                logger.error(f"❌ 启动客户端 {client_id} 失败: {start_error}")
+                    else:
+                        # 禁用自动启动：如果客户端正在运行，则停止它
+                        client = enhanced_bot.multi_client_manager.get_client(client_id)
+                        if client and client.running:
+                            try:
+                                client.stop()
+                                logger.info(f"🔄 禁用自动启动，已停止客户端: {client_id}")
+                            except Exception as stop_error:
+                                logger.error(f"❌ 停止客户端 {client_id} 失败: {stop_error}")
+                
                 return JSONResponse(content={
                     "success": True,
-                    "message": f"客户端 {client_id} 自动启动已{'启用' if auto_start else '禁用'}"
+                    "message": f"客户端 {client_id} 自动启动已{'启用' if auto_start else '禁用'}{'，并已相应地启动/停止客户端' if enhanced_bot else ''}"
                 })
                 
             except Exception as e:
