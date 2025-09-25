@@ -162,6 +162,8 @@ db_manager = DatabaseManager()
 async def init_database():
     """初始化数据库"""
     await db_manager.init_db()
+    # 确保所有表都被创建
+    await db_manager.create_tables()
 
 async def get_db():
     """获取数据库会话"""
