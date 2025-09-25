@@ -203,41 +203,9 @@ class EnhancedTelegramBot:
             # 自动启动设置了auto_start=True的客户端
             await self._auto_start_clients()
             
-            # 添加默认用户客户端（带配置）
-            user_config = {
-                'api_id': Config.API_ID,
-                'api_hash': Config.API_HASH,
-                'phone': Config.PHONE_NUMBER
-            }
-            user_client = self.multi_client_manager.add_client_with_config("main_user", "user", user_config)
-            user_client.add_status_callback(self._notify_status_change)
-            
-            # 如果配置了BOT_TOKEN，添加机器人客户端
-            if Config.BOT_TOKEN:
-                bot_config = {
-                    'bot_token': Config.BOT_TOKEN,
-                    'admin_user_id': Config.ADMIN_USER_IDS[0] if Config.ADMIN_USER_IDS else None
-                }
-                bot_client = self.multi_client_manager.add_client_with_config("main_bot", "bot", bot_config)
-                bot_client.add_status_callback(self._notify_status_change)
-            
-            # 启动客户端
-            self.logger.info("🔄 启动Telegram客户端...")
-            
-            # 启动用户客户端
-            user_success = self.multi_client_manager.start_client("main_user")
-            if user_success:
-                self.logger.info("✅ 用户客户端启动成功")
-            else:
-                self.logger.error("❌ 用户客户端启动失败")
-            
-            # 启动机器人客户端（如果配置了）
-            if Config.BOT_TOKEN:
-                bot_success = self.multi_client_manager.start_client("main_bot")
-                if bot_success:
-                    self.logger.info("✅ 机器人客户端启动成功")
-                else:
-                    self.logger.warning("⚠️ 机器人客户端启动失败")
+            # 客户端启动完全由自动启动逻辑控制
+            # 不再无条件启动客户端，避免绕过auto_start设置
+            self.logger.info("✅ 客户端启动已由自动启动逻辑控制")
             
             self.running = True
             
