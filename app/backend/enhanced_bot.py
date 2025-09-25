@@ -127,11 +127,19 @@ class EnhancedTelegramBot:
                 })
                 
                 # 主机器人客户端 - 始终创建记录
+                admin_user_id = None
+                if hasattr(Config, 'ADMIN_USER_IDS') and Config.ADMIN_USER_IDS:
+                    # 将列表转换为逗号分隔的字符串
+                    if isinstance(Config.ADMIN_USER_IDS, list):
+                        admin_user_id = ','.join(str(uid) for uid in Config.ADMIN_USER_IDS)
+                    else:
+                        admin_user_id = str(Config.ADMIN_USER_IDS)
+                
                 legacy_clients.append({
                     'client_id': 'main_bot',
                     'client_type': 'bot',
                     'bot_token': Config.BOT_TOKEN if hasattr(Config, 'BOT_TOKEN') and Config.BOT_TOKEN else None,
-                    'admin_user_id': Config.ADMIN_USER_IDS if hasattr(Config, 'ADMIN_USER_IDS') and Config.ADMIN_USER_IDS else None
+                    'admin_user_id': admin_user_id
                 })
                 
                 # 检查并迁移每个传统客户端
