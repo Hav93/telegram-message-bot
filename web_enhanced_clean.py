@@ -291,8 +291,8 @@ async def main():
         
         app = FastAPI(
             title="Telegram消息转发机器人 - 增强版",
-            description="Telegram消息转发机器人v3.7",
-            version="3.7.0"
+            description="Telegram消息转发机器人v3.8",
+            version="3.8.0"
         )
         
         # 添加启动事件处理器
