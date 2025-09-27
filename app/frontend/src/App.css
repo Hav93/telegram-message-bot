@@ -353,82 +353,29 @@ a:hover, .ant-typography a:hover {
   transform: translateY(-2px) !important; /* 参照测试页面悬停效果 */
 }
 
-/* 消息类型快捷按钮特殊样式 - 强制保持内联样式颜色 */
-.glass-card .ant-table .ant-btn[type="text"],
-.glass-card .ant-table tbody .ant-btn.ant-btn-text,
-.glass-card .ant-table .ant-btn.ant-btn-text,
-.ant-table .ant-btn[type="text"],
-.ant-table tbody .ant-btn.ant-btn-text,
-.ant-table .ant-btn.ant-btn-text {
+/* 消息类型按钮 - 简洁版本确保内联样式生效 */
+.ant-table .ant-btn[type="text"] {
   background: transparent !important;
   border: none !important;
-  backdrop-filter: none !important;
   font-size: 14px !important;
   padding: 2px !important;
-  text-shadow: none !important;
   border-radius: 4px !important;
-  transform: none !important;
-  /* 强制使用内联样式颜色，不被任何全局样式覆盖 */
+  /* 关键：不设置任何color属性，完全依赖内联样式 */
 }
 
-.glass-card .ant-table .ant-btn[type="text"]:hover,
-.glass-card .ant-table tbody .ant-btn.ant-btn-text:hover,
-.glass-card .ant-table .ant-btn.ant-btn-text:hover,
-.ant-table .ant-btn[type="text"]:hover,
-.ant-table tbody .ant-btn.ant-btn-text:hover,
-.ant-table .ant-btn.ant-btn-text:hover {
+.ant-table .ant-btn[type="text"]:hover {
   background: rgba(255, 255, 255, 0.1) !important;
-  transform: none !important;
-  border: none !important;
-  /* 悬停时也保持内联样式颜色 */
+  /* 悬停时也不设置color */
 }
 
-/* 专门针对消息类型图标的颜色保持 */
-.glass-card .ant-table .ant-btn[type="text"] .anticon,
+/* 图标继承按钮颜色 */
 .ant-table .ant-btn[type="text"] .anticon {
   color: inherit !important;
 }
 
-/* 确保按钮内联样式优先级最高 - 更强力的规则 */
-.glass-card .ant-table td .ant-btn[style*="color"],
-.glass-card .ant-table .ant-btn[style*="color"],
-.ant-table td .ant-btn[style*="color"],
-.ant-table .ant-btn[style*="color"],
-.glass-card-3d .ant-table .ant-btn[style*="color"],
-.glass-card-3d .ant-table td .ant-btn[style*="color"] {
-  /* 这里不设置color，让内联样式生效 */
-}
-
-/* 专门针对消息类型按钮 - 最高优先级 */
-.glass-card .ant-table .ant-btn.ant-btn-text[style*="color"],
-.glass-card .ant-table td .ant-btn.ant-btn-text[style*="color"],
-.ant-table .ant-btn.ant-btn-text[style*="color"],
-.ant-table td .ant-btn.ant-btn-text[style*="color"],
-.glass-card-3d .ant-table .ant-btn.ant-btn-text[style*="color"],
-.glass-card-3d .ant-table td .ant-btn.ant-btn-text[style*="color"] {
-  /* 移除任何可能覆盖的颜色样式 */
-}
-
-/* 强制重置所有可能影响的样式 - 让内联样式生效 */
-.ant-table .ant-btn[type="text"][style*="color"] {
-  /* 完全不设置color，让内联样式自然生效 */
-}
-
-/* 最终解决方案 - 确保内联样式优先 */
-.ant-table .ant-btn[type="text"]:not([style*="color"]) {
-  color: #ffffff !important; /* 只对没有内联颜色的按钮设置默认白色 */
-}
-
-
-/* 确保图标颜色跟随按钮颜色 */
-.ant-table .ant-btn[type="text"] .anticon {
-  color: inherit !important;
-}
-
-/* 消息类型按钮特定样式 - 基于data属性或类名 */
-.glass-card .ant-table .ant-btn[type="text"][style*="color"],
-.ant-table .ant-btn[type="text"][style*="color"] {
-  /* 让浏览器使用内联样式 */
+/* 仅对没有内联样式的按钮设置默认白色 */
+.ant-table .ant-btn[type="text"]:not([style]) {
+  color: #ffffff !important;
 }
 
 /* 标签样式 */
@@ -458,14 +405,14 @@ a:hover, .ant-typography a:hover {
   color: #ffadd2 !important;
 }
 
-/* 输入框样式 */
-.ant-input, 
-.ant-select-selector, 
-.ant-textarea,
-.ant-input-password,
-.ant-input-password .ant-input,
-.ant-input-number,
-.ant-input-number .ant-input-number-input {
+/* 全局输入框样式 - 仅应用于非玻璃质感容器 */
+body:not(.glass-modal) .ant-input:not(.glass-card .ant-input):not(.glass-card-3d .ant-input), 
+body:not(.glass-modal) .ant-select-selector:not(.glass-card .ant-select-selector):not(.glass-card-3d .ant-select-selector), 
+body:not(.glass-modal) .ant-textarea:not(.glass-card .ant-textarea):not(.glass-card-3d .ant-textarea),
+body:not(.glass-modal) .ant-input-password:not(.glass-card .ant-input-password):not(.glass-card-3d .ant-input-password),
+body:not(.glass-modal) .ant-input-password .ant-input:not(.glass-card .ant-input):not(.glass-card-3d .ant-input),
+body:not(.glass-modal) .ant-input-number:not(.glass-card .ant-input-number):not(.glass-card-3d .ant-input-number),
+body:not(.glass-modal) .ant-input-number .ant-input-number-input:not(.glass-card .ant-input-number-input):not(.glass-card-3d .ant-input-number-input) {
   background: rgba(255, 255, 255, 0.15) !important;
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
   color: white !important;
@@ -1277,32 +1224,50 @@ body.theme-custom .ant-alert-description {
 
 /* 主题设置和界面设置的输入框玻璃质感 */
 .glass-modal .ant-input,
-.ant-modal .ant-input {
-  background: rgba(0, 0, 0, 0.6) !important; /* 更深的背景确保对比度 */
+.ant-modal .ant-input,
+.glass-card .ant-input,
+.glass-card-3d .ant-input {
+  background: rgba(255, 255, 255, 0.1) !important; /* 透明玻璃质感背景 */
+  backdrop-filter: blur(12px) brightness(1.1) !important;
+  -webkit-backdrop-filter: blur(12px) brightness(1.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   color: #ffffff !important;
-  backdrop-filter: blur(8px) !important;
   border-radius: 8px !important;
   font-weight: 500 !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .glass-modal .ant-input:hover,
-.ant-modal .ant-input:hover {
-  border-color: rgba(255, 255, 255, 0.4) !important;
-  background: rgba(0, 0, 0, 0.7) !important; /* 悬停时更深 */
+.ant-modal .ant-input:hover,
+.glass-card .ant-input:hover,
+.glass-card-3d .ant-input:hover {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.15) !important; /* 悬停时稍微更亮 */
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 6px 16px rgba(0, 0, 0, 0.2) !important;
 }
 
 .glass-modal .ant-input:focus,
-.ant-modal .ant-input:focus {
+.ant-modal .ant-input:focus,
+.glass-card .ant-input:focus,
+.glass-card-3d .ant-input:focus {
   border-color: #667eea !important;
-  background: rgba(0, 0, 0, 0.8) !important; /* 焦点时最深 */
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3) !important;
+  background: rgba(255, 255, 255, 0.2) !important; /* 焦点时更亮 */
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 0 2px rgba(102, 126, 234, 0.3),
+    0 8px 20px rgba(0, 0, 0, 0.25) !important;
   color: #ffffff !important;
 }
 
 .glass-modal .ant-input::placeholder,
-.ant-modal .ant-input::placeholder {
-  color: rgba(255, 255, 255, 0.7) !important;
+.ant-modal .ant-input::placeholder,
+.glass-card .ant-input::placeholder,
+.glass-card-3d .ant-input::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
 /* 主题设置弹窗整体玻璃质感 */
@@ -2558,22 +2523,6 @@ body.theme-custom .glass3d {
   font-size: 14px !important;
 }
 
-/* 优化输入框背景色 */
-.glass-card .ant-input,
-.glass-card .ant-input-affix-wrapper,
-.glass-card .ant-select-selector,
-.glass-card .ant-picker,
-.glass-card .ant-input-number,
-.glass-card-3d .ant-input,
-.glass-card-3d .ant-input-affix-wrapper,
-.glass-card-3d .ant-select-selector,
-.glass-card-3d .ant-picker,
-.glass-card-3d .ant-input-number {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  color: rgba(255, 255, 255, 0.9) !important;
-  backdrop-filter: blur(8px) !important;
-}
 
 .glass-card .ant-input:focus,
 .glass-card .ant-input-affix-wrapper:focus,
@@ -2651,22 +2600,6 @@ body.theme-custom .glass3d {
   color: #ff4d4f !important;
 }
 
-.glass-card .ant-input,
-.glass-card .ant-input-password,
-.glass-card .ant-input-number,
-.glass-card .ant-select .ant-select-selector,
-.glass-card .ant-picker,
-.glass-card-3d .ant-input,
-.glass-card-3d .ant-input-password,
-.glass-card-3d .ant-input-number,
-.glass-card-3d .ant-select .ant-select-selector,
-.glass-card-3d .ant-picker {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  color: #ffffff !important;
-  backdrop-filter: blur(8px) !important;
-  border-radius: 8px !important;
-}
 
 .glass-card .ant-input::placeholder,
 .glass-card .ant-input-password::placeholder,

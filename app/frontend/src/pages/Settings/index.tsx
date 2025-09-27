@@ -418,17 +418,54 @@ const SettingsPage: React.FC = () => {
                         <ColorPicker
                           value={`hsl(${glassSettings.color.h}, ${glassSettings.color.s}%, ${glassSettings.color.l}%)`}
                           onChange={(color) => {
-                            const hsb = color.toHsb();
-                            updateGlassSettings({
-                              color: {
-                                h: Math.round(hsb.h || 0),
-                                s: Math.round(hsb.s || 0),
-                                l: Math.round(hsb.b || 0), // HSB的b对应HSL的l
-                                a: glassSettings.color.a
+                            try {
+                              console.log('ColorPicker onChange - color object:', color);
+                              console.log('ColorPicker onChange - available methods:', Object.getOwnPropertyNames(color));
+                              
+                              // 尝试不同的颜色提取方法
+                              let h = 0, s = 0, l = 0;
+                              
+                              if (typeof color.toHsl === 'function') {
+                                const hsl = color.toHsl();
+                                console.log('Using toHsl():', hsl);
+                                h = Math.round(hsl.h || 0);
+                                s = Math.round((hsl.s || 0) * 100);
+                                l = Math.round((hsl.l || 0) * 100);
+                              } else if (typeof color.toHsb === 'function') {
+                                // 如果没有toHsl，尝试从HSB转换
+                                const hsb = color.toHsb();
+                                console.log('Using toHsb():', hsb);
+                                h = Math.round(hsb.h || 0);
+                                s = Math.round(hsb.s || 0);
+                                l = Math.round(hsb.b || 0);
+                              } else if (color.metaColor) {
+                                // 检查是否有metaColor属性
+                                const meta = color.metaColor;
+                                console.log('Using metaColor:', meta);
+                                if (meta.toHsl) {
+                                  const hsl = meta.toHsl();
+                                  h = Math.round(hsl.h || 0);
+                                  s = Math.round((hsl.s || 0) * 100);
+                                  l = Math.round((hsl.l || 0) * 100);
+                                }
                               }
-                            });
+                              
+                              console.log('Final HSL values:', { h, s, l });
+                              
+                              updateGlassSettings({
+                                color: {
+                                  h,
+                                  s,
+                                  l,
+                                  a: glassSettings.color.a
+                                }
+                              });
+                            } catch (error) {
+                              console.error('ColorPicker onChange error:', error);
+                              console.error('Error stack:', error.stack);
+                            }
                           }}
-                          showText={(color) => `HSL(${glassSettings.color.h}, ${glassSettings.color.s}%, ${glassSettings.color.l}%)`}
+                          showText={(_color) => `HSL(${glassSettings.color.h}, ${glassSettings.color.s}%, ${glassSettings.color.l}%)`}
                           size="large"
                         />
                       </div>
