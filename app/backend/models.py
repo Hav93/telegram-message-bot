@@ -11,27 +11,28 @@ from sqlalchemy.orm import relationship
 Base = declarative_base()
 
 def get_local_now():
-    """获取本地时区的当前时间"""
+    """获取本地时区的当前时间 - 使用统一时区处理"""
     try:
-        import pytz
-        tz_name = os.environ.get('TZ', 'UTC')
-        if tz_name == 'Asia/Shanghai':
-            tz = pytz.timezone('Asia/Shanghai')
-            return datetime.now(tz)
-        elif tz_name != 'UTC':
-            # 尝试使用指定的时区
-            try:
-                tz = pytz.timezone(tz_name)
-                return datetime.now(tz)
-            except pytz.UnknownTimeZoneError:
-                # 如果时区无效，使用UTC
-                return datetime.now(pytz.UTC)
-        else:
-            # 使用UTC时区
-            return datetime.now(pytz.UTC)
+        from timezone_utils import get_current_time
+        return get_current_time()
     except ImportError:
-        # 如果pytz不可用，使用系统本地时间
-        return datetime.now()
+        # 如果timezone_utils不可用，使用默认逻辑
+        try:
+            import pytz
+            import os
+            tz_name = os.environ.get('TZ', 'Asia/Shanghai')  # 默认改为中国时区
+            if tz_name == 'UTC':
+                return datetime.now(pytz.UTC)
+            else:
+                try:
+                    tz = pytz.timezone(tz_name)
+                    return datetime.now(tz)
+                except pytz.UnknownTimeZoneError:
+                    # 如果时区无效，使用Asia/Shanghai
+                    return datetime.now(pytz.timezone('Asia/Shanghai'))
+        except ImportError:
+            # 如果pytz不可用，使用系统本地时间
+            return datetime.now()
 
 class ForwardRule(Base):
     """转发规则模型"""

@@ -564,13 +564,15 @@ class TelegramClientManager:
             return True
     
     def _check_time_filter(self, rule: ForwardRule, message) -> bool:
-        """检查时间过滤条件 - 使用配置的时区"""
+        """检查时间过滤条件 - 统一在用户时区进行比较"""
+        from timezone_utils import get_user_now, telegram_time_to_user_time, database_time_to_user_time
+        
         if not hasattr(rule, 'time_filter_type'):
             return True
         
-        # 使用配置的时区
-        message_time = ensure_timezone(message.date)
-        current_time = get_current_time()
+        # 核心：将Telegram消息时间转换为用户时区，后续所有比较都在用户时区进行
+        message_time = telegram_time_to_user_time(message.date)
+        current_time = get_user_now()
         
         if rule.time_filter_type == "after_start":
             # 启动后的消息都转发（实时消息处理）
@@ -580,20 +582,20 @@ class TelegramClientManager:
             today_start = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
             return message_time >= today_start
         elif rule.time_filter_type == "from_time":
-            # 从指定时间开始
+            # 从指定时间开始 - 数据库时间转为用户时区
             if hasattr(rule, 'start_time') and rule.start_time:
-                start_time = ensure_timezone(rule.start_time)
+                start_time = database_time_to_user_time(rule.start_time)
                 return message_time >= start_time
             else:
                 # 未设置开始时间，默认允许所有实时消息
                 self.logger.warning(f"⚠️ 规则 '{rule.name}' 设置为from_time但未配置start_time，默认允许实时消息")
                 return True
         elif rule.time_filter_type == "time_range":
-            # 指定时间段内
+            # 指定时间段内 - 数据库时间转为用户时区
             if hasattr(rule, 'start_time') and hasattr(rule, 'end_time'):
                 if rule.start_time and rule.end_time:
-                    start_time = ensure_timezone(rule.start_time)
-                    end_time = ensure_timezone(rule.end_time)
+                    start_time = database_time_to_user_time(rule.start_time)
+                    end_time = database_time_to_user_time(rule.end_time)
                     return start_time <= message_time <= end_time
                 else:
                     # 时间配置不完整，默认允许所有实时消息
@@ -1489,46 +1491,44 @@ class MultiClientManager:
             return True
     
     def _check_time_filter(self, message, rule):
-        """检查时间过滤"""
+        """检查时间过滤 - 统一在用户时区进行比较"""
         try:
-            from datetime import datetime, timezone
+            from timezone_utils import get_user_now, telegram_time_to_user_time, database_time_to_user_time
             
             # 如果规则没有时间过滤设置，则通过
             if not hasattr(rule, 'time_filter_type'):
                 return True
             
-            message_time = message.date
-            if message_time.tzinfo is None:
-                message_time = message_time.replace(tzinfo=timezone.utc)
-            
-            current_time = datetime.now(timezone.utc)
+            # 核心：将Telegram消息时间转换为用户时区，后续所有比较都在用户时区进行
+            message_time = telegram_time_to_user_time(message.date)
+            current_time = get_user_now()
             
             if rule.time_filter_type == "after_start":
                 # 启动后的消息 - 历史消息处理中通常不会命中这个分支
                 # 因为在历史消息处理开始时就会被过滤掉
                 return True
             elif rule.time_filter_type == "today_only":
-                # 仅转发当天消息
+                # 仅转发当天消息 - 用户时区的今天开始时间
                 today_start = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
-                return message_time >= today_start
+                result = message_time >= today_start
+                self.logger.debug(f"🕐 时间过滤检查: 消息时间={message_time}, 今天开始={today_start}, 结果={result}")
+                return result
             elif rule.time_filter_type == "from_time":
-                # 从指定时间开始
+                # 从指定时间开始 - 数据库时间转为用户时区
                 if hasattr(rule, 'start_time') and rule.start_time:
-                    start_time = rule.start_time
-                    if start_time.tzinfo is None:
-                        start_time = start_time.replace(tzinfo=timezone.utc)
-                    return message_time >= start_time
+                    start_time = database_time_to_user_time(rule.start_time)
+                    result = message_time >= start_time
+                    self.logger.debug(f"🕐 from_time过滤: 消息时间={message_time}, 开始时间={start_time}, 结果={result}")
+                    return result
             elif rule.time_filter_type == "time_range":
-                # 指定时间段内
+                # 指定时间段内 - 数据库时间转为用户时区
                 if hasattr(rule, 'start_time') and hasattr(rule, 'end_time'):
                     if rule.start_time and rule.end_time:
-                        start_time = rule.start_time
-                        end_time = rule.end_time
-                        if start_time.tzinfo is None:
-                            start_time = start_time.replace(tzinfo=timezone.utc)
-                        if end_time.tzinfo is None:
-                            end_time = end_time.replace(tzinfo=timezone.utc)
-                        return start_time <= message_time <= end_time
+                        start_time = database_time_to_user_time(rule.start_time)
+                        end_time = database_time_to_user_time(rule.end_time)
+                        result = start_time <= message_time <= end_time
+                        self.logger.debug(f"🕐 time_range过滤: 消息时间={message_time}, 时间段={start_time}~{end_time}, 结果={result}")
+                        return result
             elif rule.time_filter_type == "all_messages":
                 # 转发所有消息（无时间限制）
                 return True
