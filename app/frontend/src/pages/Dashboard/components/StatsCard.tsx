@@ -22,7 +22,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
 }) => {
   if (loading) {
     return (
-      <Card className="glass-card" style={{ height: 120 }}>
+      <Card className="glass-card-3d" style={{ height: 120 }}>
         <Skeleton active paragraph={{ rows: 1 }} />
       </Card>
     );
@@ -30,7 +30,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
 
   return (
     <Card
-      className="glass-card"
+      className="glass-card-3d"
       style={{
         height: 120,
         position: 'relative',

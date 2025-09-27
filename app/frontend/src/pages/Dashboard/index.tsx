@@ -378,49 +378,41 @@ const Dashboard: React.FC = () => {
       {/* 统计卡片 */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} lg={6}>
-          <div className="glass-card-3d">
-            <MemoizedStatsCard
-              title="今日消息"
-              value={todayMessages}
-              icon={<MessageOutlined />}
-              color="#1890ff"
-              loading={statsLoading}
-            />
-          </div>
+          <MemoizedStatsCard
+            title="今日消息"
+            value={todayMessages}
+            icon={<MessageOutlined />}
+            color="#1890ff"
+            loading={statsLoading}
+          />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <div className="glass-card-3d">
-            <MemoizedStatsCard
-              title="转发成功率"
-              value={successRate}
-              suffix="%"
-              icon={<CheckCircleOutlined />}
-              color="#52c41a"
-              loading={statsLoading}
-            />
-          </div>
+          <MemoizedStatsCard
+            title="转发成功率"
+            value={successRate}
+            suffix="%"
+            icon={<CheckCircleOutlined />}
+            color="#52c41a"
+            loading={statsLoading}
+          />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <div className="glass-card-3d">
-            <MemoizedStatsCard
-              title="活跃规则"
-              value={activeRules}
-              icon={<ClockCircleOutlined />}
-              color="#faad14"
-              loading={rulesLoading}
-            />
-          </div>
+          <MemoizedStatsCard
+            title="活跃规则"
+            value={activeRules}
+            icon={<ClockCircleOutlined />}
+            color="#faad14"
+            loading={rulesLoading}
+          />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <div className="glass-card-3d">
-            <MemoizedStatsCard
-              title="总规则数"
-              value={totalRules}
-              icon={<SettingOutlined />}
-              color="#722ed1"
-              loading={rulesLoading}
-            />
-          </div>
+          <MemoizedStatsCard
+            title="总规则数"
+            value={totalRules}
+            icon={<SettingOutlined />}
+            color="#722ed1"
+            loading={rulesLoading}
+          />
         </Col>
       </Row>
 
@@ -717,25 +709,41 @@ const Dashboard: React.FC = () => {
                       
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                          backgroundColor: 'rgba(0, 0, 0, 0.85)',
                           border: 'none',
                           borderRadius: '8px',
                           color: '#ffffff',
-                          fontSize: '13px',
-                          backdropFilter: 'blur(10px)',
+                          fontSize: '15px',
+                          fontWeight: '500',
+                          backdropFilter: 'blur(12px)',
+                          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
                         }}
-                        formatter={(value: any, name: any) => [`${value}条消息`, name]}
-                        labelStyle={{ color: '#ffffff', fontWeight: 'bold' }}
+                        formatter={(value: any, name: any) => [
+                          <span style={{ color: '#ffffff', fontSize: '15px', fontWeight: '600' }}>
+                            {value}条消息
+                          </span>, 
+                          <span style={{ color: '#ffffff', fontSize: '14px', fontWeight: '500' }}>
+                            {name}
+                          </span>
+                        ]}
+                        labelStyle={{ 
+                          color: '#ffffff', 
+                          fontWeight: 'bold',
+                          fontSize: '16px',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
+                        }}
                       />
                       
                       <Legend
                         verticalAlign="bottom"
-                        height={36}
+                        height={40}
                         iconType="circle"
                         wrapperStyle={{
                           color: '#ffffff',
-                          fontSize: '12px',
-                          paddingTop: '10px'
+                          fontSize: '15px',
+                          fontWeight: '500',
+                          paddingTop: '12px',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
                         }}
                       />
                     </PieChart>
@@ -952,16 +960,30 @@ const Dashboard: React.FC = () => {
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  backgroundColor: 'rgba(0, 0, 0, 0.85)',
                   border: 'none',
                   borderRadius: '8px',
                   color: '#ffffff',
-                  fontSize: '13px',
-                  backdropFilter: 'blur(10px)',
+                  fontSize: '15px',
+                  fontWeight: '500',
+                  backdropFilter: 'blur(12px)',
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
                 }}
                 cursor={false} // 完全禁用悬停背景
-                formatter={(value: any, name: any) => [`${value}条`, name]}
-                labelStyle={{ color: '#ffffff', fontWeight: 'bold' }}
+                formatter={(value: any, name: any) => [
+                  <span style={{ color: '#ffffff', fontSize: '15px', fontWeight: '600' }}>
+                    {value}条
+                  </span>, 
+                  <span style={{ color: '#ffffff', fontSize: '14px', fontWeight: '500' }}>
+                    {name}
+                  </span>
+                ]}
+                labelStyle={{ 
+                  color: '#ffffff', 
+                  fontWeight: 'bold',
+                  fontSize: '16px',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
+                }}
               />
               {/* 动态生成Bar组件，健壮地处理各种数据类型 */}
               {(() => {
