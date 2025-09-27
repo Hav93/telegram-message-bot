@@ -2131,11 +2131,12 @@ body.theme-custom .glass3d {
 }
 
 .ant-modal .ant-collapse > .ant-collapse-item {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: 12px !important;
   margin-bottom: 12px !important;
-  backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
 .ant-modal .ant-collapse > .ant-collapse-item:last-child {
@@ -2143,7 +2144,7 @@ body.theme-custom .glass3d {
 }
 
 .ant-modal .ant-collapse > .ant-collapse-item > .ant-collapse-header {
-  background: transparent !important;
+  background: rgba(255, 255, 255, 0.03) !important;
   border-bottom: none !important;
   padding: 16px 20px !important;
   color: #ffffff !important;
@@ -2152,18 +2153,21 @@ body.theme-custom .glass3d {
 }
 
 .ant-modal .ant-collapse > .ant-collapse-item.ant-collapse-item-active > .ant-collapse-header {
+  background: rgba(255, 255, 255, 0.05) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: 12px 12px 0 0 !important;
 }
 
 .ant-modal .ant-collapse > .ant-collapse-item > .ant-collapse-content {
-  background: transparent !important;
+  background: rgba(0, 0, 0, 0.1) !important;
   border-top: none !important;
+  border-radius: 0 0 12px 12px !important;
 }
 
 .ant-modal .ant-collapse > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
   padding: 20px !important;
-  background: transparent !important;
+  background: rgba(0, 0, 0, 0.15) !important;
+  border-radius: 0 0 12px 12px !important;
 }
 
 .ant-modal .ant-collapse .ant-collapse-expand-icon {
@@ -2173,6 +2177,81 @@ body.theme-custom .glass3d {
 
 .ant-modal .ant-collapse .ant-collapse-expand-icon:hover {
   color: #ffffff !important;
+}
+
+/* 设置页面中的组件样式优化 - 减少刺眼的白色背景 */
+.ant-modal .ant-slider {
+  margin: 8px 0 !important;
+}
+
+.ant-modal .ant-slider-rail {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.ant-modal .ant-slider-track {
+  background: linear-gradient(90deg, #1890ff, #40a9ff) !important;
+}
+
+.ant-modal .ant-slider-handle {
+  background: #ffffff !important;
+  border: 2px solid #1890ff !important;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3) !important;
+}
+
+.ant-modal .ant-slider-handle:hover,
+.ant-modal .ant-slider-handle:focus {
+  border-color: #40a9ff !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4) !important;
+}
+
+.ant-modal .ant-color-picker {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.ant-modal .ant-color-picker:hover {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+}
+
+.ant-modal .ant-select .ant-select-selector {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(8px) !important;
+  color: #ffffff !important;
+}
+
+.ant-modal .ant-select .ant-select-selector:hover {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+}
+
+.ant-modal .ant-select .ant-select-selection-item {
+  color: #ffffff !important;
+}
+
+.ant-modal .ant-select .ant-select-arrow {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.ant-modal .ant-select-dropdown {
+  background: rgba(0, 0, 0, 0.9) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.ant-modal .ant-select-item {
+  color: #ffffff !important;
+  background: transparent !important;
+}
+
+.ant-modal .ant-select-item:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ant-modal .ant-select-item-option-selected {
+  background: rgba(24, 144, 255, 0.3) !important;
 }
 
 /* 玻璃质感弹窗滚动条样式 */
