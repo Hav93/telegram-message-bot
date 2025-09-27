@@ -353,19 +353,17 @@ a:hover, .ant-typography a:hover {
   transform: translateY(-2px) !important; /* 参照测试页面悬停效果 */
 }
 
-/* 消息类型按钮 - 简洁版本确保内联样式生效 */
+/* 消息类型按钮 - 确保内联样式优先 */
 .ant-table .ant-btn[type="text"] {
   background: transparent !important;
   border: none !important;
   font-size: 14px !important;
   padding: 2px !important;
   border-radius: 4px !important;
-  /* 关键：不设置任何color属性，完全依赖内联样式 */
 }
 
 .ant-table .ant-btn[type="text"]:hover {
   background: rgba(255, 255, 255, 0.1) !important;
-  /* 悬停时也不设置color */
 }
 
 /* 图标继承按钮颜色 */
@@ -373,8 +371,26 @@ a:hover, .ant-typography a:hover {
   color: inherit !important;
 }
 
-/* 仅对没有内联样式的按钮设置默认白色 */
-.ant-table .ant-btn[type="text"]:not([style]) {
+/* 强制使用内联样式 - 移除所有可能的颜色覆盖 */
+.glass-card .ant-table .ant-btn[type="text"][style*="color"],
+.glass-card-3d .ant-table .ant-btn[type="text"][style*="color"],
+.ant-table .ant-btn[type="text"][style*="color"] {
+  color: unset !important; /* 完全重置，让浏览器使用内联样式 */
+  all: unset !important; /* 重置所有样式 */
+  /* 然后重新设置必要的样式 */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: none !important;
+  font-size: 14px !important;
+  padding: 2px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+}
+
+/* 对没有内联颜色样式的按钮设置默认白色 */
+.ant-table .ant-btn[type="text"]:not([style*="color"]) {
   color: #ffffff !important;
 }
 
@@ -1272,6 +1288,39 @@ body.theme-custom .ant-alert-description {
 .glass-card .ant-input::placeholder,
 .glass-card-3d .ant-input::placeholder {
   color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* 添加客户端弹窗玻璃质感 - 参考主题设置样式 */
+.glass-modal .ant-modal-content {
+  background: rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: blur(20px) brightness(1.2) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(20px) brightness(1.2) saturate(1.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 16px !important;
+  box-shadow: 
+    0 25px 50px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 100px rgba(102, 126, 234, 0.1) !important;
+  overflow: hidden !important;
+}
+
+.glass-modal .ant-modal-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+  padding: 20px 24px 16px !important;
+}
+
+.glass-modal .ant-modal-body {
+  background: transparent !important;
+  padding: 20px 24px !important;
+  max-height: 70vh !important;
+  overflow-y: auto !important;
+}
+
+.glass-modal .ant-modal-footer {
+  background: transparent !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+  padding: 16px 24px 20px !important;
 }
 
 /* 主题设置弹窗整体玻璃质感 */
