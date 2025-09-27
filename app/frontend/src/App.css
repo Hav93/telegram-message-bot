@@ -3003,46 +3003,46 @@ html body .ant-table .ant-btn[type="text"] .anticon {
   color: inherit !important;
 }
 
-/* 消息类型按钮颜色最终解决方案 - 基于数据属性 */
-.message-type-btn.enabled[data-message-type="text"] {
+/* 消息类型按钮颜色最终解决方案 - 使用最高优先级选择器 */
+html body .ant-table .ant-btn.message-type-btn.enabled[data-message-type="text"] {
   color: #52c41a !important; /* 绿色 - 文本消息启用 */
 }
-.message-type-btn.enabled[data-message-type="photo"] {
+html body .ant-table .ant-btn.message-type-btn.enabled[data-message-type="photo"] {
   color: #1890ff !important; /* 蓝色 - 图片消息启用 */
 }
-.message-type-btn.enabled[data-message-type="video"] {
+html body .ant-table .ant-btn.message-type-btn.enabled[data-message-type="video"] {
   color: #fa541c !important; /* 橙色 - 视频消息启用 */
 }
-.message-type-btn.enabled[data-message-type="document"] {
+html body .ant-table .ant-btn.message-type-btn.enabled[data-message-type="document"] {
   color: #722ed1 !important; /* 紫色 - 文档消息启用 */
 }
-.message-type-btn.enabled[data-message-type="audio"] {
+html body .ant-table .ant-btn.message-type-btn.enabled[data-message-type="audio"] {
   color: #13c2c2 !important; /* 青色 - 音频消息启用 */
 }
-.message-type-btn.enabled[data-message-type="voice"] {
+html body .ant-table .ant-btn.message-type-btn.enabled[data-message-type="voice"] {
   color: #eb2f96 !important; /* 粉色 - 语音消息启用 */
 }
-.message-type-btn.disabled {
+html body .ant-table .ant-btn.message-type-btn.disabled {
   color: #d9d9d9 !important; /* 灰色 - 所有禁用状态 */
 }
 
 /* 功能设置按钮颜色 */
-.feature-btn.enabled[data-feature-type="keyword_filter"] {
+html body .ant-table .ant-btn.feature-btn.enabled[data-feature-type="keyword_filter"] {
   color: #52c41a !important; /* 绿色 - 关键词过滤启用 */
 }
-.feature-btn.enabled[data-feature-type="regex_replace"] {
+html body .ant-table .ant-btn.feature-btn.enabled[data-feature-type="regex_replace"] {
   color: #1890ff !important; /* 蓝色 - 正则替换启用 */
 }
-.feature-btn.enabled[data-feature-type="link_preview"] {
+html body .ant-table .ant-btn.feature-btn.enabled[data-feature-type="link_preview"] {
   color: #722ed1 !important; /* 紫色 - 链接预览启用 */
 }
-.feature-btn.disabled {
+html body .ant-table .ant-btn.feature-btn.disabled {
   color: #d9d9d9 !important; /* 灰色 - 所有功能禁用状态 */
 }
 
 /* 按钮图标颜色继承 */
-.message-type-btn .anticon,
-.feature-btn .anticon {
+html body .ant-table .ant-btn.message-type-btn .anticon,
+html body .ant-table .ant-btn.feature-btn .anticon {
   color: inherit !important;
 }
 
