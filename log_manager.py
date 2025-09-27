@@ -14,6 +14,9 @@ import gzip
 import shutil
 import asyncio
 from typing import Optional
+import sys
+import os
+sys.path.append('app/backend')
 from config import Config
 
 

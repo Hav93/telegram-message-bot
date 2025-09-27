@@ -26,7 +26,8 @@ class EnhancedTelegramBot:
     """
     
     def __init__(self):
-        self.logger = setup_logging()
+        from log_manager import get_logger
+        self.logger = get_logger('enhanced_bot', 'enhanced_bot.log')
         self.multi_client_manager = multi_client_manager
         self.running = False
         
