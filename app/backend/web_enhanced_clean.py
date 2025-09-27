@@ -400,8 +400,8 @@ async def main():
         # 挂载React前端 - 修复路径问题
         # 尝试多个可能的前端路径
         possible_paths = [
+            Path("frontend/dist"),      # Docker容器中的路径
             Path("app/frontend/dist"),  # 从项目根目录运行时
-            Path("frontend/dist"),      # 从app目录运行时  
             Path("../frontend/dist"),   # 从backend目录运行时
         ]
         
