@@ -362,7 +362,7 @@ const ClientManagement: React.FC = () => {
       {systemStatus?.enhanced_mode && (
         <Row gutter={16} style={{ marginBottom: '24px' }}>
           <Col span={6}>
-            <Card>
+            <Card className="glass-card">
               <Statistic
                 title="总客户端数"
                 value={systemStatus.total_clients || 0}
@@ -371,7 +371,7 @@ const ClientManagement: React.FC = () => {
             </Card>
           </Col>
           <Col span={6}>
-            <Card>
+            <Card className="glass-card">
               <Statistic
                 title="运行中"
                 value={systemStatus.running_clients || 0}
@@ -381,7 +381,7 @@ const ClientManagement: React.FC = () => {
             </Card>
           </Col>
           <Col span={6}>
-            <Card>
+            <Card className="glass-card">
               <Statistic
                 title="已连接"
                 value={systemStatus.connected_clients || 0}
@@ -391,7 +391,7 @@ const ClientManagement: React.FC = () => {
             </Card>
           </Col>
           <Col span={6}>
-            <Card>
+            <Card className="glass-card">
               <Statistic
                 title="增强模式"
                 value={systemStatus.enhanced_mode ? "启用" : "禁用"}
@@ -406,7 +406,7 @@ const ClientManagement: React.FC = () => {
       )}
 
       {!systemStatus?.enhanced_mode && (
-        <Card style={{ marginBottom: '24px' }}>
+        <Card className="glass-card" style={{ marginBottom: '24px' }}>
           <div style={{ textAlign: 'center', padding: '20px' }}>
             <CloseCircleOutlined style={{ fontSize: '48px', color: '#faad14', marginBottom: '16px' }} />
             <Title level={4}>传统模式运行中</Title>
@@ -420,6 +420,7 @@ const ClientManagement: React.FC = () => {
 
       {/* 客户端列表 */}
       <Card
+        className="glass-card"
         title="客户端列表"
         extra={
           <Space>

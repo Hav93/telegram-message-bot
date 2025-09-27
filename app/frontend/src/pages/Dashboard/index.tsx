@@ -246,39 +246,33 @@ const Dashboard: React.FC = () => {
       
       const allRulesList = Array.from(allRulesSet);
       
-      // 生成图表数据 - 为了展示多色效果，确保每天都有不同类型的数据
+      // 生成图表数据 - 确保数据格式正确
       const chartData = enhancedStats.flatMap(dayData => {
         if (allRulesList.length === 0) {
-          // 如果没有真实数据，生成示例数据来展示多色效果
-          return [
-            {
-              day: String(dayData.day),
-              count: Math.floor(Math.random() * 20) + 1, // 随机数据1-20
-              type: '规则类型A',
-              weekday: String(dayData.weekday),
-            },
-            {
-              day: String(dayData.day),
-              count: Math.floor(Math.random() * 15) + 1, // 随机数据1-15
-              type: '规则类型B',
-              weekday: String(dayData.weekday),
-            },
-            {
-              day: String(dayData.day),
-              count: Math.floor(Math.random() * 10) + 1, // 随机数据1-10
-              type: '规则类型C',
-              weekday: String(dayData.weekday),
-            },
+          // 如果没有真实数据，生成固定的示例数据（避免随机数导致的不一致）
+          const sampleData = [
+            { type: '示例规则A', baseCount: 8 },
+            { type: '示例规则B', baseCount: 5 },
+            { type: '示例规则C', baseCount: 3 },
           ];
+          
+          return sampleData.map(sample => ({
+            day: String(dayData.day),
+            count: sample.baseCount + Math.floor(Math.sin(dayData.day.charCodeAt(0)) * 5), // 基于日期的固定变化
+            type: sample.type,
+            weekday: String(dayData.weekday),
+          }));
         }
         
-        // 有真实数据时，显示所有规则（包括0值）
-        return allRulesList.map(ruleName => ({
-          day: String(dayData.day), // 确保是字符串
-          count: Number(dayData.ruleStats[ruleName] || 0), // 确保是数字，没有数据时为0
-          type: String(ruleName), // 确保是字符串
-          weekday: String(dayData.weekday), // 确保是字符串
-        }));
+        // 有真实数据时，只显示有数据的规则（过滤掉0值）
+        return allRulesList
+          .map(ruleName => ({
+            day: String(dayData.day),
+            count: Number(dayData.ruleStats[ruleName] || 0),
+            type: String(ruleName),
+            weekday: String(dayData.weekday),
+          }))
+          .filter(item => item.count > 0); // 只显示有数据的项目
       });
       
       console.log('所有规则:', allRulesList);
@@ -685,17 +679,36 @@ const Dashboard: React.FC = () => {
                   tooltip={{
                     customContent: (title: any, data: any[]) => {
                       console.log('🔍 Pie tooltip customContent - title:', title, 'data:', data);
+                      console.log('🔍 完整数据结构:', JSON.stringify(data, null, 2));
                       
                       if (!data || data.length === 0) {
-                        return '<div>暂无数据</div>';
+                        return '<div style="background: rgba(0, 0, 0, 0.8); color: white; padding: 8px 12px; border-radius: 4px;">暂无数据</div>';
                       }
                       
                       const item = data[0];
-                      console.log('🔍 Tooltip item:', item);
+                      console.log('🔍 Tooltip item详细信息:', item);
                       
-                      // 从数据项中提取信息
-                      const ruleName = item.data?.rule || item.name || '未知规则';
-                      const messageCount = item.data?.count || item.value || 0;
+                      // 尝试多种方式获取数据
+                      let ruleName = '未知规则';
+                      let messageCount = 0;
+                      
+                      // 方式1: 直接从item获取
+                      if (item.rule) {
+                        ruleName = item.rule;
+                        messageCount = item.count || 0;
+                      }
+                      // 方式2: 从data属性获取
+                      else if (item.data) {
+                        ruleName = item.data.rule || item.data.name || '未知规则';
+                        messageCount = item.data.count || item.data.value || 0;
+                      }
+                      // 方式3: 从其他可能的属性获取
+                      else {
+                        ruleName = item.name || item.label || item.category || '未知规则';
+                        messageCount = item.value || item.count || item.y || 0;
+                      }
+                      
+                      console.log(`🔍 最终提取结果 - 规则名: ${ruleName}, 消息数: ${messageCount}`);
                       
                       return `
                         <div style="
@@ -704,6 +717,7 @@ const Dashboard: React.FC = () => {
                           padding: 8px 12px; 
                           border-radius: 4px;
                           font-size: 12px;
+                          border: 1px solid rgba(255, 255, 255, 0.2);
                         ">
                           <div style="font-weight: bold; margin-bottom: 4px;">${ruleName}</div>
                           <div>${messageCount} 条消息</div>
@@ -823,14 +837,20 @@ const Dashboard: React.FC = () => {
                 enable: false, // 禁用悬停高亮效果
               }
             ]}
-            color={(weeklyStats?.allRules || []).length > 0 
-              ? (weeklyStats.allRules.map((_: any, index: number) => {
-                  // 动态生成颜色，根据规则数量
-                  const colors = ['#f59e0b', '#06b6d4', '#10b981', '#8b5cf6', '#ef4444', '#f59e0b', '#06b6d4'];
-                  return colors[index % colors.length];
-                }))
-              : ['#f59e0b', '#06b6d4', '#10b981'] // 默认三色用于示例数据，橙色为主色
-            }
+            color={(() => {
+              // 获取图表中实际的数据类型
+              const dataTypes = [...new Set(weeklyStats?.chartData?.map((item: any) => item.type) || [])];
+              const colors = ['#f59e0b', '#06b6d4', '#10b981', '#8b5cf6', '#ef4444', '#fa8c16', '#722ed1'];
+              
+              console.log('🔍 图表数据类型:', dataTypes);
+              console.log('🔍 分配的颜色:', dataTypes.map((_, index) => colors[index % colors.length]));
+              
+              if (dataTypes.length > 0) {
+                return dataTypes.map((_, index) => colors[index % colors.length]);
+              } else {
+                return ['#f59e0b', '#06b6d4', '#10b981']; // 默认三色
+              }
+            })()}
             xAxis={{
               label: {
                 style: {
