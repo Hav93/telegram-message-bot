@@ -216,6 +216,8 @@ async def auto_trigger_history_messages(enhanced_bot):
     """启动时自动检查激活的规则并触发历史消息转发"""
     try:
         from services import ForwardRuleService
+        from datetime import datetime, timedelta
+        from timezone_utils import get_user_now, database_time_to_user_time
         
         # 获取所有激活的规则
         active_rules = await ForwardRuleService.get_all_rules()
@@ -225,13 +227,66 @@ async def auto_trigger_history_messages(enhanced_bot):
             logger.info("📝 未找到任何激活的转发规则")
             return
             
-        logger.info(f"📝 发现 {len(activated_rules)} 个激活的规则，开始触发历史消息转发...")
+        logger.info(f"📝 发现 {len(activated_rules)} 个激活的规则，开始根据时间过滤设置触发历史消息转发...")
         
-        # 为每个激活的规则触发历史消息转发
+        # 为每个激活的规则根据其时间过滤设置触发历史消息转发
         for rule in activated_rules:
             try:
-                logger.info(f"🔄 触发规则 '{rule.name}' 的历史消息转发...")
-                await enhanced_bot.forward_history_messages(rule.id, hours=24)
+                # 根据规则的时间过滤类型决定是否处理历史消息
+                time_filter_type = getattr(rule, 'time_filter_type', 'after_start')
+                
+                if time_filter_type == 'after_start':
+                    # 仅转发启动后的消息 - 不处理历史消息
+                    logger.info(f"📝 规则 '{rule.name}' 设置为仅转发启动后消息，跳过历史消息处理")
+                    continue
+                    
+                elif time_filter_type == 'today_only':
+                    # 仅转发当天消息 - 从今天0点开始
+                    logger.info(f"🔄 规则 '{rule.name}' 设置为仅转发当天消息，处理今日历史消息...")
+                    await enhanced_bot.forward_history_messages(rule.id, hours=None)  # 让底层逻辑处理
+                    
+                elif time_filter_type == 'from_time':
+                    # 从指定时间开始 - 根据start_time决定
+                    if hasattr(rule, 'start_time') and rule.start_time:
+                        start_time = database_time_to_user_time(rule.start_time)
+                        current_time = get_user_now()
+                        hours_diff = (current_time - start_time).total_seconds() / 3600
+                        
+                        if hours_diff > 0:
+                            logger.info(f"🔄 规则 '{rule.name}' 从指定时间开始，处理 {start_time.strftime('%Y-%m-%d %H:%M:%S')} 以来的历史消息...")
+                            await enhanced_bot.forward_history_messages(rule.id, hours=min(int(hours_diff) + 1, 168))  # 最多7天
+                        else:
+                            logger.info(f"📝 规则 '{rule.name}' 的开始时间在未来，跳过历史消息处理")
+                    else:
+                        logger.info(f"⚠️ 规则 '{rule.name}' 设置为从指定时间开始但未设置开始时间，处理最近24小时")
+                        await enhanced_bot.forward_history_messages(rule.id, hours=24)
+                        
+                elif time_filter_type == 'time_range':
+                    # 时间段过滤 - 根据start_time和end_time
+                    if hasattr(rule, 'start_time') and rule.start_time:
+                        start_time = database_time_to_user_time(rule.start_time)
+                        current_time = get_user_now()
+                        hours_diff = (current_time - start_time).total_seconds() / 3600
+                        
+                        if hours_diff > 0:
+                            logger.info(f"🔄 规则 '{rule.name}' 设置时间段过滤，处理指定时间段的历史消息...")
+                            await enhanced_bot.forward_history_messages(rule.id, hours=min(int(hours_diff) + 1, 168))  # 最多7天
+                        else:
+                            logger.info(f"📝 规则 '{rule.name}' 的时间段在未来，跳过历史消息处理")
+                    else:
+                        logger.info(f"⚠️ 规则 '{rule.name}' 设置为时间段过滤但未设置时间，处理最近24小时")
+                        await enhanced_bot.forward_history_messages(rule.id, hours=24)
+                        
+                elif time_filter_type == 'all_messages':
+                    # 所有消息 - 处理最近7天的历史消息（避免过多）
+                    logger.info(f"🔄 规则 '{rule.name}' 设置为转发所有消息，处理最近7天的历史消息...")
+                    await enhanced_bot.forward_history_messages(rule.id, hours=168)  # 7天
+                    
+                else:
+                    # 未知类型，默认处理最近24小时
+                    logger.warning(f"⚠️ 规则 '{rule.name}' 有未知的时间过滤类型 '{time_filter_type}'，默认处理最近24小时")
+                    await enhanced_bot.forward_history_messages(rule.id, hours=24)
+                    
             except Exception as rule_error:
                 logger.error(f"❌ 规则 '{rule.name}' 历史消息转发失败: {rule_error}")
                 
