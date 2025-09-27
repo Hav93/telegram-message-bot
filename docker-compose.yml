@@ -35,6 +35,12 @@ services:
       - WEB_PORT=9393
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       
+      # === 日志管理配置 ===
+      - ENABLE_LOG_CLEANUP=${ENABLE_LOG_CLEANUP:-true}
+      - LOG_RETENTION_DAYS=${LOG_RETENTION_DAYS:-30}
+      - LOG_CLEANUP_TIME=${LOG_CLEANUP_TIME:-02:00}
+      - MAX_LOG_SIZE=${MAX_LOG_SIZE:-100}
+      
       # === 权限配置 ===
       - PUID=1000
       - PGID=1000

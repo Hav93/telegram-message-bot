@@ -11,16 +11,9 @@ import os
 import sys
 from pathlib import Path
 
-# 设置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s | %(levelname)s | %(name)s:%(funcName)s:%(lineno)d - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/web_enhanced_clean.log', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
+# 设置日志 - 使用统一的日志轮转机制
+from log_manager import get_logger
+logger = get_logger('web', 'web_enhanced_clean.log')
 
 async def auto_database_migration(enhanced_bot=None):
     """自动数据库迁移和修复"""
@@ -301,6 +294,11 @@ async def main():
         # 确保日志目录存在
         os.makedirs('logs', exist_ok=True)
         
+        # 启动日志清理任务
+        from log_manager import schedule_log_cleanup
+        asyncio.create_task(schedule_log_cleanup())
+        logger.info("📋 日志清理定时任务已启动")
+        
         # 加载配置
         logger.info("📄 加载配置...")
         from config import Config
@@ -506,6 +504,41 @@ async def main():
                     "success": False,
                     "enhanced_mode": True,  # 保持增强模式状态
                     "message": f"获取系统状态失败: {str(e)}"
+                }, status_code=500)
+        
+        # 日志管理API
+        @app.get("/api/system/logs/stats")
+        async def get_log_stats():
+            """获取日志统计信息"""
+            try:
+                from log_manager import log_manager
+                stats = log_manager.get_log_stats()
+                return JSONResponse(content={
+                    "success": True,
+                    "data": stats
+                })
+            except Exception as e:
+                logger.error(f"获取日志统计失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "error": str(e)
+                }, status_code=500)
+        
+        @app.post("/api/system/logs/cleanup")
+        async def trigger_log_cleanup():
+            """手动触发日志清理"""
+            try:
+                from log_manager import log_manager
+                await log_manager.cleanup_old_logs()
+                return JSONResponse(content={
+                    "success": True,
+                    "message": "日志清理完成"
+                })
+            except Exception as e:
+                logger.error(f"日志清理失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "error": str(e)
                 }, status_code=500)
         
         # 基础API代理 - 转发到传统API（如果需要）

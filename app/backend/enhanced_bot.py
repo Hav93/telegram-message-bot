@@ -447,15 +447,9 @@ async def main():
 
 
 if __name__ == "__main__":
-    # 设置日志
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s | %(levelname)s | %(name)s:%(funcName)s:%(lineno)d - %(message)s',
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler('logs/enhanced_bot.log', encoding='utf-8')
-        ]
-    )
+    # 设置日志 - 使用统一的日志轮转机制
+    from log_manager import get_logger
+    main_logger = get_logger('main', 'enhanced_bot.log')
     
     try:
         asyncio.run(main())

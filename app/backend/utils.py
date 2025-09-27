@@ -6,45 +6,9 @@ from loguru import logger
 from config import Config
 
 def setup_logging():
-    """设置日志"""
-    import os
-    
-    # 配置loguru
-    logger.remove()  # 移除默认处理器
-    
-    # 尝试添加文件处理器
-    try:
-        # 创建日志目录
-        log_file = Path(Config.LOG_FILE)
-        log_file.parent.mkdir(parents=True, exist_ok=True)
-        
-        # 尝试创建日志文件并设置权限
-        if not log_file.exists():
-            log_file.touch()
-            os.chmod(log_file, 0o666)  # 设置文件权限
-        
-        # 添加文件处理器
-        logger.add(
-            Config.LOG_FILE,
-            rotation="10 MB",
-            retention="7 days",
-            level=Config.LOG_LEVEL,
-            format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} - {message}",
-            encoding="utf-8"
-        )
-        print(f"📄 日志文件: {Config.LOG_FILE}")
-    except (PermissionError, OSError) as e:
-        print(f"⚠️  无法创建日志文件 {Config.LOG_FILE}: {e}")
-        print("📝 日志将仅输出到控制台")
-    
-    # 添加控制台处理器
-    logger.add(
-        lambda msg: print(msg, end=""),
-        level=Config.LOG_LEVEL,
-        format="<green>{time:HH:mm:ss}</green> | <level>{level}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
-    )
-    
-    return logger
+    """设置日志 - 使用统一的日志轮转机制"""
+    from log_manager import setup_logging as setup_log_manager
+    return setup_log_manager()
 
 def is_admin(user_id: int) -> bool:
     """检查用户是否为管理员"""

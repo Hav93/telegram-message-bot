@@ -170,6 +170,15 @@
 | `PHONE_NUMBER` | 手机号 | 用于用户客户端登录 |
 | `ADMIN_USER_IDS` | 管理员用户ID | [@userinfobot](https://t.me/userinfobot) |
 
+### 日志管理配置
+
+| 配置项 | 说明 | 默认值 |
+|--------|------|--------|
+| `ENABLE_LOG_CLEANUP` | 是否启用日志自动清理 | `true` |
+| `LOG_RETENTION_DAYS` | 日志保留天数 | `30` |
+| `LOG_CLEANUP_TIME` | 日志清理时间 (HH:MM) | `02:00` |
+| `MAX_LOG_SIZE` | 单个日志文件最大大小 (MB) | `100` |
+
 ### 代理配置（可选）
 
 ```env
