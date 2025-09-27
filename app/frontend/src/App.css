@@ -333,7 +333,7 @@ a:hover, .ant-typography a:hover {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important; /* 更柔和的阴影 */
 }
 
-.ant-btn-default {
+.ant-btn-default:not(.ant-table .ant-btn[type="text"]):not(.ant-table .ant-btn.ant-btn-text) {
   background: rgba(255, 255, 255, 0.1) !important; /* 默认按钮稍微透明 */
   border: 1px solid rgba(255, 255, 255, 0.3) !important; /* 参照测试页面边框 */
   color: #ffffff !important; /* 纯白色文字 */
@@ -346,15 +346,20 @@ a:hover, .ant-typography a:hover {
   transition: all 0.3s ease !important; /* 参照测试页面过渡效果 */
 }
 
-.ant-btn-default:hover {
+.ant-btn-default:hover:not(.ant-table .ant-btn[type="text"]):not(.ant-table .ant-btn.ant-btn-text) {
   background: rgba(255, 255, 255, 0.3) !important; /* 参照测试页面悬停背景 */
   border-color: rgba(255, 255, 255, 0.4) !important;
   color: #ffffff !important;
   transform: translateY(-2px) !important; /* 参照测试页面悬停效果 */
 }
 
-/* 消息类型快捷按钮特殊样式 - 保持原有颜色状态 */
-.ant-table .ant-btn[type="text"] {
+/* 消息类型快捷按钮特殊样式 - 强制保持内联样式颜色 */
+.glass-card .ant-table .ant-btn[type="text"],
+.glass-card .ant-table tbody .ant-btn.ant-btn-text,
+.glass-card .ant-table .ant-btn.ant-btn-text,
+.ant-table .ant-btn[type="text"],
+.ant-table tbody .ant-btn.ant-btn-text,
+.ant-table .ant-btn.ant-btn-text {
   background: transparent !important;
   border: none !important;
   backdrop-filter: none !important;
@@ -363,32 +368,34 @@ a:hover, .ant-typography a:hover {
   text-shadow: none !important;
   border-radius: 4px !important;
   transform: none !important;
-  color: inherit !important; /* 继承内联样式的颜色 */
+  /* 强制使用内联样式颜色，不被任何全局样式覆盖 */
 }
 
-.ant-table .ant-btn[type="text"]:hover {
+.glass-card .ant-table .ant-btn[type="text"]:hover,
+.glass-card .ant-table tbody .ant-btn.ant-btn-text:hover,
+.glass-card .ant-table .ant-btn.ant-btn-text:hover,
+.ant-table .ant-btn[type="text"]:hover,
+.ant-table tbody .ant-btn.ant-btn-text:hover,
+.ant-table .ant-btn.ant-btn-text:hover {
   background: rgba(255, 255, 255, 0.1) !important;
   transform: none !important;
   border: none !important;
-  color: inherit !important; /* 悬停时也保持原有颜色 */
+  /* 悬停时也保持内联样式颜色 */
 }
 
-/* 更具体的选择器确保消息类型按钮颜色正确显示 */
-.ant-table tbody .ant-btn.ant-btn-text {
-  background: transparent !important;
-  border: none !important;
-  backdrop-filter: none !important;
-  font-size: 14px !important;
-  padding: 2px !important;
-  text-shadow: none !important;
-  border-radius: 4px !important;
-  transform: none !important;
+/* 专门针对消息类型图标的颜色保持 */
+.glass-card .ant-table .ant-btn[type="text"] .anticon,
+.ant-table .ant-btn[type="text"] .anticon {
+  color: inherit !important;
 }
 
-.ant-table tbody .ant-btn.ant-btn-text:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  transform: none !important;
-  border: none !important;
+/* 确保按钮内联样式优先级最高 */
+.glass-card .ant-table td .ant-btn[style*="color"] {
+  color: inherit !important;
+}
+
+.ant-table td .ant-btn[style*="color"] {
+  color: inherit !important;
 }
 
 /* 标签样式 */
