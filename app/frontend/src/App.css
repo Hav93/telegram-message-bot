@@ -353,31 +353,12 @@ a:hover, .ant-typography a:hover {
   transform: translateY(-2px) !important; /* 参照测试页面悬停效果 */
 }
 
-/* 消息类型按钮 - 确保内联样式优先 */
-.ant-table .ant-btn[type="text"] {
-  background: transparent !important;
-  border: none !important;
-  font-size: 14px !important;
-  padding: 2px !important;
-  border-radius: 4px !important;
-}
-
-.ant-table .ant-btn[type="text"]:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* 图标继承按钮颜色 */
-.ant-table .ant-btn[type="text"] .anticon {
-  color: inherit !important;
-}
-
-/* 强制使用内联样式 - 移除所有可能的颜色覆盖 */
-.glass-card .ant-table .ant-btn[type="text"][style*="color"],
-.glass-card-3d .ant-table .ant-btn[type="text"][style*="color"],
-.ant-table .ant-btn[type="text"][style*="color"] {
-  color: unset !important; /* 完全重置，让浏览器使用内联样式 */
-  all: unset !important; /* 重置所有样式 */
-  /* 然后重新设置必要的样式 */
+/* 消息类型按钮 - 最终解决方案，彻底重置并使用最高优先级 */
+table .ant-btn[type="text"],
+.ant-table .ant-btn[type="text"],
+.ant-table tbody .ant-btn[type="text"],
+.ant-table td .ant-btn[type="text"] {
+  all: initial !important; /* 完全重置所有样式到初始状态 */
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -387,10 +368,33 @@ a:hover, .ant-typography a:hover {
   padding: 2px !important;
   border-radius: 4px !important;
   cursor: pointer !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  transition: background-color 0.2s ease !important;
+  box-sizing: border-box !important;
+}
+
+/* 悬停效果 */
+table .ant-btn[type="text"]:hover,
+.ant-table .ant-btn[type="text"]:hover,
+.ant-table tbody .ant-btn[type="text"]:hover,
+.ant-table td .ant-btn[type="text"]:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 图标继承按钮颜色 - 最高优先级 */
+table .ant-btn[type="text"] .anticon,
+.ant-table .ant-btn[type="text"] .anticon,
+.ant-table tbody .ant-btn[type="text"] .anticon,
+.ant-table td .ant-btn[type="text"] .anticon {
+  color: inherit !important;
+  font-size: inherit !important;
 }
 
 /* 对没有内联颜色样式的按钮设置默认白色 */
-.ant-table .ant-btn[type="text"]:not([style*="color"]) {
+table .ant-btn[type="text"]:not([style*="color"]),
+.ant-table .ant-btn[type="text"]:not([style*="color"]),
+.ant-table tbody .ant-btn[type="text"]:not([style*="color"]),
+.ant-table td .ant-btn[type="text"]:not([style*="color"]) {
   color: #ffffff !important;
 }
 
@@ -1290,18 +1294,25 @@ body.theme-custom .ant-alert-description {
   color: rgba(255, 255, 255, 0.6) !important;
 }
 
-/* 添加客户端弹窗玻璃质感 - 参考主题设置样式 */
+/* 添加客户端弹窗玻璃质感 - 强化透明效果 */
 .glass-modal .ant-modal-content {
-  background: rgba(0, 0, 0, 0.25) !important;
-  backdrop-filter: blur(20px) brightness(1.2) saturate(1.5) !important;
-  -webkit-backdrop-filter: blur(20px) brightness(1.2) saturate(1.5) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 16px !important;
+  background: rgba(0, 0, 0, 0.15) !important; /* 更透明的背景 */
+  backdrop-filter: blur(25px) brightness(1.3) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(25px) brightness(1.3) saturate(1.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 20px !important;
   box-shadow: 
-    0 25px 50px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 0 100px rgba(102, 126, 234, 0.1) !important;
+    0 30px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 120px rgba(102, 126, 234, 0.15) !important;
   overflow: hidden !important;
+}
+
+/* 添加客户端弹窗蒙版层也要透明 */
+.glass-modal .ant-modal-mask {
+  background: rgba(0, 0, 0, 0.3) !important; /* 更透明的蒙版 */
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
 }
 
 .glass-modal .ant-modal-header {
@@ -1321,6 +1332,26 @@ body.theme-custom .ant-alert-description {
   background: transparent !important;
   border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
   padding: 16px 24px 20px !important;
+}
+
+/* 强制覆盖所有可能的白色背景 */
+.glass-modal *,
+.glass-modal .ant-form-item,
+.glass-modal .ant-form-item-control,
+.glass-modal .ant-form-item-control-input,
+.glass-modal .ant-row,
+.glass-modal .ant-col,
+.glass-modal .ant-space,
+.glass-modal .ant-space-item {
+  background: transparent !important;
+}
+
+/* 特别针对界面设置的内容区域 */
+.glass-modal .ant-tabs-content,
+.glass-modal .ant-tabs-tabpane,
+.glass-modal .ant-card-body > div,
+.glass-modal .ant-form > div {
+  background: transparent !important;
 }
 
 /* 主题设置弹窗整体玻璃质感 */
@@ -2466,6 +2497,33 @@ body.theme-custom .glass3d {
   color: #ffffff !important;
 }
 
+/* 界面设置中的白色面板强制透明玻璃质感 - 使用最高优先级选择器 */
+div.ant-collapse div.ant-collapse-content-box,
+div.ant-collapse div.ant-collapse-content,
+div.ant-collapse-item,
+div.ant-collapse-item-active,
+.ant-modal div.ant-collapse div.ant-collapse-content-box,
+.ant-modal div.ant-collapse div.ant-collapse-content,
+.ant-modal div.ant-collapse-item,
+.ant-modal div.ant-collapse-item-active,
+.glass-modal div.ant-collapse div.ant-collapse-content-box,
+.glass-modal div.ant-collapse div.ant-collapse-content,
+.glass-modal div.ant-collapse-item,
+.glass-modal div.ant-collapse-item-active,
+.ant-collapse > .ant-collapse-item,
+.ant-collapse > .ant-collapse-item > .ant-collapse-content,
+.ant-collapse > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
+  background: rgba(0, 0, 0, 0.4) !important; /* 更深的半透明背景 */
+  background-color: rgba(0, 0, 0, 0.4) !important; /* 强制覆盖 */
+  backdrop-filter: blur(20px) brightness(0.8) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(20px) brightness(0.8) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 12px !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 10px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
 /* 设置页面中的组件样式优化 - 减少刺眼的白色背景 */
 .ant-modal .ant-slider {
   margin: 8px 0 !important;
@@ -2951,4 +3009,69 @@ h1, h2, h3, h4, h5, h6,
 .glass-card-3d .ant-pagination .ant-pagination-total-text {
   color: rgba(255, 255, 255, 0.9) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ============= 终极修复方案 - 最高优先级CSS规则 ============= */
+
+/* 消息类型按钮终极修复 - 确保内联样式生效 */
+html body .ant-table .ant-btn[type="text"] {
+  all: unset !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: none !important;
+  font-size: 14px !important;
+  padding: 2px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-family: inherit !important;
+  transition: background-color 0.2s ease !important;
+}
+
+html body .ant-table .ant-btn[type="text"]:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+html body .ant-table .ant-btn[type="text"]:not([style*="color"]) {
+  color: #ffffff !important;
+}
+
+html body .ant-table .ant-btn[type="text"] .anticon {
+  color: inherit !important;
+}
+
+/* 界面设置白色面板终极修复 */
+html body .ant-collapse .ant-collapse-content-box,
+html body .ant-collapse .ant-collapse-content,
+html body .ant-collapse-item,
+html body .ant-modal .ant-collapse .ant-collapse-content-box,
+html body .ant-modal .ant-collapse .ant-collapse-content,
+html body .ant-modal .ant-collapse-item {
+  background: rgba(0, 0, 0, 0.5) !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(25px) brightness(0.7) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(25px) brightness(0.7) saturate(1.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 12px !important;
+}
+
+/* 添加客户端弹窗终极修复 - 完全透明效果 */
+html body .glass-modal .ant-modal-mask {
+  background: rgba(0, 0, 0, 0.2) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+html body .glass-modal .ant-modal-content {
+  background: rgba(0, 0, 0, 0.1) !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(30px) brightness(1.4) saturate(2) !important;
+  -webkit-backdrop-filter: blur(30px) brightness(1.4) saturate(2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 24px !important;
+  box-shadow: 
+    0 35px 70px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 150px rgba(102, 126, 234, 0.2) !important;
 }
