@@ -6,8 +6,6 @@ import {
   Modal, 
   Input, 
   message, 
-  Radio, 
-  Card,
   Typography 
 } from 'antd';
 import { 
@@ -151,55 +149,59 @@ const ThemeSwitcher: React.FC = () => {
             选择背景主题：
           </Text>
           
-          <Radio.Group
-            value={selectedTheme}
-            onChange={(e) => setSelectedTheme(e.target.value)}
-            style={{ width: '100%' }}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-              {themeOptions.map(option => (
-                <Radio.Button 
-                  key={option.key} 
-                  value={option.key}
-                  style={{ height: 'auto', padding: 0 }}
-                >
-                  <Card
-                    size="small"
-                    style={{ 
-                      margin: 0,
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      border: selectedTheme === option.key ? 
-                        '2px solid #1890ff' : 
-                        '1px solid rgba(255, 255, 255, 0.2)',
-                      backdropFilter: 'blur(5px)'
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            {themeOptions.map(option => (
+              <div
+                key={option.key}
+                onClick={() => setSelectedTheme(option.key as ThemeType)}
+                style={{
+                  padding: '12px',
+                  background: selectedTheme === option.key ? 
+                    'rgba(24, 144, 255, 0.2)' : 
+                    'rgba(255, 255, 255, 0.1)',
+                  border: selectedTheme === option.key ? 
+                    '2px solid #1890ff' : 
+                    '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '8px',
+                  backdropFilter: 'blur(10px)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'center'
+                }}
+                onMouseEnter={(e) => {
+                  if (selectedTheme !== option.key) {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (selectedTheme !== option.key) {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                  }
+                }}
+              >
+                {option.preview && (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '40px',
+                      background: option.preview,
+                      borderRadius: '4px',
+                      marginBottom: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
                     }}
-                    bodyStyle={{ padding: '12px' }}
-                  >
-                    <div style={{ textAlign: 'center' }}>
-                      {option.preview && (
-                        <div
-                          style={{
-                            width: '100%',
-                            height: '40px',
-                            background: option.preview,
-                            borderRadius: '4px',
-                            marginBottom: '8px',
-                            border: '1px solid rgba(255, 255, 255, 0.2)'
-                          }}
-                        />
-                      )}
-                      <Space>
-                        {option.icon}
-                        <Text style={{ color: '#ffffff', fontSize: '12px' }}>
-                          {option.label}
-                        </Text>
-                      </Space>
-                    </div>
-                  </Card>
-                </Radio.Button>
-              ))}
-            </div>
-          </Radio.Group>
+                  />
+                )}
+                <Space>
+                  {option.icon}
+                  <Text style={{ color: '#ffffff', fontSize: '12px' }}>
+                    {option.label}
+                  </Text>
+                </Space>
+              </div>
+            ))}
+          </div>
 
           {selectedTheme === 'custom' && (
             <div style={{ marginTop: '20px' }}>

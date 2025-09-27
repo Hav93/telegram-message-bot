@@ -508,43 +508,110 @@ a:hover, .ant-typography a:hover {
   background: linear-gradient(90deg, #52c41a 0%, rgba(82, 196, 26, 0.3) 100%) !important;
 }
 
-/* Alert组件在模态框中的样式优化 */
-.ant-modal .ant-alert {
-  background: rgba(255, 255, 255, 0.1) !important;
+/* Alert组件样式优化 - 降低亮度减少刺眼 */
+.ant-alert {
+  background: rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: 8px !important;
 }
 
-.ant-modal .ant-alert-info {
-  background: rgba(24, 144, 255, 0.1) !important;
-  border-color: rgba(24, 144, 255, 0.3) !important;
+.ant-alert-info {
+  background: rgba(24, 144, 255, 0.08) !important;
+  border-color: rgba(24, 144, 255, 0.2) !important;
 }
 
-.ant-modal .ant-alert-success {
-  background: rgba(82, 196, 26, 0.1) !important;
-  border-color: rgba(82, 196, 26, 0.3) !important;
+.ant-alert-success {
+  background: rgba(82, 196, 26, 0.08) !important;
+  border-color: rgba(82, 196, 26, 0.2) !important;
 }
 
-.ant-modal .ant-alert-warning {
-  background: rgba(250, 140, 22, 0.1) !important;
-  border-color: rgba(250, 140, 22, 0.3) !important;
+.ant-alert-warning {
+  background: rgba(250, 140, 22, 0.08) !important;
+  border-color: rgba(250, 140, 22, 0.2) !important;
 }
 
-.ant-modal .ant-alert-error {
-  background: rgba(255, 77, 79, 0.1) !important;
-  border-color: rgba(255, 77, 79, 0.3) !important;
+.ant-alert-error {
+  background: rgba(255, 77, 79, 0.08) !important;
+  border-color: rgba(255, 77, 79, 0.2) !important;
 }
 
-.ant-modal .ant-alert-message {
+.ant-alert-message {
   color: rgba(255, 255, 255, 0.95) !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
   font-weight: 600 !important;
 }
 
-.ant-modal .ant-alert-description {
-  color: rgba(255, 255, 255, 0.8) !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+.ant-alert-description {
+  color: rgba(255, 255, 255, 0.85) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 模态框中的Alert进一步优化 */
+.ant-modal .ant-alert {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.ant-modal .ant-alert-info {
+  background: rgba(24, 144, 255, 0.06) !important;
+  border-color: rgba(24, 144, 255, 0.15) !important;
+}
+
+.ant-modal .ant-alert-success {
+  background: rgba(82, 196, 26, 0.06) !important;
+  border-color: rgba(82, 196, 26, 0.15) !important;
+}
+
+.ant-modal .ant-alert-warning {
+  background: rgba(250, 140, 22, 0.06) !important;
+  border-color: rgba(250, 140, 22, 0.15) !important;
+}
+
+.ant-modal .ant-alert-error {
+  background: rgba(255, 77, 79, 0.06) !important;
+  border-color: rgba(255, 77, 79, 0.15) !important;
+}
+
+/* 不同主题下的Alert组件优化 */
+body.theme-dark .ant-alert {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.theme-dark .ant-alert-info {
+  background: rgba(24, 144, 255, 0.05) !important;
+  border-color: rgba(24, 144, 255, 0.12) !important;
+}
+
+body.theme-dark .ant-alert-success {
+  background: rgba(82, 196, 26, 0.05) !important;
+  border-color: rgba(82, 196, 26, 0.12) !important;
+}
+
+body.theme-dark .ant-alert-warning {
+  background: rgba(250, 140, 22, 0.05) !important;
+  border-color: rgba(250, 140, 22, 0.12) !important;
+}
+
+body.theme-dark .ant-alert-error {
+  background: rgba(255, 77, 79, 0.05) !important;
+  border-color: rgba(255, 77, 79, 0.12) !important;
+}
+
+/* 自定义背景下的Alert加强对比度 */
+body.theme-custom .ant-alert {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(15px) !important;
+}
+
+body.theme-custom .ant-alert-message {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+body.theme-custom .ant-alert-description {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7) !important;
 }
 
 /* 开关样式 */
@@ -698,21 +765,6 @@ a:hover, .ant-typography a:hover {
   background: transparent !important;
 }
 
-.glass-modal .ant-radio-button-wrapper {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-  color: rgba(255, 255, 255, 0.8) !important;
-}
-
-.glass-modal .ant-radio-button-wrapper-checked {
-  background: rgba(24, 144, 255, 0.3) !important;
-  border-color: #1890ff !important;
-  color: #ffffff !important;
-}
-
-.glass-modal .ant-radio-button-wrapper:hover {
-  background: rgba(255, 255, 255, 0.2) !important;
-}
 
 /* 不同主题下的模态框适应性样式 */
 
@@ -841,4 +893,40 @@ body.theme-custom .custom-modal-content p {
 body.theme-custom .ant-modal-footer .ant-btn,
 body.theme-custom .custom-modal-button {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* 优化文字选中状态的可读性 */
+::selection {
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+::-moz-selection {
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* 不同主题下的选中文字优化 */
+body.theme-dark ::selection {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+body.theme-dark ::-moz-selection {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+body.theme-custom ::selection {
+  background: rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+body.theme-custom ::-moz-selection {
+  background: rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
 }

@@ -11,8 +11,9 @@ import {
 } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Column, Bar, Pie } from '@ant-design/plots';
+import { Column, Pie } from '@ant-design/plots';
 import dayjs from 'dayjs';
+import { useTheme } from '../../hooks/useTheme';
 
 // Services
 // import { systemApi } from '../../services/system';
@@ -67,6 +68,34 @@ const logTableColumns = [
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { themeConfig } = useTheme();
+
+  // 根据主题获取字体颜色
+  const getTextColor = () => {
+    switch (themeConfig.type) {
+      case 'dark':
+        return 'rgba(255, 255, 255, 0.9)'; // 深色主题下更高对比度
+      case 'gray':
+        return 'rgba(255, 255, 255, 0.85)'; // 灰色主题下适中对比度
+      case 'custom':
+        return 'rgba(255, 255, 255, 0.95)'; // 自定义背景下最高对比度
+      default: // gradient
+        return 'rgba(255, 255, 255, 0.8)'; // 默认渐变主题
+    }
+  };
+
+  const getSecondaryTextColor = () => {
+    switch (themeConfig.type) {
+      case 'dark':
+        return 'rgba(255, 255, 255, 0.7)';
+      case 'gray':
+        return 'rgba(255, 255, 255, 0.65)';
+      case 'custom':
+        return 'rgba(255, 255, 255, 0.8)';
+      default:
+        return 'rgba(255, 255, 255, 0.6)';
+    }
+  };
   
   // 性能优化：使用useCallback包装导航函数
   // const navigateToLogs = useCallback(() => navigate('/logs'), [navigate]);
@@ -631,11 +660,18 @@ const Dashboard: React.FC = () => {
                     },
                   }}
                   tooltip={{
-                    formatter: (datum: any) => {
-                      return {
-                        name: datum.rule,
-                        value: datum.count + '条消息'
-                      };
+                    showTitle: false,
+                    showMarkers: false,
+                    customContent: (title: any, data: any[]) => {
+                      if (!data || data.length === 0) return '';
+                      const item = data[0];
+                      const { rule, count } = item.data;
+                      return `
+                        <div style="padding: 8px 12px; background: rgba(0, 0, 0, 0.8); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.2);">
+                          <div style="color: #ffffff; font-weight: 600; margin-bottom: 4px;">${rule}</div>
+                          <div style="color: #00D4FF; font-size: 14px;">${count} 条消息</div>
+                        </div>
+                      `;
                     }
                   }}
                 />
@@ -738,26 +774,38 @@ const Dashboard: React.FC = () => {
             columnStyle={{
               fillOpacity: 0.8,
             }}
+            interactions={[
+              {
+                type: 'element-active',
+                enable: false, // 禁用悬停高亮效果
+              },
+              {
+                type: 'element-highlight',
+                enable: false, // 禁用悬停高亮效果
+              }
+            ]}
             color={['#1890ff', '#52c41a', '#ff4d4f', '#faad14', '#722ed1', '#eb2f96', '#13c2c2', '#fa8c16']} // 多种颜色区分规则
             xAxis={{
               label: {
                 style: {
-                  fill: 'rgba(255, 255, 255, 0.8)',
+                  fill: getTextColor(),
                   fontSize: 12,
+                  fontWeight: themeConfig.type === 'custom' ? 600 : 400,
                 },
               },
             }}
             yAxis={{
               label: {
                 style: {
-                  fill: 'rgba(255, 255, 255, 0.8)',
+                  fill: getTextColor(),
                   fontSize: 12,
+                  fontWeight: themeConfig.type === 'custom' ? 600 : 400,
                 },
               },
               grid: {
                 line: {
                   style: {
-                    stroke: 'rgba(255, 255, 255, 0.2)',
+                    stroke: getSecondaryTextColor(),
                   },
                 },
               },
@@ -766,15 +814,16 @@ const Dashboard: React.FC = () => {
               position: 'top',
               itemName: {
                 style: {
-                  fill: 'rgba(255, 255, 255, 0.8)',
+                  fill: getTextColor(),
+                  fontWeight: themeConfig.type === 'custom' ? 600 : 400,
                 },
               },
             }}
             tooltip={{
               showTitle: true,
               showMarkers: true,
-              title: (title: string, data: unknown) => {
-                console.log('🔍 Title调试 - title:', title, 'data:', data);
+              title: (title: string, _data: unknown) => {
+                console.log('🔍 Title调试 - title:', title, 'data:', _data);
                 return title;
               },
               customItems: (originalItems: unknown[]) => {
