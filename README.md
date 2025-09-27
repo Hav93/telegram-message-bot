@@ -67,7 +67,7 @@
    ```
 
 2. **创建配置文件**
-   ```bash
+   ```yaml
    version: '3.8'
    
    services:
@@ -90,14 +90,18 @@
          #- PROXY_TYPE=http
          #- PROXY_HOST=127.0.0.1
          #- PROXY_PORT=1080
+      # 新增：权限配置（NAS推荐）
+         - PUID=1000
+         - PGID=1000
          - DATABASE_URL=sqlite:///data/bot.db
       # 日志级别
          - LOG_LEVEL=INFO
        volumes:
-         - ./data:/app/data
-         - ./logs:/app/logs
-         - ./sessions:/app/sessions
-         - ./temp:/app/temp
+         - ./data:/app/data              # 数据库和会话文件（重要数据），冒号前填自己部署环境的绝对路径
+         - ./logs:/app/logs              # 应用日志，冒号前填自己部署环境的绝对路径
+         - ./sessions:/app/sessions      # Telegram会话文件目录(重要：登录状态持久化)，冒号前填自己部署环境的绝对路径
+         - ./temp:/app/temp              # 临时文件，冒号前填自己部署环境的绝对路径
+         - ./config:/app/config          # 新增：配置文件目录，冒号前填自己部署环境的绝对路径
    
    ```
 

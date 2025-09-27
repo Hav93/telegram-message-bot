@@ -212,6 +212,32 @@ async def auto_update_chat_names(db, enhanced_bot=None):
     except Exception as e:
         logger.error(f"❌ 自动更新聊天名称失败: {e}")
 
+async def auto_trigger_history_messages(enhanced_bot):
+    """启动时自动检查激活的规则并触发历史消息转发"""
+    try:
+        from services import ForwardRuleService
+        
+        # 获取所有激活的规则
+        active_rules = await ForwardRuleService.get_all_rules()
+        activated_rules = [rule for rule in active_rules if rule.is_active]
+        
+        if not activated_rules:
+            logger.info("📝 未找到任何激活的转发规则")
+            return
+            
+        logger.info(f"📝 发现 {len(activated_rules)} 个激活的规则，开始触发历史消息转发...")
+        
+        # 为每个激活的规则触发历史消息转发
+        for rule in activated_rules:
+            try:
+                logger.info(f"🔄 触发规则 '{rule.name}' 的历史消息转发...")
+                await enhanced_bot.forward_history_messages(rule.id, hours=24)
+            except Exception as rule_error:
+                logger.error(f"❌ 规则 '{rule.name}' 历史消息转发失败: {rule_error}")
+                
+    except Exception as e:
+        logger.error(f"❌ 启动时历史消息转发检查失败: {e}")
+
 async def main():
     """主函数"""
     try:
@@ -255,6 +281,11 @@ async def main():
         
         # 自动数据库迁移
         await auto_database_migration(enhanced_bot)
+        
+        # 启动时检查激活的规则并触发历史消息转发
+        if enhanced_bot:
+            logger.info("🔍 检查启动时激活的规则...")
+            await auto_trigger_history_messages(enhanced_bot)
         
         # 聊天名称更新提示
         if enhanced_bot:
