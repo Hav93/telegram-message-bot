@@ -246,15 +246,15 @@ async def auto_trigger_history_messages(enhanced_bot):
                     await enhanced_bot.forward_history_messages(rule.id, hours=None)  # 让底层逻辑处理
                     
                 elif time_filter_type == 'from_time':
-                    # 从指定时间开始 - 根据start_time决定
+                    # 从指定时间开始 - 根据start_time决定，不做时间限制
                     if hasattr(rule, 'start_time') and rule.start_time:
                         start_time = database_time_to_user_time(rule.start_time)
                         current_time = get_user_now()
                         hours_diff = (current_time - start_time).total_seconds() / 3600
                         
                         if hours_diff > 0:
-                            logger.info(f"🔄 规则 '{rule.name}' 从指定时间开始，处理 {start_time.strftime('%Y-%m-%d %H:%M:%S')} 以来的历史消息...")
-                            await enhanced_bot.forward_history_messages(rule.id, hours=min(int(hours_diff) + 1, 168))  # 最多7天
+                            logger.info(f"🔄 规则 '{rule.name}' 从指定时间开始，处理 {start_time.strftime('%Y-%m-%d %H:%M:%S')} 以来的所有历史消息...")
+                            await enhanced_bot.forward_history_messages(rule.id, hours=int(hours_diff) + 1)  # 处理所有时间范围内的消息
                         else:
                             logger.info(f"📝 规则 '{rule.name}' 的开始时间在未来，跳过历史消息处理")
                     else:
@@ -262,15 +262,15 @@ async def auto_trigger_history_messages(enhanced_bot):
                         await enhanced_bot.forward_history_messages(rule.id, hours=24)
                         
                 elif time_filter_type == 'time_range':
-                    # 时间段过滤 - 根据start_time和end_time
+                    # 时间段过滤 - 根据start_time和end_time，不做时间限制
                     if hasattr(rule, 'start_time') and rule.start_time:
                         start_time = database_time_to_user_time(rule.start_time)
                         current_time = get_user_now()
                         hours_diff = (current_time - start_time).total_seconds() / 3600
                         
                         if hours_diff > 0:
-                            logger.info(f"🔄 规则 '{rule.name}' 设置时间段过滤，处理指定时间段的历史消息...")
-                            await enhanced_bot.forward_history_messages(rule.id, hours=min(int(hours_diff) + 1, 168))  # 最多7天
+                            logger.info(f"🔄 规则 '{rule.name}' 设置时间段过滤，处理指定时间段的所有历史消息...")
+                            await enhanced_bot.forward_history_messages(rule.id, hours=int(hours_diff) + 1)  # 处理完整时间段的消息
                         else:
                             logger.info(f"📝 规则 '{rule.name}' 的时间段在未来，跳过历史消息处理")
                     else:
@@ -278,9 +278,9 @@ async def auto_trigger_history_messages(enhanced_bot):
                         await enhanced_bot.forward_history_messages(rule.id, hours=24)
                         
                 elif time_filter_type == 'all_messages':
-                    # 所有消息 - 处理最近7天的历史消息（避免过多）
-                    logger.info(f"🔄 规则 '{rule.name}' 设置为转发所有消息，处理最近7天的历史消息...")
-                    await enhanced_bot.forward_history_messages(rule.id, hours=168)  # 7天
+                    # 所有消息 - 处理所有历史消息，不做时间限制
+                    logger.info(f"🔄 规则 '{rule.name}' 设置为转发所有消息，处理所有可用的历史消息...")
+                    await enhanced_bot.forward_history_messages(rule.id, hours=None)  # 不限制时间，让底层逻辑处理
                     
                 else:
                     # 未知类型，默认处理最近24小时
