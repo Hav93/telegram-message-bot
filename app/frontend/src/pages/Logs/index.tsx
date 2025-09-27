@@ -316,9 +316,10 @@ const LogsPage: React.FC = () => {
   return (
     <div style={{ padding: '24px' }}>
       <Card className="glass-card">
-        <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Title level={2} style={{ margin: 0, color: 'white' }}>消息日志</Title>
-          <Space>
+        <div style={{ marginBottom: '16px' }}>
+          <Title level={2} style={{ margin: '0 0 16px 0', color: 'white' }}>消息日志</Title>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+            <Space>
             <Search
               placeholder="搜索日志..."
               allowClear
@@ -353,7 +354,8 @@ const LogsPage: React.FC = () => {
             >
               刷新
             </Button>
-          </Space>
+            </Space>
+          </div>
         </div>
 
         <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>

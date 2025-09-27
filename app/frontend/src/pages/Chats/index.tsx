@@ -344,9 +344,10 @@ const ChatsPage: React.FC = () => {
   return (
     <div style={{ padding: '24px' }}>
       <Card className="glass-card">
-        <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Title level={2} style={{ margin: 0, color: 'white' }}>聊天管理</Title>
-          <Space>
+        <div style={{ marginBottom: '16px' }}>
+          <Title level={2} style={{ margin: '0 0 16px 0', color: 'white' }}>聊天管理</Title>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+            <Space>
             <Select
               value={selectedClient}
               onChange={setSelectedClient}
@@ -385,7 +386,8 @@ const ChatsPage: React.FC = () => {
             >
               同步聊天
             </Button>
-          </Space>
+            </Space>
+          </div>
         </div>
 
         <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>

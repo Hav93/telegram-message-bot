@@ -353,50 +353,7 @@ a:hover, .ant-typography a:hover {
   transform: translateY(-2px) !important; /* 参照测试页面悬停效果 */
 }
 
-/* 消息类型按钮 - 最终解决方案，彻底重置并使用最高优先级 */
-table .ant-btn[type="text"],
-.ant-table .ant-btn[type="text"],
-.ant-table tbody .ant-btn[type="text"],
-.ant-table td .ant-btn[type="text"] {
-  all: initial !important; /* 完全重置所有样式到初始状态 */
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: transparent !important;
-  border: none !important;
-  font-size: 14px !important;
-  padding: 2px !important;
-  border-radius: 4px !important;
-  cursor: pointer !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
-  transition: background-color 0.2s ease !important;
-  box-sizing: border-box !important;
-}
-
-/* 悬停效果 */
-table .ant-btn[type="text"]:hover,
-.ant-table .ant-btn[type="text"]:hover,
-.ant-table tbody .ant-btn[type="text"]:hover,
-.ant-table td .ant-btn[type="text"]:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* 图标继承按钮颜色 - 最高优先级 */
-table .ant-btn[type="text"] .anticon,
-.ant-table .ant-btn[type="text"] .anticon,
-.ant-table tbody .ant-btn[type="text"] .anticon,
-.ant-table td .ant-btn[type="text"] .anticon {
-  color: inherit !important;
-  font-size: inherit !important;
-}
-
-/* 对没有内联颜色样式的按钮设置默认白色 */
-table .ant-btn[type="text"]:not([style*="color"]),
-.ant-table .ant-btn[type="text"]:not([style*="color"]),
-.ant-table tbody .ant-btn[type="text"]:not([style*="color"]),
-.ant-table td .ant-btn[type="text"]:not([style*="color"]) {
-  color: #ffffff !important;
-}
+/* 旧的消息类型按钮规则已移动到文件末尾的终极修复方案 */
 
 /* 标签样式 */
 .ant-tag {
@@ -3013,31 +2970,68 @@ h1, h2, h3, h4, h5, h6,
 
 /* ============= 终极修复方案 - 最高优先级CSS规则 ============= */
 
-/* 消息类型按钮终极修复 - 确保内联样式生效 */
+/* 消息类型按钮终极修复 - 不使用all:unset，保护内联样式 */
 html body .ant-table .ant-btn[type="text"] {
-  all: unset !important;
+  /* 不使用 all: unset，而是逐个重置属性 */
+  background: transparent !important;
+  border: none !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background: transparent !important;
-  border: none !important;
   font-size: 14px !important;
   padding: 2px !important;
   border-radius: 4px !important;
   cursor: pointer !important;
   font-family: inherit !important;
   transition: background-color 0.2s ease !important;
+  box-sizing: border-box !important;
+  /* 不重置 color 属性，让内联样式生效 */
 }
 
 html body .ant-table .ant-btn[type="text"]:hover {
   background: rgba(255, 255, 255, 0.1) !important;
+  /* 悬停时也不覆盖 color */
 }
 
+/* 只对没有内联颜色的按钮设置默认白色 */
 html body .ant-table .ant-btn[type="text"]:not([style*="color"]) {
   color: #ffffff !important;
 }
 
+/* 图标颜色继承按钮颜色 */
 html body .ant-table .ant-btn[type="text"] .anticon {
+  color: inherit !important;
+}
+
+/* 强制确保每种颜色的内联样式都能生效 */
+html body .ant-table .ant-btn[type="text"][style*="color: #52c41a"] {
+  color: #52c41a !important; /* 绿色 - 文本消息 */
+}
+html body .ant-table .ant-btn[type="text"][style*="color: #1890ff"] {
+  color: #1890ff !important; /* 蓝色 - 图片/正则替换 */
+}
+html body .ant-table .ant-btn[type="text"][style*="color: #fa541c"] {
+  color: #fa541c !important; /* 橙色 - 视频 */
+}
+html body .ant-table .ant-btn[type="text"][style*="color: #722ed1"] {
+  color: #722ed1 !important; /* 紫色 - 文档/链接预览 */
+}
+html body .ant-table .ant-btn[type="text"][style*="color: #13c2c2"] {
+  color: #13c2c2 !important; /* 青色 - 音频 */
+}
+html body .ant-table .ant-btn[type="text"][style*="color: #eb2f96"] {
+  color: #eb2f96 !important; /* 粉色 - 语音 */
+}
+html body .ant-table .ant-btn[type="text"][style*="color: #d9d9d9"] {
+  color: #d9d9d9 !important; /* 灰色 - 禁用状态 */
+}
+
+/* 终极解决方案 - 使用更高的特异性 */
+html body div.ant-table-container table.ant-table tbody tr td .ant-btn[type="text"] {
+  /* 完全不设置color，让内联样式生效 */
+}
+
+html body div.ant-table-container table.ant-table tbody tr td .ant-btn[type="text"] .anticon {
   color: inherit !important;
 }
 
@@ -3056,22 +3050,39 @@ html body .ant-modal .ant-collapse-item {
   border-radius: 12px !important;
 }
 
-/* 添加客户端弹窗终极修复 - 完全透明效果 */
+/* 添加客户端弹窗终极修复 - 完全移除灰色背景 */
 html body .glass-modal .ant-modal-mask {
-  background: rgba(0, 0, 0, 0.2) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
+  background: transparent !important; /* 完全透明的蒙版 */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 html body .glass-modal .ant-modal-content {
-  background: rgba(0, 0, 0, 0.1) !important;
-  background-color: rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: blur(30px) brightness(1.4) saturate(2) !important;
-  -webkit-backdrop-filter: blur(30px) brightness(1.4) saturate(2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  border-radius: 24px !important;
+  background: rgba(255, 255, 255, 0.05) !important; /* 极浅的白色透明背景 */
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(25px) brightness(1.3) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(25px) brightness(1.3) saturate(1.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  border-radius: 20px !important;
   box-shadow: 
-    0 35px 70px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 0 150px rgba(102, 126, 234, 0.2) !important;
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 100px rgba(102, 126, 234, 0.15) !important;
+}
+
+/* 弹窗按钮区域背景完全透明 */
+html body .glass-modal .ant-modal-footer {
+  background: transparent !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* 弹窗头部背景完全透明 */
+html body .glass-modal .ant-modal-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* 弹窗主体内容背景完全透明 */
+html body .glass-modal .ant-modal-body {
+  background: transparent !important;
 }
