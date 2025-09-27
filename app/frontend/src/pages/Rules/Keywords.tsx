@@ -262,6 +262,7 @@ const KeywordsPage: React.FC = () => {
           form.resetFields();
         }}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
+        className="glass-modal"
       >
         <Form form={form} layout="vertical">
           <Form.Item

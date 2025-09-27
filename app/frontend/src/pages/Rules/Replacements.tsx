@@ -311,6 +311,7 @@ const ReplacementsPage: React.FC = () => {
         }}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         width={600}
+        className="glass-modal"
       >
         <Form form={form} layout="vertical">
           <Form.Item

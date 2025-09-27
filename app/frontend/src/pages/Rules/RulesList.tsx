@@ -491,8 +491,10 @@ const RulesList: React.FC = () => {
               type="text"
               size="small"
               icon={<FilterOutlined />}
+              className={`feature-btn ${record.enable_keyword_filter ? 'enabled' : 'disabled'}`}
+              data-feature-type="keyword_filter"
+              data-enabled={record.enable_keyword_filter}
               style={{ 
-                color: record.enable_keyword_filter ? '#52c41a' : '#d9d9d9',
                 border: 'none',
                 padding: '2px'
               }}
@@ -510,8 +512,10 @@ const RulesList: React.FC = () => {
               type="text"
               size="small"
               icon={<SwapOutlined />}
+              className={`feature-btn ${record.enable_regex_replace ? 'enabled' : 'disabled'}`}
+              data-feature-type="regex_replace"
+              data-enabled={record.enable_regex_replace}
               style={{ 
-                color: record.enable_regex_replace ? '#1890ff' : '#d9d9d9',
                 border: 'none',
                 padding: '2px'
               }}
@@ -552,8 +556,10 @@ const RulesList: React.FC = () => {
               type="text"
               size="small"
               icon={<MessageOutlined />}
+              className={`message-type-btn ${record.enable_text ? 'enabled' : 'disabled'}`}
+              data-message-type="text"
+              data-enabled={record.enable_text}
               style={{ 
-                color: record.enable_text ? '#52c41a' : '#d9d9d9',
                 border: 'none',
                 padding: '2px',
                 fontSize: '14px'
@@ -567,8 +573,10 @@ const RulesList: React.FC = () => {
               type="text"
               size="small"
               icon={<FileImageOutlined />}
+              className={`message-type-btn ${record.enable_photo ? 'enabled' : 'disabled'}`}
+              data-message-type="photo"
+              data-enabled={record.enable_photo}
               style={{ 
-                color: record.enable_photo ? '#1890ff' : '#d9d9d9',
                 border: 'none',
                 padding: '2px',
                 fontSize: '14px'
@@ -582,8 +590,10 @@ const RulesList: React.FC = () => {
               type="text"
               size="small"
               icon={<VideoCameraOutlined />}
+              className={`message-type-btn ${record.enable_video ? 'enabled' : 'disabled'}`}
+              data-message-type="video"
+              data-enabled={record.enable_video}
               style={{ 
-                color: record.enable_video ? '#fa541c' : '#d9d9d9',
                 border: 'none',
                 padding: '2px',
                 fontSize: '14px'
@@ -597,8 +607,10 @@ const RulesList: React.FC = () => {
               type="text"
               size="small"
               icon={<FileOutlined />}
+              className={`message-type-btn ${record.enable_document ? 'enabled' : 'disabled'}`}
+              data-message-type="document"
+              data-enabled={record.enable_document}
               style={{ 
-                color: record.enable_document ? '#722ed1' : '#d9d9d9',
                 border: 'none',
                 padding: '2px',
                 fontSize: '14px'
@@ -612,8 +624,10 @@ const RulesList: React.FC = () => {
               type="text"
               size="small"
               icon={<AudioOutlined />}
+              className={`message-type-btn ${record.enable_audio ? 'enabled' : 'disabled'}`}
+              data-message-type="audio"
+              data-enabled={record.enable_audio}
               style={{ 
-                color: record.enable_audio ? '#13c2c2' : '#d9d9d9',
                 border: 'none',
                 padding: '2px',
                 fontSize: '14px'
@@ -627,8 +641,10 @@ const RulesList: React.FC = () => {
               type="text"
               size="small"
               icon={<SoundOutlined />}
+              className={`message-type-btn ${record.enable_voice ? 'enabled' : 'disabled'}`}
+              data-message-type="voice"
+              data-enabled={record.enable_voice}
               style={{ 
-                color: record.enable_voice ? '#eb2f96' : '#d9d9d9',
                 border: 'none',
                 padding: '2px',
                 fontSize: '14px'
