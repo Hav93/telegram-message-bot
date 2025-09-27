@@ -44,7 +44,7 @@ const ThemeSwitcher: React.FC = () => {
     });
   };
 
-  // 处理文件上传
+  // 处理文件上传到服务器
   const handleFileUpload = async (file: File) => {
     // 验证文件类型
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
@@ -53,22 +53,41 @@ const ThemeSwitcher: React.FC = () => {
       return false;
     }
 
-    // 验证文件大小 (最大5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // 验证文件大小 (最大20MB)
+    const maxSize = 20 * 1024 * 1024; // 20MB
     if (file.size > maxSize) {
-      message.error('图片大小不能超过 5MB');
+      message.error('图片大小不能超过 20MB');
       return false;
     }
 
     try {
-      const base64 = await fileToBase64(file);
-      setUploadedImageBase64(base64);
-      console.log('✅ 图片上传成功，Base64长度:', base64.length);
-      message.success('图片上传成功');
+      // 创建FormData上传到服务器
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await fetch('/api/system/upload-background', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('上传失败');
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setUploadedImageBase64(result.imageUrl); // 使用服务器返回的图片URL
+        console.log('✅ 图片上传成功，URL:', result.imageUrl);
+        message.success('图片上传成功');
+      } else {
+        throw new Error(result.message || '上传失败');
+      }
+      
       return false; // 阻止默认上传
     } catch (error) {
-      console.error('❌ 图片转换失败:', error);
-      message.error('图片转换失败');
+      console.error('❌ 图片上传失败:', error);
+      message.error('图片上传失败，请重试');
       return false;
     }
   };
@@ -91,7 +110,7 @@ const ThemeSwitcher: React.FC = () => {
           return;
         }
         
-        console.log('✅ 应用上传的图片:', uploadedImageBase64.substring(0, 50) + '...');
+        console.log('✅ 应用上传的图片URL:', uploadedImageBase64);
         changeTheme('custom', uploadedImageBase64);
         message.success('自定义背景已应用');
         setModalVisible(false);
@@ -372,23 +391,26 @@ const ThemeSwitcher: React.FC = () => {
                             点击或拖拽图片到此区域上传
                           </p>
                           <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px', margin: 0 }}>
-                            支持 JPG、PNG、WebP、GIF 格式，最大 5MB
+                            支持 JPG、PNG、WebP、GIF 格式，最大 20MB
                           </p>
                         </Dragger>
                         
-                        {uploadedImageBase64 && (
-                          <div style={{ 
-                            marginTop: '12px', 
-                            padding: '8px', 
-                            background: 'rgba(82, 196, 26, 0.1)',
-                            border: '1px solid rgba(82, 196, 26, 0.3)',
-                            borderRadius: '6px'
-                          }}>
-                            <Text style={{ color: '#52c41a', fontSize: '12px' }}>
-                              ✅ 图片上传成功，大小: {Math.round(uploadedImageBase64.length / 1024)}KB
-                            </Text>
-                          </div>
-                        )}
+                               {uploadedImageBase64 && (
+                                 <div style={{ 
+                                   marginTop: '12px', 
+                                   padding: '8px', 
+                                   background: 'rgba(82, 196, 26, 0.1)',
+                                   border: '1px solid rgba(82, 196, 26, 0.3)',
+                                   borderRadius: '6px'
+                                 }}>
+                                   <Text style={{ color: '#52c41a', fontSize: '12px' }}>
+                                     ✅ 图片上传成功，已保存到服务器
+                                   </Text>
+                                   <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '10px', marginTop: '4px' }}>
+                                     {uploadedImageBase64}
+                                   </div>
+                                 </div>
+                               )}
                       </div>
                     )
                   }

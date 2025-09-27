@@ -541,6 +541,91 @@ async def main():
                     "error": str(e)
                 }, status_code=500)
         
+        @app.post("/api/system/upload-background")
+        async def upload_background_image(image: UploadFile = File(...)):
+            """上传背景图片到持久化目录"""
+            try:
+                import uuid
+                from pathlib import Path
+                import shutil
+                
+                # 验证文件类型
+                allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
+                if not image.content_type or image.content_type not in allowed_types:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "仅支持 JPG、PNG、WebP、GIF 格式的图片"
+                    }, status_code=400)
+                
+                # 验证文件大小 (最大20MB)
+                max_size = 20 * 1024 * 1024  # 20MB
+                content = await image.read()
+                if len(content) > max_size:
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "图片大小不能超过 20MB"
+                    }, status_code=400)
+                
+                # 创建持久化目录
+                upload_dir = Path("data/uploads/backgrounds")
+                upload_dir.mkdir(parents=True, exist_ok=True)
+                
+                # 生成唯一文件名
+                file_extension = Path(image.filename).suffix.lower()
+                if not file_extension:
+                    file_extension = '.jpg'  # 默认扩展名
+                
+                unique_filename = f"{uuid.uuid4()}{file_extension}"
+                file_path = upload_dir / unique_filename
+                
+                # 保存文件
+                with open(file_path, "wb") as f:
+                    f.write(content)
+                
+                # 返回可访问的URL
+                image_url = f"/api/system/backgrounds/{unique_filename}"
+                
+                logger.info(f"✅ 背景图片上传成功: {file_path}")
+                return JSONResponse(content={
+                    "success": True,
+                    "imageUrl": image_url,
+                    "message": "图片上传成功"
+                })
+                
+            except Exception as e:
+                logger.error(f"❌ 背景图片上传失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"上传失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.get("/api/system/backgrounds/{filename}")
+        async def serve_background_image(filename: str):
+            """提供背景图片文件服务"""
+            try:
+                from fastapi.responses import FileResponse
+                
+                file_path = Path("data/uploads/backgrounds") / filename
+                
+                if not file_path.exists():
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "文件不存在"
+                    }, status_code=404)
+                
+                return FileResponse(
+                    file_path,
+                    media_type="image/*",
+                    headers={"Cache-Control": "public, max-age=86400"}  # 缓存1天
+                )
+                
+            except Exception as e:
+                logger.error(f"❌ 提供背景图片失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"服务失败: {str(e)}"
+                }, status_code=500)
+        
         # 基础API代理 - 转发到传统API（如果需要）
         @app.get("/api/rules")
         async def get_rules():
