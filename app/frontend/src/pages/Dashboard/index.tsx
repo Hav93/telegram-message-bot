@@ -872,71 +872,43 @@ const Dashboard: React.FC = () => {
             <ResponsiveContainer width="100%" height={300}>
             <BarChart
               data={(() => {
-                // 健壮的数据转换函数，处理不同部署环境的数据格式差异
-                const convertToRechartsFormat = (rawData: any[]) => {
-                  if (!Array.isArray(rawData) || rawData.length === 0) {
-                    console.warn('📊 Recharts: 数据为空或格式错误', rawData);
-                    return [];
+                const rawData = weeklyStats.chartData || [];
+                console.log('📊 原始chartData:', rawData);
+                
+                if (!Array.isArray(rawData) || rawData.length === 0) {
+                  console.warn('📊 BarChart: 数据为空');
+                  return [];
+                }
+
+                // 按日期分组数据
+                const groupedByDay: Record<string, any> = {};
+                
+                rawData.forEach((item) => {
+                  const day = String(item?.day || '');
+                  const count = Number(item?.count || 0);
+                  const type = String(item?.type || '未知规则');
+                  
+                  if (count <= 0 || !day) return;
+                  
+                  if (!groupedByDay[day]) {
+                    groupedByDay[day] = { day };
                   }
-
-                  const groupedData: Record<string, any> = {};
                   
-                  rawData.forEach((item, index) => {
-                    try {
-                      // 数据验证和标准化
-                      const day = String(item?.day || item?.date || item?.x || `Day${index}`);
-                      const count = Number(item?.count || item?.value || item?.y || 0);
-                      const type = String(item?.type || item?.category || item?.name || item?.series || '未知类型');
-                      
-                      // 跳过无效数据
-                      if (count <= 0) {
-                        console.log(`📊 跳过无效数据: day=${day}, count=${count}, type=${type}`);
-                        return;
-                      }
-
-                      // 初始化日期组
-                      if (!groupedData[day]) {
-                        groupedData[day] = { 
-                          day: day,
-                          _dayOrder: index // 保持日期排序
-                        };
-                      }
-                      
-                      // 处理重复类型（累加）
-                      if (groupedData[day][type]) {
-                        groupedData[day][type] += count;
-                        console.log(`📊 累加重复类型: ${day}.${type} = ${groupedData[day][type]}`);
-                      } else {
-                        groupedData[day][type] = count;
-                      }
-                      
-                    } catch (error) {
-                      console.error('📊 数据转换错误:', error, '原始数据:', item);
-                    }
-                  });
-                  
-                  // 转换为数组并按日期排序
-                  const result = Object.values(groupedData)
-                    .sort((a: any, b: any) => (a._dayOrder || 0) - (b._dayOrder || 0))
-                    .map((item: any) => {
-                      const { _dayOrder, ...cleanItem } = item;
-                      return cleanItem;
-                    });
-                  
-                  console.log('📊 Recharts转换完成:', {
-                    原始数据长度: rawData.length,
-                    转换后长度: result.length,
-                    数据样本: result.slice(0, 2),
-                    所有类型: [...new Set(rawData.map(item => item?.type || item?.category || item?.name))]
-                  });
-                  
-                  return result;
-                };
-
-                return convertToRechartsFormat(weeklyStats.chartData || []);
+                  // 累加同一天同一规则的数据
+                  if (groupedByDay[day][type]) {
+                    groupedByDay[day][type] += count;
+                  } else {
+                    groupedByDay[day][type] = count;
+                  }
+                });
+                
+                const result = Object.values(groupedByDay);
+                console.log('📊 BarChart转换后数据:', result);
+                
+                return result;
               })()}
               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              barCategoryGap="20%" // 柱子组之间的间距
+              barCategoryGap="20%"
             >
               <CartesianGrid 
                 strokeDasharray="3 3" 
@@ -973,16 +945,24 @@ const Dashboard: React.FC = () => {
                   backdropFilter: 'blur(12px)',
                   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
                 }}
-                cursor={false} // 完全禁用悬停背景
+                cursor={false}
                 formatter={(value: any, name: any, props: any) => {
-                  console.log('📊 柱状图Tooltip调试:', { value, name, props, payload: props?.payload });
+                  // 详细调试信息
+                  console.log('📊 BarChart Tooltip Debug:', {
+                    value: value,
+                    name: name, // 这是dataKey，即规则名称
+                    props: props,
+                    payload: props?.payload,
+                    dataKey: props?.dataKey,
+                    color: props?.color
+                  });
                   
-                  // 尝试从多个来源获取规则名
-                  const ruleName = name || props?.name || props?.dataKey || props?.payload?.name || '未知规则';
+                  // name就是dataKey，即规则名称
+                  const ruleName = name || '未知规则';
                   
                   return [
                     <span style={{ color: '#ffffff', fontSize: '15px', fontWeight: '600' }}>
-                      {value}条
+                      {value}条消息
                     </span>, 
                     <span style={{ color: '#ffffff', fontSize: '14px', fontWeight: '500' }}>
                       {ruleName}
@@ -1000,72 +980,37 @@ const Dashboard: React.FC = () => {
                   </span>
                 )}
               />
-              {/* 动态生成Bar组件，健壮地处理各种数据类型 */}
+              {/* 动态生成Bar组件 */}
               {(() => {
                 const colors = ['#f59e0b', '#06b6d4', '#10b981', '#8b5cf6', '#ef4444', '#fa8c16', '#722ed1'];
+                const rawData = weeklyStats.chartData || [];
                 
-                // 从原始数据和转换后的数据中提取所有可能的类型
-                const extractDataTypes = (rawData: any[]) => {
-                  if (!Array.isArray(rawData) || rawData.length === 0) {
-                    console.warn('📊 Bar组件: 无法提取数据类型', rawData);
-                    return [];
+                // 提取所有规则类型
+                const ruleTypes = new Set<string>();
+                rawData.forEach(item => {
+                  const type = item?.type;
+                  if (type && typeof type === 'string') {
+                    ruleTypes.add(type);
                   }
-
-                  const typeSet = new Set<string>();
-                  
-                  rawData.forEach(item => {
-                    try {
-                      const type = String(
-                        item?.type || 
-                        item?.category || 
-                        item?.name || 
-                        item?.series || 
-                        '未知类型'
-                      ).trim();
-                      
-                      if (type && type !== 'undefined' && type !== 'null') {
-                        typeSet.add(type);
-                      }
-                    } catch (error) {
-                      console.error('📊 提取类型时出错:', error, item);
-                    }
-                  });
-                  
-                  const types = Array.from(typeSet).sort(); // 排序确保一致性
-                  console.log('📊 提取到的数据类型:', types);
-                  return types;
-                };
-
-                const dataTypes = extractDataTypes(weeklyStats.chartData || []);
+                });
                 
-                if (dataTypes.length === 0) {
-                  console.warn('📊 没有找到有效的数据类型，使用默认类型');
-                  return [
-                    <Bar
-                      key="default"
-                      dataKey="count"
-                      fill={colors[0]}
-                      radius={[6, 6, 0, 0]}
-                      maxBarSize={8}
-                      name="数据"
-                    />
-                  ];
+                const typesList = Array.from(ruleTypes).sort();
+                console.log('📊 发现的规则类型:', typesList);
+                
+                if (typesList.length === 0) {
+                  return <Bar key="empty" dataKey="empty" fill={colors[0]} />;
                 }
                 
-                return dataTypes.map((type: string, index: number) => {
-                  const safeType = type.replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '_'); // 安全的dataKey
-                  
-                  return (
-                    <Bar
-                      key={`bar-${safeType}-${index}`}
-                      dataKey={type} // 使用原始类型名
-                      fill={colors[index % colors.length]}
-                      radius={[6, 6, 0, 0]} // 圆角顶部
-                      maxBarSize={8} // 超细柱子，最大宽度8px
-                      name={type}
-                    />
-                  );
-                });
+                return typesList.map((ruleType, index) => (
+                  <Bar
+                    key={`bar-${ruleType}-${index}`}
+                    dataKey={ruleType}
+                    fill={colors[index % colors.length]}
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={8}
+                    name={ruleType}
+                  />
+                ));
               })()}
             </BarChart>
           </ResponsiveContainer>

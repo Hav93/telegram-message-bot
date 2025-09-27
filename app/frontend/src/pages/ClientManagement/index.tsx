@@ -469,7 +469,12 @@ const ClientManagement: React.FC = () => {
 
       {/* 添加客户端模态框 */}
       <Modal
-        title="添加客户端"
+        title={
+          <span style={{ color: '#ffffff' }}>
+            <PlusOutlined style={{ marginRight: 8 }} />
+            添加客户端
+          </span>
+        }
         open={addModalVisible}
         onOk={handleAddClient}
         onCancel={() => {
@@ -477,6 +482,7 @@ const ClientManagement: React.FC = () => {
           form.resetFields();
         }}
         confirmLoading={addClientMutation.isPending}
+        className="glass-modal"
         zIndex={1050}
         getContainer={false}
       >

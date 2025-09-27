@@ -991,7 +991,46 @@ body.theme-custom .ant-alert-description {
 
 .glass-modal .ant-modal-body {
   background: transparent !important;
-  backdrop-filter: blur(4px) !important;
+  /* 移除blur效果，避免内容区域的灰色图层 */
+}
+
+/* 关闭按钮样式优化 */
+.glass-modal .ant-modal-close {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  z-index: 10 !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(8px) !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.glass-modal .ant-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  transform: scale(1.05) !important;
+}
+
+.glass-modal .ant-modal-close .ant-modal-close-x {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+.glass-modal .ant-modal-close:hover .ant-modal-close-x {
+  color: #ffffff !important;
 }
 
 

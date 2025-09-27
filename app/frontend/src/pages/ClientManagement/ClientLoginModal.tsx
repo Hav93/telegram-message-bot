@@ -268,11 +268,17 @@ export const ClientLoginModal: React.FC<ClientLoginModalProps> = ({
 
   return (
     <Modal
-      title={`用户客户端登录 - ${clientId}`}
+      title={
+        <span style={{ color: '#ffffff' }}>
+          <LoginOutlined style={{ marginRight: 8 }} />
+          用户客户端登录 - {clientId}
+        </span>
+      }
       open={visible}
       onCancel={handleCancel}
       footer={null}
       width={600}
+      className="glass-modal"
       destroyOnClose
     >
       <Steps current={currentStep} style={{ marginBottom: 30 }}>
