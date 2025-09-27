@@ -946,39 +946,81 @@ const Dashboard: React.FC = () => {
                   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
                 }}
                 cursor={false}
-                formatter={(value: any, name: any, props: any) => {
-                  // 详细调试信息
-                  console.log('📊 BarChart Tooltip Debug:', {
-                    value: value,
-                    name: name, // 这是dataKey，即规则名称
-                    props: props,
-                    payload: props?.payload,
-                    dataKey: props?.dataKey,
-                    color: props?.color
-                  });
+                content={(props) => {
+                  if (!props.active || !props.payload || !props.payload.length) {
+                    return null;
+                  }
                   
-                  // name就是dataKey，即规则名称
-                  const ruleName = name || '未知规则';
+                  const label = props.label || '未知日期';
+                  console.log('📊 完整的Tooltip数据:', props);
                   
-                  return [
-                    <span style={{ color: '#ffffff', fontSize: '15px', fontWeight: '600' }}>
-                      {value}条消息
-                    </span>, 
-                    <span style={{ color: '#ffffff', fontSize: '14px', fontWeight: '500' }}>
-                      {ruleName}
-                    </span>
-                  ];
+                  return (
+                    <div style={{
+                      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: '#ffffff',
+                      fontSize: '15px',
+                      fontWeight: '500',
+                      backdropFilter: 'blur(12px)',
+                      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+                      padding: '12px 16px'
+                    }}>
+                      <div style={{ 
+                        color: '#ffffff', 
+                        fontWeight: 'bold',
+                        fontSize: '16px',
+                        textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)',
+                        marginBottom: '8px'
+                      }}>
+                        {label}
+                      </div>
+                      {props.payload.map((entry: any, index: number) => {
+                        const ruleName = entry.dataKey || entry.name || '未知规则';
+                        const value = entry.value || 0;
+                        const color = entry.color || '#1890ff';
+                        
+                        console.log('📊 每个条目:', { 
+                          dataKey: entry.dataKey, 
+                          name: entry.name, 
+                          value: entry.value,
+                          payload: entry.payload
+                        });
+                        
+                        return (
+                          <div key={index} style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            marginBottom: index === props.payload.length - 1 ? 0 : '4px'
+                          }}>
+                            <div style={{
+                              width: '8px',
+                              height: '8px',
+                              backgroundColor: color,
+                              marginRight: '8px',
+                              borderRadius: '2px'
+                            }} />
+                            <span style={{ 
+                              color: '#ffffff', 
+                              fontSize: '14px', 
+                              fontWeight: '500',
+                              marginRight: '8px'
+                            }}>
+                              {ruleName}:
+                            </span>
+                            <span style={{ 
+                              color: '#ffffff', 
+                              fontSize: '15px', 
+                              fontWeight: '600' 
+                            }}>
+                              {value}条消息
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
                 }}
-                labelFormatter={(label: any) => (
-                  <span style={{ 
-                    color: '#ffffff', 
-                    fontWeight: 'bold',
-                    fontSize: '16px',
-                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
-                  }}>
-                    {label}
-                  </span>
-                )}
               />
               {/* 动态生成Bar组件 */}
               {(() => {

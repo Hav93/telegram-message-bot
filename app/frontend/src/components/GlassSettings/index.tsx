@@ -271,7 +271,11 @@ const GlassSettings: React.FC = () => {
           body: {
             maxHeight: '480px',
             overflowY: 'auto',
-            padding: '16px 24px'
+            padding: '16px 24px',
+            background: 'transparent'
+          },
+          content: {
+            background: 'transparent'
           }
         }}
       >
