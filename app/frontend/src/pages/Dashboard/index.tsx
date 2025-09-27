@@ -677,52 +677,20 @@ const Dashboard: React.FC = () => {
                     },
                   }}
                   tooltip={{
-                    customContent: (title: any, data: any[]) => {
-                      console.log('🔍 Pie tooltip customContent - title:', title, 'data:', data);
-                      console.log('🔍 完整数据结构:', JSON.stringify(data, null, 2));
+                    fields: ['rule', 'count'],
+                    formatter: (datum: any) => {
+                      console.log('🔍 Pie tooltip formatter - datum:', datum);
+                      console.log('🔍 Datum keys:', Object.keys(datum));
+                      console.log('🔍 Datum values:', {
+                        rule: datum.rule,
+                        count: datum.count,
+                        type: datum.type
+                      });
                       
-                      if (!data || data.length === 0) {
-                        return '<div style="background: rgba(0, 0, 0, 0.8); color: white; padding: 8px 12px; border-radius: 4px;">暂无数据</div>';
-                      }
-                      
-                      const item = data[0];
-                      console.log('🔍 Tooltip item详细信息:', item);
-                      
-                      // 尝试多种方式获取数据
-                      let ruleName = '未知规则';
-                      let messageCount = 0;
-                      
-                      // 方式1: 直接从item获取
-                      if (item.rule) {
-                        ruleName = item.rule;
-                        messageCount = item.count || 0;
-                      }
-                      // 方式2: 从data属性获取
-                      else if (item.data) {
-                        ruleName = item.data.rule || item.data.name || '未知规则';
-                        messageCount = item.data.count || item.data.value || 0;
-                      }
-                      // 方式3: 从其他可能的属性获取
-                      else {
-                        ruleName = item.name || item.label || item.category || '未知规则';
-                        messageCount = item.value || item.count || item.y || 0;
-                      }
-                      
-                      console.log(`🔍 最终提取结果 - 规则名: ${ruleName}, 消息数: ${messageCount}`);
-                      
-                      return `
-                        <div style="
-                          background: rgba(0, 0, 0, 0.8); 
-                          color: white; 
-                          padding: 8px 12px; 
-                          border-radius: 4px;
-                          font-size: 12px;
-                          border: 1px solid rgba(255, 255, 255, 0.2);
-                        ">
-                          <div style="font-weight: bold; margin-bottom: 4px;">${ruleName}</div>
-                          <div>${messageCount} 条消息</div>
-                        </div>
-                      `;
+                      return {
+                        name: datum.rule || '未知规则',
+                        value: `${datum.count || 0} 条消息`
+                      };
                     }
                   }}
                 />
@@ -823,20 +791,25 @@ const Dashboard: React.FC = () => {
               background: 'transparent',
             }}
             columnStyle={{
-              fillOpacity: 0.85, // 适中的不透明度
-              radius: [3, 3, 0, 0], // 小圆角，参考图片的微圆角效果
+              fillOpacity: 0.9, // 增加不透明度，让颜色更鲜明
+              radius: [6, 6, 0, 0], // 增大圆角，更明显的效果
+              stroke: 'transparent', // 去除边框
+              lineWidth: 0, // 确保没有边框线
             }}
-            columnWidthRatio={0.4} // 细柱子，参考图片中的细柱子效果
-            interactions={[
-              {
-                type: 'element-active',
-                enable: false, // 禁用悬停高亮效果
+            columnWidthRatio={0.2} // 细柱子，更好看的彩色效果
+            interactions={[]} // 完全禁用所有交互效果
+            state={{
+              active: {
+                style: {
+                  opacity: 1, // 保持原始透明度，不变化
+                }
               },
-              {
-                type: 'element-highlight',
-                enable: false, // 禁用悬停高亮效果
+              inactive: {
+                style: {
+                  opacity: 1, // 保持原始透明度，不变化
+                }
               }
-            ]}
+            }}
             color={(() => {
               // 获取图表中实际的数据类型
               const dataTypes = [...new Set(weeklyStats?.chartData?.map((item: any) => item.type) || [])];
