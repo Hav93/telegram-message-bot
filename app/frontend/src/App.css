@@ -1173,21 +1173,51 @@ body.theme-custom .ant-alert-description {
   -webkit-backdrop-filter: var(--glass-filter, blur(12px) brightness(1.05) saturate(1.1)) !important;
 }
 
-/* 优化Collapse组件内的背景 - 强制覆盖所有白色背景 */
+/* 优化Collapse组件内的背景 - 玻璃质感效果 */
 .glass-modal .ant-collapse-content-box,
 .ant-modal .ant-collapse-content-box,
 .ant-collapse-content-box {
-  background: rgba(0, 0, 0, 0.5) !important; /* 更深的背景确保白字清晰 */
+  background: rgba(255, 255, 255, 0.08) !important; /* 玻璃质感背景 */
+  backdrop-filter: blur(12px) brightness(1.1) !important;
+  -webkit-backdrop-filter: blur(12px) brightness(1.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   padding: 16px !important;
   border-radius: 0 0 12px 12px !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
-/* 强制覆盖所有可能的白色背景 */
+/* 折叠面板项目玻璃质感背景 */
 .glass-modal .ant-collapse .ant-collapse-content,
 .ant-modal .ant-collapse .ant-collapse-content,
 .glass-modal .ant-collapse-item,
 .ant-modal .ant-collapse-item {
-  background: rgba(0, 0, 0, 0.4) !important; /* 更深的背景确保对比度 */
+  background: rgba(255, 255, 255, 0.05) !important; /* 轻微的玻璃质感 */
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+/* 折叠面板头部玻璃质感 */
+.glass-modal .ant-collapse > .ant-collapse-item > .ant-collapse-header,
+.ant-modal .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) brightness(1.05) !important;
+  -webkit-backdrop-filter: blur(10px) brightness(1.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 8px 8px 0 0 !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  padding: 12px 16px !important;
+}
+
+.glass-modal .ant-collapse > .ant-collapse-item > .ant-collapse-header:hover,
+.ant-modal .ant-collapse > .ant-collapse-item > .ant-collapse-header:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
 /* 界面设置页面的内容区域玻璃质感 */
@@ -1198,11 +1228,15 @@ body.theme-custom .ant-alert-description {
 
 .glass-card .ant-card-body > .ant-space > div,
 .glass-card-3d .ant-card-body > .ant-space > div {
-  background: rgba(0, 0, 0, 0.2) !important; /* 更深的背景 */
-  backdrop-filter: blur(8px) !important;
+  background: rgba(255, 255, 255, 0.06) !important; /* 玻璃质感背景 */
+  backdrop-filter: blur(12px) brightness(1.1) saturate(1.05) !important;
+  -webkit-backdrop-filter: blur(12px) brightness(1.1) saturate(1.05) !important;
   border-radius: 12px !important;
   padding: 16px !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important; /* 更明显的边框 */
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* 确保所有文字在深色背景上清晰可见 */
@@ -1271,45 +1305,148 @@ body.theme-custom .ant-alert-description {
   color: rgba(255, 255, 255, 0.7) !important;
 }
 
-/* 主题颜色预览样式 - 确保不受全局样式影响 */
+/* 主题设置弹窗整体玻璃质感 */
+.glass-modal.theme-settings-modal .ant-modal-content {
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(20px) brightness(1.1) saturate(1.05) !important;
+  -webkit-backdrop-filter: blur(20px) brightness(1.1) saturate(1.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 16px !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 20px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+.glass-modal.theme-settings-modal .ant-modal-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: none !important;
+  border-radius: 16px 16px 0 0 !important;
+}
+
+.glass-modal.theme-settings-modal .ant-modal-body {
+  background: transparent !important;
+  padding: 24px !important;
+}
+
+.glass-modal.theme-settings-modal .ant-modal-footer {
+  background: transparent !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: none !important;
+  border-radius: 0 0 16px 16px !important;
+}
+
+/* 主题设置标签页玻璃质感 */
+.glass-modal.theme-settings-modal .ant-tabs .ant-tabs-tab {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 8px 8px 0 0 !important;
+  margin-right: 4px !important;
+  backdrop-filter: blur(8px) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.glass-modal.theme-settings-modal .ant-tabs .ant-tabs-tab:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+.glass-modal.theme-settings-modal .ant-tabs .ant-tabs-tab-active {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+.glass-modal.theme-settings-modal .ant-tabs-content-holder {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0 8px 8px 8px !important;
+  backdrop-filter: blur(6px) !important;
+  padding: 16px !important;
+}
+
+/* 主题设置输入框玻璃质感 */
+.glass-modal.theme-settings-modal .ant-input {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(8px) !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+}
+
+.glass-modal.theme-settings-modal .ant-input:hover {
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.glass-modal.theme-settings-modal .ant-input:focus {
+  border-color: #667eea !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3) !important;
+  color: #ffffff !important;
+}
+
+.glass-modal.theme-settings-modal .ant-input::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* 主题颜色预览样式 - 玻璃质感 */
 .theme-preview {
   width: 100% !important;
   height: 40px !important;
-  border-radius: 4px !important;
+  border-radius: 8px !important;
   margin-bottom: 8px !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* 主题选择卡片样式 */
+/* 主题选择卡片玻璃质感样式 */
 .theme-card {
-  padding: 12px !important;
-  border-radius: 8px !important;
-  backdrop-filter: blur(10px) !important;
+  padding: 16px !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(12px) brightness(1.05) !important;
+  -webkit-backdrop-filter: blur(12px) brightness(1.05) !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.3s ease !important;
   text-align: center !important;
   position: relative !important;
   overflow: hidden !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .theme-card.selected {
-  background: rgba(24, 144, 255, 0.2) !important;
-  border: 2px solid #1890ff !important;
+  background: rgba(102, 126, 234, 0.25) !important;
+  border: 2px solid #667eea !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 20px rgba(102, 126, 234, 0.4),
+    0 8px 25px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-2px) !important;
 }
 
 .theme-card:not(.selected) {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
 .theme-card:not(.selected):hover {
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
   border-color: rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 6px 16px rgba(0, 0, 0, 0.2) !important;
 }
 
 .glass-modal .ant-collapse-item {
