@@ -389,13 +389,50 @@ a:hover, .ant-typography a:hover {
   color: inherit !important;
 }
 
-/* 确保按钮内联样式优先级最高 */
-.glass-card .ant-table td .ant-btn[style*="color"] {
+/* 确保按钮内联样式优先级最高 - 更强力的规则 */
+.glass-card .ant-table td .ant-btn[style*="color"],
+.glass-card .ant-table .ant-btn[style*="color"],
+.ant-table td .ant-btn[style*="color"],
+.ant-table .ant-btn[style*="color"],
+.glass-card-3d .ant-table .ant-btn[style*="color"],
+.glass-card-3d .ant-table td .ant-btn[style*="color"] {
+  /* 这里不设置color，让内联样式生效 */
+}
+
+/* 专门针对消息类型按钮 - 最高优先级 */
+.glass-card .ant-table .ant-btn.ant-btn-text[style*="color"],
+.glass-card .ant-table td .ant-btn.ant-btn-text[style*="color"],
+.ant-table .ant-btn.ant-btn-text[style*="color"],
+.ant-table td .ant-btn.ant-btn-text[style*="color"],
+.glass-card-3d .ant-table .ant-btn.ant-btn-text[style*="color"],
+.glass-card-3d .ant-table td .ant-btn.ant-btn-text[style*="color"] {
+  /* 移除任何可能覆盖的颜色样式 */
+}
+
+/* 强制重置所有可能影响的样式 */
+.glass-card .ant-table .ant-btn[type="text"].ant-btn-text,
+.ant-table .ant-btn[type="text"].ant-btn-text {
+  color: unset !important; /* 使用unset让内联样式生效 */
+}
+
+/* 最终解决方案 - 直接覆盖所有可能的按钮样式 */
+.ant-table .ant-btn[type="text"] {
   color: inherit !important;
 }
 
-.ant-table td .ant-btn[style*="color"] {
+.ant-table .ant-btn[type="text"]:not([style*="color"]) {
+  color: #ffffff !important; /* 默认白色 */
+}
+
+/* 确保图标颜色跟随按钮颜色 */
+.ant-table .ant-btn[type="text"] .anticon {
   color: inherit !important;
+}
+
+/* 消息类型按钮特定样式 - 基于data属性或类名 */
+.glass-card .ant-table .ant-btn[type="text"][style*="color"],
+.ant-table .ant-btn[type="text"][style*="color"] {
+  /* 让浏览器使用内联样式 */
 }
 
 /* 标签样式 */
@@ -1140,10 +1177,44 @@ body.theme-custom .ant-alert-description {
   -webkit-backdrop-filter: var(--glass-filter, blur(12px) brightness(1.05) saturate(1.1)) !important;
 }
 
-/* 优化Collapse组件内的背景 */
-.glass-modal .ant-collapse-content-box {
-  background: transparent !important;
+/* 优化Collapse组件内的背景 - 强制覆盖所有白色背景 */
+.glass-modal .ant-collapse-content-box,
+.ant-modal .ant-collapse-content-box,
+.ant-collapse-content-box {
+  background: rgba(0, 0, 0, 0.15) !important;
   padding: 16px !important;
+}
+
+/* 强制覆盖所有可能的白色背景 */
+.glass-modal .ant-collapse .ant-collapse-content,
+.ant-modal .ant-collapse .ant-collapse-content,
+.glass-modal .ant-collapse-item,
+.ant-modal .ant-collapse-item {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 确保Slider组件背景不是白色 */
+.glass-modal .ant-slider,
+.ant-modal .ant-slider {
+  background: transparent !important;
+}
+
+.glass-modal .ant-slider .ant-slider-step,
+.ant-modal .ant-slider .ant-slider-step {
+  background: transparent !important;
+}
+
+/* ColorPicker和Select组件背景优化 */
+.glass-modal .ant-color-picker-panel,
+.ant-modal .ant-color-picker-panel {
+  background: rgba(0, 0, 0, 0.9) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.glass-modal .ant-select-dropdown,
+.ant-modal .ant-select-dropdown {
+  background: rgba(0, 0, 0, 0.9) !important;
+  backdrop-filter: blur(12px) !important;
 }
 
 /* 主题颜色预览样式 - 确保不受全局样式影响 */
