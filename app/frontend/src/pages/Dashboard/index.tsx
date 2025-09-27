@@ -579,16 +579,16 @@ const Dashboard: React.FC = () => {
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         {/* 今日规则统计图表 - 圆环图 */}
         <Col xs={24} lg={12}>
-          <Card
-            className="glass-card"
-            title={
-              <span style={{ color: '#ffffff' }}>
-                <BarChartOutlined style={{ marginRight: 8 }} />
-                资产统计
-              </span>
-            }
-            style={{ height: 400 }}
-          >
+        <Card
+          className="glass-card"
+          title={
+            <span style={{ color: '#ffffff' }}>
+              <BarChartOutlined style={{ marginRight: 8 }} />
+              今日统计
+            </span>
+          }
+          style={{ height: 400 }}
+        >
             {todayStatsLoading ? (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
                 <Spin size="large" />
@@ -660,12 +660,27 @@ const Dashboard: React.FC = () => {
                     },
                   }}
                   tooltip={{
-                    showTitle: false,
-                    showMarkers: false,
                     customContent: (title: any, data: any[]) => {
+                      console.log('🔍 Pie tooltip - title:', title, 'data:', data);
                       if (!data || data.length === 0) return '';
                       const item = data[0];
-                      const { rule, count } = item.data;
+                      console.log('🔍 Pie tooltip - item:', item);
+                      console.log('🔍 Pie tooltip - item.data:', item?.data);
+                      
+                      // 尝试多种方式获取数据
+                      let rule = '';
+                      let count = 0;
+                      
+                      if (item.data) {
+                        rule = item.data.rule || item.data.type || '未知规则';
+                        count = item.data.count || item.data.value || 0;
+                      } else {
+                        rule = item.rule || item.type || title || '未知规则';
+                        count = item.count || item.value || item.y || 0;
+                      }
+                      
+                      console.log('🔍 Pie tooltip - 最终数据:', { rule, count });
+                      
                       return `
                         <div style="padding: 8px 12px; background: rgba(0, 0, 0, 0.8); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.2);">
                           <div style="color: #ffffff; font-weight: 600; margin-bottom: 4px;">${rule}</div>
