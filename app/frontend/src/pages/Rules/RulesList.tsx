@@ -766,15 +766,8 @@ const RulesList: React.FC = () => {
               style={{ 
                 width: 250,
               }}
-              styles={{
-                input: {
-                  color: '#1a1a1a !important',
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  fontWeight: '500',
-                }
-              }}
               onChange={(e) => setSearchText(e.target.value)}
-              prefix={<SearchOutlined style={{ color: '#666' }} />}
+              prefix={<SearchOutlined />}
             />
             <Button
               icon={<ReloadOutlined />}
@@ -825,11 +818,17 @@ const RulesList: React.FC = () => {
           locale={{
             emptyText: (
               <div style={{ 
-                padding: '50px', 
+                padding: '40px 20px',
                 textAlign: 'center',
-                color: 'rgba(255, 255, 255, 0.6)'
+                color: 'rgba(255, 255, 255, 0.6)',
+                background: 'rgba(255, 255, 255, 0.03)',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(8px)',
+                margin: '20px 0',
+                textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
               }}>
-                <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
+                <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.4 }}>📋</div>
                 <div style={{ fontSize: '16px', marginBottom: '8px' }}>暂无转发规则</div>
                 <div style={{ fontSize: '14px' }}>点击"新建规则"开始创建您的第一个转发规则</div>
               </div>

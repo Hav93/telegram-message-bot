@@ -59,23 +59,18 @@ const StatsCard: React.FC<StatsCardProps> = ({
         {icon}
       </div>
 
-      {/* React标识 */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 5,
-          right: 5,
-          fontSize: 12,
-          color: color,
-          opacity: 0.6,
-          fontWeight: 'bold',
-        }}
-      >
-        ⚛️
-      </div>
 
       {/* 统计内容 */}
-      <div style={{ position: 'relative', zIndex: 1 }}>
+      <div style={{ 
+        position: 'relative', 
+        zIndex: 1, 
+        textAlign: 'center',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
         <div
           style={{
             color: 'rgba(255, 255, 255, 0.9)',

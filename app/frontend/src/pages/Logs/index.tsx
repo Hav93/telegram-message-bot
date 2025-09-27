@@ -407,11 +407,17 @@ const LogsPage: React.FC = () => {
           locale={{
             emptyText: (
               <div style={{ 
-                padding: '50px', 
+                padding: '40px 20px',
                 textAlign: 'center',
-                color: 'rgba(255, 255, 255, 0.6)'
+                color: 'rgba(255, 255, 255, 0.6)',
+                background: 'rgba(255, 255, 255, 0.03)',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(8px)',
+                margin: '20px 0',
+                textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
               }}>
-                <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
+                <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.4 }}>📋</div>
                 <div style={{ fontSize: '16px', marginBottom: '8px' }}>暂无日志数据</div>
                 <div style={{ fontSize: '14px' }}>转发规则执行后，日志将显示在这里</div>
               </div>

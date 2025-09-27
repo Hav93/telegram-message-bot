@@ -2059,6 +2059,94 @@ body.theme-custom .glass3d {
   font-size: 14px !important;
 }
 
+/* 优化输入框背景色 */
+.glass-card .ant-input,
+.glass-card .ant-input-affix-wrapper,
+.glass-card .ant-select-selector,
+.glass-card .ant-picker,
+.glass-card .ant-input-number,
+.glass-card-3d .ant-input,
+.glass-card-3d .ant-input-affix-wrapper,
+.glass-card-3d .ant-select-selector,
+.glass-card-3d .ant-picker,
+.glass-card-3d .ant-input-number {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.glass-card .ant-input:focus,
+.glass-card .ant-input-affix-wrapper:focus,
+.glass-card .ant-input-affix-wrapper-focused,
+.glass-card .ant-select-focused .ant-select-selector,
+.glass-card .ant-picker:focus,
+.glass-card .ant-input-number:focus,
+.glass-card-3d .ant-input:focus,
+.glass-card-3d .ant-input-affix-wrapper:focus,
+.glass-card-3d .ant-input-affix-wrapper-focused,
+.glass-card-3d .ant-select-focused .ant-select-selector,
+.glass-card-3d .ant-picker:focus,
+.glass-card-3d .ant-input-number:focus {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(24, 144, 255, 0.6) !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+.glass-card .ant-input::placeholder,
+.glass-card .ant-input-affix-wrapper input::placeholder,
+.glass-card-3d .ant-input::placeholder,
+.glass-card-3d .ant-input-affix-wrapper input::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 优化空状态样式 */
+.glass-card .ant-empty,
+.glass-card-3d .ant-empty {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.glass-card .ant-empty-description,
+.glass-card-3d .ant-empty-description {
+  color: rgba(255, 255, 255, 0.6) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.glass-card .ant-empty-image,
+.glass-card-3d .ant-empty-image {
+  opacity: 0.4 !important;
+  filter: brightness(1.2) contrast(0.8) !important;
+}
+
+/* 表格空状态优化 */
+.glass-card .ant-table-placeholder,
+.glass-card-3d .ant-table-placeholder {
+  background: transparent !important;
+  border: none !important;
+}
+
+.glass-card .ant-table-placeholder .ant-empty,
+.glass-card-3d .ant-table-placeholder .ant-empty {
+  margin: 40px 0 !important;
+  padding: 20px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* 列表空状态优化 */
+.glass-card .ant-list-empty-text,
+.glass-card-3d .ant-list-empty-text {
+  color: rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  padding: 40px 20px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(8px) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
 .glass-card .ant-form-item-label > label.ant-form-item-required::before,
 .glass-card-3d .ant-form-item-label > label.ant-form-item-required::before {
   color: #ff4d4f !important;
