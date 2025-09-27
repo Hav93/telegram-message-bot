@@ -11,7 +11,8 @@ import {
 } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Column, Pie } from '@ant-design/plots';
+import { Pie } from '@ant-design/plots';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -677,20 +678,29 @@ const Dashboard: React.FC = () => {
                     },
                   }}
                   tooltip={{
-                    fields: ['rule', 'count'],
-                    formatter: (datum: any) => {
-                      console.log('🔍 Pie tooltip formatter - datum:', datum);
-                      console.log('🔍 Datum keys:', Object.keys(datum));
-                      console.log('🔍 Datum values:', {
-                        rule: datum.rule,
-                        count: datum.count,
-                        type: datum.type
-                      });
+                    showTitle: false,
+                    showMarkers: true,
+                    customItems: (originalItems: unknown[]) => {
+                      console.log('🔍 Pie CustomItems调试 - originalItems:', originalItems);
+                      console.log('🔍 完整originalItems结构:', JSON.stringify(originalItems, null, 2));
                       
-                      return {
-                        name: datum.rule || '未知规则',
-                        value: `${datum.count || 0} 条消息`
-                      };
+                      return originalItems.map((item: unknown) => {
+                        const typedItem = item as Record<string, unknown>;
+                        console.log('🔍 Pie Item调试:', typedItem);
+                        
+                        // 尝试多种方式获取数值 - 圆环图的数据结构
+                        const itemData = typedItem.data as Record<string, unknown> | undefined;
+                        const value = typedItem.value || typedItem.count || itemData?.count || 0;
+                        const name = typedItem.name || itemData?.rule || '未知规则';
+                        
+                        console.log(`🔍 Pie解析结果 - name: ${name}, value: ${value}`);
+                        
+                        return {
+                          ...typedItem,
+                          name: name,
+                          value: `${value}条消息`
+                        };
+                      });
                     }
                   }}
                 />
@@ -781,126 +791,183 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         ) : weeklyStats?.chartData?.length ? (
-          <Column
-            data={weeklyStats.chartData}
-            xField="day"
-            yField="count"
-            seriesField="type"
-            height={300}
-            theme={{
-              background: 'transparent',
-            }}
-            columnStyle={{
-              fillOpacity: 0.9, // 增加不透明度，让颜色更鲜明
-              radius: [6, 6, 0, 0], // 增大圆角，更明显的效果
-              stroke: 'transparent', // 去除边框
-              lineWidth: 0, // 确保没有边框线
-            }}
-            columnWidthRatio={0.2} // 细柱子，更好看的彩色效果
-            interactions={[]} // 完全禁用所有交互效果
-            state={{
-              active: {
-                style: {
-                  opacity: 1, // 保持原始透明度，不变化
-                }
-              },
-              inactive: {
-                style: {
-                  opacity: 1, // 保持原始透明度，不变化
-                }
-              }
-            }}
-            color={(() => {
-              // 获取图表中实际的数据类型
-              const dataTypes = [...new Set(weeklyStats?.chartData?.map((item: any) => item.type) || [])];
-              const colors = ['#f59e0b', '#06b6d4', '#10b981', '#8b5cf6', '#ef4444', '#fa8c16', '#722ed1'];
-              
-              console.log('🔍 图表数据类型:', dataTypes);
-              console.log('🔍 分配的颜色:', dataTypes.map((_, index) => colors[index % colors.length]));
-              
-              if (dataTypes.length > 0) {
-                return dataTypes.map((_, index) => colors[index % colors.length]);
-              } else {
-                return ['#f59e0b', '#06b6d4', '#10b981']; // 默认三色
-              }
-            })()}
-            xAxis={{
-              label: {
-                style: {
-                  fill: getTextColor(),
-                  fontSize: 13, // 稍微增大字体
-                  fontWeight: themeConfig.type === 'custom' ? 700 : 500, // 增加字重提高可读性
-                  textShadow: themeConfig.type === 'custom' ? '0 1px 2px rgba(0, 0, 0, 0.8)' : '0 1px 1px rgba(0, 0, 0, 0.5)', // 添加文字阴影
-                },
-              },
-              line: {
-                style: {
-                  stroke: getSecondaryTextColor(),
-                  lineWidth: 1,
-                },
-              },
-            }}
-            yAxis={{
-              label: {
-                style: {
-                  fill: getTextColor(),
-                  fontSize: 13, // 稍微增大字体
-                  fontWeight: themeConfig.type === 'custom' ? 700 : 500, // 增加字重提高可读性
-                  textShadow: themeConfig.type === 'custom' ? '0 1px 2px rgba(0, 0, 0, 0.8)' : '0 1px 1px rgba(0, 0, 0, 0.5)', // 添加文字阴影
-                },
-              },
-              grid: {
-                line: {
-                  style: {
-                    stroke: getSecondaryTextColor(),
-                    lineWidth: 1,
-                    lineDash: [2, 2], // 添加虚线效果
-                  },
-                },
-              },
-            }}
-            legend={{
-              position: 'top',
-              itemName: {
-                style: {
-                  fill: getTextColor(),
-                  fontSize: 13,
-                  fontWeight: themeConfig.type === 'custom' ? 700 : 500,
-                  textShadow: themeConfig.type === 'custom' ? '0 1px 2px rgba(0, 0, 0, 0.8)' : '0 1px 1px rgba(0, 0, 0, 0.5)',
-                },
-              },
-            }}
-            tooltip={{
-              showTitle: true,
-              showMarkers: true,
-              title: (title: string, _data: unknown) => {
-                console.log('🔍 Title调试 - title:', title, 'data:', _data);
-                return title;
-              },
-              customItems: (originalItems: unknown[]) => {
-                console.log('🔍 CustomItems调试 - originalItems:', originalItems);
-                console.log('🔍 完整originalItems结构:', JSON.stringify(originalItems, null, 2));
+          <div className="recharts-fallback-container">
+            <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={(() => {
+                // 健壮的数据转换函数，处理不同部署环境的数据格式差异
+                const convertToRechartsFormat = (rawData: any[]) => {
+                  if (!Array.isArray(rawData) || rawData.length === 0) {
+                    console.warn('📊 Recharts: 数据为空或格式错误', rawData);
+                    return [];
+                  }
+
+                  const groupedData: Record<string, any> = {};
+                  
+                  rawData.forEach((item, index) => {
+                    try {
+                      // 数据验证和标准化
+                      const day = String(item?.day || item?.date || item?.x || `Day${index}`);
+                      const count = Number(item?.count || item?.value || item?.y || 0);
+                      const type = String(item?.type || item?.category || item?.name || item?.series || '未知类型');
+                      
+                      // 跳过无效数据
+                      if (count <= 0) {
+                        console.log(`📊 跳过无效数据: day=${day}, count=${count}, type=${type}`);
+                        return;
+                      }
+
+                      // 初始化日期组
+                      if (!groupedData[day]) {
+                        groupedData[day] = { 
+                          day: day,
+                          _dayOrder: index // 保持日期排序
+                        };
+                      }
+                      
+                      // 处理重复类型（累加）
+                      if (groupedData[day][type]) {
+                        groupedData[day][type] += count;
+                        console.log(`📊 累加重复类型: ${day}.${type} = ${groupedData[day][type]}`);
+                      } else {
+                        groupedData[day][type] = count;
+                      }
+                      
+                    } catch (error) {
+                      console.error('📊 数据转换错误:', error, '原始数据:', item);
+                    }
+                  });
+                  
+                  // 转换为数组并按日期排序
+                  const result = Object.values(groupedData)
+                    .sort((a: any, b: any) => (a._dayOrder || 0) - (b._dayOrder || 0))
+                    .map((item: any) => {
+                      const { _dayOrder, ...cleanItem } = item;
+                      return cleanItem;
+                    });
+                  
+                  console.log('📊 Recharts转换完成:', {
+                    原始数据长度: rawData.length,
+                    转换后长度: result.length,
+                    数据样本: result.slice(0, 2),
+                    所有类型: [...new Set(rawData.map(item => item?.type || item?.category || item?.name))]
+                  });
+                  
+                  return result;
+                };
+
+                return convertToRechartsFormat(weeklyStats.chartData || []);
+              })()}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              barCategoryGap="20%" // 柱子组之间的间距
+            >
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                stroke="rgba(255, 255, 255, 0.1)" 
+                vertical={false} // 只显示水平网格线
+              />
+              <XAxis 
+                dataKey="day" 
+                axisLine={false}
+                tickLine={false}
+                tick={{ 
+                  fill: '#ffffff', 
+                  fontSize: 13, 
+                  fontWeight: 600,
+                  textAnchor: 'middle'
+                }}
+              />
+              <YAxis 
+                axisLine={false}
+                tickLine={false}
+                tick={{ 
+                  fill: 'rgba(255, 255, 255, 0.8)', 
+                  fontSize: 12 
+                }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#ffffff',
+                  fontSize: '13px',
+                  backdropFilter: 'blur(10px)',
+                }}
+                cursor={false} // 完全禁用悬停背景
+                formatter={(value: any, name: any) => [`${value}条`, name]}
+                labelStyle={{ color: '#ffffff', fontWeight: 'bold' }}
+              />
+              {/* 动态生成Bar组件，健壮地处理各种数据类型 */}
+              {(() => {
+                const colors = ['#f59e0b', '#06b6d4', '#10b981', '#8b5cf6', '#ef4444', '#fa8c16', '#722ed1'];
                 
-                return originalItems.map((item: unknown) => {
-                  const typedItem = item as Record<string, unknown>;
-                  console.log('🔍 Item调试:', typedItem);
+                // 从原始数据和转换后的数据中提取所有可能的类型
+                const extractDataTypes = (rawData: any[]) => {
+                  if (!Array.isArray(rawData) || rawData.length === 0) {
+                    console.warn('📊 Bar组件: 无法提取数据类型', rawData);
+                    return [];
+                  }
+
+                  const typeSet = new Set<string>();
                   
-                  // 尝试多种方式获取数值
-                  const itemData = typedItem.data as Record<string, unknown> | undefined;
-                  const value = typedItem.value || typedItem.count || typedItem.y || itemData?.count || 0;
-                  const name = typedItem.name || typedItem.seriesName || itemData?.type || '未知';
+                  rawData.forEach(item => {
+                    try {
+                      const type = String(
+                        item?.type || 
+                        item?.category || 
+                        item?.name || 
+                        item?.series || 
+                        '未知类型'
+                      ).trim();
+                      
+                      if (type && type !== 'undefined' && type !== 'null') {
+                        typeSet.add(type);
+                      }
+                    } catch (error) {
+                      console.error('📊 提取类型时出错:', error, item);
+                    }
+                  });
                   
-                  console.log(`🔍 解析结果 - name: ${name}, value: ${value}`);
+                  const types = Array.from(typeSet).sort(); // 排序确保一致性
+                  console.log('📊 提取到的数据类型:', types);
+                  return types;
+                };
+
+                const dataTypes = extractDataTypes(weeklyStats.chartData || []);
+                
+                if (dataTypes.length === 0) {
+                  console.warn('📊 没有找到有效的数据类型，使用默认类型');
+                  return [
+                    <Bar
+                      key="default"
+                      dataKey="count"
+                      fill={colors[0]}
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={8}
+                      name="数据"
+                    />
+                  ];
+                }
+                
+                return dataTypes.map((type: string, index: number) => {
+                  const safeType = type.replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '_'); // 安全的dataKey
                   
-                  return {
-                    ...typedItem,
-                    name: name,
-                    value: `${value}条`
-                  };
+                  return (
+                    <Bar
+                      key={`bar-${safeType}-${index}`}
+                      dataKey={type} // 使用原始类型名
+                      fill={colors[index % colors.length]}
+                      radius={[6, 6, 0, 0]} // 圆角顶部
+                      maxBarSize={8} // 超细柱子，最大宽度8px
+                      name={type}
+                    />
+                  );
                 });
-              },
-            }}
-          />
+              })()}
+            </BarChart>
+          </ResponsiveContainer>
+          </div>
         ) : (
           <div style={{ 
             textAlign: 'center', 

@@ -3,6 +3,26 @@
   box-sizing: border-box;
 }
 
+/* 彻底禁用柱状图悬停背景高亮效果，但保留tooltip */
+.column-chart-container .g2-element-active,
+.column-chart-container .g2-element-selected,
+.column-chart-container .g2-element-highlight {
+  opacity: 1 !important;
+  fill: inherit !important;
+  stroke: inherit !important;
+  filter: none !important;
+}
+
+/* 禁用G2图表的背景高亮层 */
+.column-chart-container .g2-active-region {
+  display: none !important;
+}
+
+.column-chart-container .g2-element-active {
+  fill: inherit !important;
+  opacity: 1 !important;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -1070,4 +1090,57 @@ body.theme-custom ::-moz-selection {
   background: rgba(255, 255, 255, 0.4) !important;
   color: #ffffff !important;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* ============================================
+   Recharts 兼容性和错误处理样式
+   ============================================ */
+
+/* Recharts容器样式和错误边界 */
+.recharts-fallback-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.recharts-fallback-container .recharts-wrapper {
+  font-family: inherit !important;
+}
+
+/* Recharts错误处理 */
+.recharts-fallback-container:has(.recharts-error) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.recharts-fallback-container:has(.recharts-error)::after {
+  content: "📊 图表渲染失败，请刷新页面重试";
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Recharts工具提示样式优化 */
+.recharts-default-tooltip {
+  background: rgba(0, 0, 0, 0.8) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+/* 禁用Column图表悬停背景层（保持向后兼容） */
+.column-chart-container .g2-element-active,
+.column-chart-container .g2-active-region {
+  display: none !important;
+  opacity: 0 !important;
 }
