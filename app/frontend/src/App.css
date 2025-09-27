@@ -901,29 +901,83 @@ body.theme-custom .ant-alert-description {
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
 }
 
-/* 主题切换器模态框样式 - 优化可读性 */
+/* 增强的3D玻璃质感模态框 */
 .glass-modal .ant-modal-content {
-  background: rgba(255, 255, 255, 0.25) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  border-radius: 12px !important;
+  /* 继承3D玻璃质感 */
+  --filter-glass3d: blur(12px) brightness(0.85) saturate(1.1); 
+  --color-glass3d: rgba(255, 255, 255, 0.06); 
+  --noise-glass3d: url("https://www.transparenttextures.com/patterns/egg-shell.png"); 
+
+  position: relative !important; 
+  z-index: 4 !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  overflow: hidden !important;
+  
+  box-shadow:  
+    0 0 2px rgba(255, 255, 255, 0.1), 
+    2px 4px 8px -1px rgba(0, 0, 0, 0.2), 
+    4px 8px 16px -2px rgba(0, 0, 0, 0.15), 
+    8px 16px 32px -4px rgba(0, 0, 0, 0.1), 
+    16px 32px 64px -8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.glass-modal .ant-modal-content::before { 
+  content: "" !important; 
+  position: absolute !important; 
+  inset: 0 !important; 
+  pointer-events: none !important; 
+  border-radius: inherit !important; 
+  overflow: hidden !important; 
+  z-index: 1 !important; 
+  
+  -webkit-backdrop-filter: var(--filter-glass3d) !important; 
+  backdrop-filter: var(--filter-glass3d) !important; 
+  background-color: var(--color-glass3d) !important; 
+  background-image: var(--noise-glass3d) !important; 
+  background-size: 150px !important; 
+  background-repeat: repeat !important; 
+  opacity: 0.7 !important;
+}
+
+.glass-modal .ant-modal-content::after { 
+  content: "" !important; 
+  position: absolute !important; 
+  inset: 0 !important; 
+  pointer-events: none !important; 
+  border-radius: inherit !important; 
+  overflow: hidden !important; 
+  z-index: 2 !important; 
+  
+  box-shadow: 
+    inset 2px 2px 1px -1px rgba(255, 255, 255, 0.3), 
+    inset 3px 3px 2px -2px rgba(255, 255, 255, 0.15), 
+    inset 1px 1px 1px -0.25px rgba(255, 255, 255, 0.06), 
+    inset 0 0 1px 0.5px rgba(255, 255, 255, 0.03) !important; 
+}
+
+.glass-modal .ant-modal-content > * { 
+  position: relative !important; 
+  z-index: 3 !important; 
 }
 
 .glass-modal .ant-modal-header {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
-  backdrop-filter: blur(10px) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(8px) !important;
+  border-radius: 16px 16px 0 0 !important;
 }
 
 .glass-modal .ant-modal-footer {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
-  backdrop-filter: blur(10px) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(8px) !important;
+  border-radius: 0 0 16px 16px !important;
 }
 
 .glass-modal .ant-modal-body {
   background: transparent !important;
+  backdrop-filter: blur(4px) !important;
 }
 
 
@@ -1090,6 +1144,232 @@ body.theme-custom ::-moz-selection {
   background: rgba(255, 255, 255, 0.4) !important;
   color: #ffffff !important;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* ============================================
+   高级3D玻璃质感效果
+   ============================================ */
+
+.glass3d { 
+  --filter-glass3d: blur(5px) brightness(0.8) saturate(1); 
+  --color-glass3d: hsl(189 80% 10% / 0.2); 
+  --noise-glass3d: url("https://www.transparenttextures.com/patterns/egg-shell.png"); 
+
+  position: relative; 
+  z-index: 4; 
+  box-shadow:  
+    0 0 0.75px hsl(205 20% 10% / 0.2), 
+    0.7px 0.8px 1.2px -0.4px hsl(205 20% 10% / 0.1), 
+    1.3px 1.5px 2.2px -0.8px hsl(205 20% 10% / 0.1), 
+    2.3px 2.6px 3.9px -1.2px hsl(205 20% 10% / 0.1), 
+    3.9px 4.4px 6.6px -1.7px hsl(205 20% 10% / 0.1), 
+    6.5px 7.2px 10.9px -2.1px hsl(205 20% 10% / 0.1), 
+    8px 9px 14px -2.5px hsl(205 20% 10% / 0.2); 
+}
+
+.glass3d::before { 
+  content: ""; 
+  position: absolute; 
+  inset: 0; 
+  pointer-events: none; 
+  border-radius: inherit; 
+  overflow: hidden; 
+  z-index: 3; 
+  
+  -webkit-backdrop-filter: var(--filter-glass3d); 
+  backdrop-filter: var(--filter-glass3d); 
+  background-color: var(--color-glass3d); 
+  background-image: var(--noise-glass3d); 
+  background-size: 100px; 
+  background-repeat: repeat; 
+}
+
+.glass3d::after { 
+  content: ""; 
+  position: absolute; 
+  inset: 0; 
+  pointer-events: none; 
+  border-radius: inherit; 
+  overflow: hidden; 
+  z-index: 5; 
+  
+  box-shadow: 
+    inset 2px 2px 1px -3px hsl(205 20% 90% / 0.8), 
+    inset 4px 4px 2px -6px hsl(205 20% 90% / 0.3), 
+    inset 1.5px 1.5px 1.5px -0.75px hsl(205 20% 90% / 0.15), 
+    inset 1.5px 1.5px 0.25px hsl(205 20% 90% / 0.03), 
+    inset 0 0 0.25px 0.5px hsl(205 20% 90% / 0.03); 
+}
+
+.glass3d > * { 
+  position: relative; 
+  z-index: 6; 
+}
+
+/* 主题适应的3D玻璃质感 */
+body.theme-dark .glass3d {
+  --color-glass3d: hsl(220 30% 8% / 0.3);
+  --filter-glass3d: blur(4px) brightness(0.9) saturate(1.1);
+}
+
+body.theme-gray .glass3d {
+  --color-glass3d: hsl(0 0% 15% / 0.25);
+  --filter-glass3d: blur(4px) brightness(0.85) saturate(1);
+}
+
+body.theme-custom .glass3d {
+  --color-glass3d: hsl(200 50% 5% / 0.4);
+  --filter-glass3d: blur(6px) brightness(0.7) saturate(1.2);
+}
+
+/* 高级3D玻璃卡片 - 特殊场景使用 */
+.glass-card-3d {
+  /* 使用原始3D玻璃质感参数 */
+  --filter-glass3d: blur(5px) brightness(0.8) saturate(1); 
+  --color-glass3d: hsl(189 80% 10% / 0.2); 
+  --noise-glass3d: url("https://www.transparenttextures.com/patterns/egg-shell.png"); 
+
+  position: relative; 
+  z-index: 4; 
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  
+  box-shadow:  
+    0 0 0.75px hsl(205 20% 10% / 0.2), 
+    0.7px 0.8px 1.2px -0.4px hsl(205 20% 10% / 0.1), 
+    1.3px 1.5px 2.2px -0.8px hsl(205 20% 10% / 0.1), 
+    2.3px 2.6px 3.9px -1.2px hsl(205 20% 10% / 0.1), 
+    3.9px 4.4px 6.6px -1.7px hsl(205 20% 10% / 0.1), 
+    6.5px 7.2px 10.9px -2.1px hsl(205 20% 10% / 0.1), 
+    8px 9px 14px -2.5px hsl(205 20% 10% / 0.2) !important;
+}
+
+.glass-card-3d::before { 
+  content: ""; 
+  position: absolute; 
+  inset: 0; 
+  pointer-events: none; 
+  border-radius: inherit; 
+  overflow: hidden; 
+  z-index: 3; 
+  
+  -webkit-backdrop-filter: var(--filter-glass3d); 
+  backdrop-filter: var(--filter-glass3d); 
+  background-color: var(--color-glass3d); 
+  background-image: var(--noise-glass3d); 
+  background-size: 100px; 
+  background-repeat: repeat; 
+}
+
+.glass-card-3d::after { 
+  content: ""; 
+  position: absolute; 
+  inset: 0; 
+  pointer-events: none; 
+  border-radius: inherit; 
+  overflow: hidden; 
+  z-index: 5; 
+  
+  box-shadow: 
+    inset 2px 2px 1px -3px hsl(205 20% 90% / 0.8), 
+    inset 4px 4px 2px -6px hsl(205 20% 90% / 0.3), 
+    inset 1.5px 1.5px 1.5px -0.75px hsl(205 20% 90% / 0.15), 
+    inset 1.5px 1.5px 0.25px hsl(205 20% 90% / 0.03), 
+    inset 0 0 0.25px 0.5px hsl(205 20% 90% / 0.03); 
+}
+
+.glass-card-3d > * { 
+  position: relative; 
+  z-index: 6; 
+}
+
+.glass-card-3d:hover {
+  transform: translateY(-3px) scale(1.01) !important;
+  box-shadow:  
+    0 0 1.5px hsl(205 20% 10% / 0.3), 
+    1.4px 1.6px 2.4px -0.4px hsl(205 20% 10% / 0.15), 
+    2.6px 3px 4.4px -0.8px hsl(205 20% 10% / 0.15), 
+    4.6px 5.2px 7.8px -1.2px hsl(205 20% 10% / 0.15), 
+    7.8px 8.8px 13.2px -1.7px hsl(205 20% 10% / 0.15), 
+    13px 14.4px 21.8px -2.1px hsl(205 20% 10% / 0.15), 
+    16px 18px 28px -2.5px hsl(205 20% 10% / 0.3) !important;
+}
+
+/* 增强的玻璃卡片效果 */
+.glass-card {
+  /* 继承3D玻璃质感 */
+  --filter-glass3d: blur(8px) brightness(0.9) saturate(1.1); 
+  --color-glass3d: rgba(255, 255, 255, 0.08); 
+  --noise-glass3d: url("https://www.transparenttextures.com/patterns/egg-shell.png"); 
+
+  position: relative; 
+  z-index: 4;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  
+  box-shadow:  
+    0 0 1px rgba(255, 255, 255, 0.1), 
+    0.7px 0.8px 2px -0.4px rgba(0, 0, 0, 0.15), 
+    1.3px 1.5px 4px -0.8px rgba(0, 0, 0, 0.12), 
+    2.3px 2.6px 6px -1.2px rgba(0, 0, 0, 0.1), 
+    3.9px 4.4px 10px -1.7px rgba(0, 0, 0, 0.08), 
+    6.5px 7.2px 16px -2.1px rgba(0, 0, 0, 0.06), 
+    10px 12px 24px -2.5px rgba(0, 0, 0, 0.04) !important;
+}
+
+.glass-card::before { 
+  content: ""; 
+  position: absolute; 
+  inset: 0; 
+  pointer-events: none; 
+  border-radius: inherit; 
+  overflow: hidden; 
+  z-index: 1; 
+  
+  -webkit-backdrop-filter: var(--filter-glass3d); 
+  backdrop-filter: var(--filter-glass3d); 
+  background-color: var(--color-glass3d); 
+  background-image: var(--noise-glass3d); 
+  background-size: 120px; 
+  background-repeat: repeat; 
+  opacity: 0.6;
+}
+
+.glass-card::after { 
+  content: ""; 
+  position: absolute; 
+  inset: 0; 
+  pointer-events: none; 
+  border-radius: inherit; 
+  overflow: hidden; 
+  z-index: 2; 
+  
+  box-shadow: 
+    inset 1px 1px 0px -1px rgba(255, 255, 255, 0.4), 
+    inset 2px 2px 1px -2px rgba(255, 255, 255, 0.2), 
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.08), 
+    inset 0 0 0.5px 0.25px rgba(255, 255, 255, 0.05); 
+}
+
+.glass-card > * { 
+  position: relative; 
+  z-index: 3; 
+}
+
+.glass-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow:  
+    0 0 2px rgba(255, 255, 255, 0.15), 
+    1px 1px 3px -0.4px rgba(0, 0, 0, 0.2), 
+    2px 3px 6px -0.8px rgba(0, 0, 0, 0.15), 
+    4px 5px 10px -1.2px rgba(0, 0, 0, 0.12), 
+    6px 8px 16px -1.7px rgba(0, 0, 0, 0.1), 
+    10px 14px 24px -2.1px rgba(0, 0, 0, 0.08), 
+    16px 20px 32px -2.5px rgba(0, 0, 0, 0.06) !important;
 }
 
 /* ============================================

@@ -11,8 +11,7 @@ import {
 } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Pie } from '@ant-design/plots';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import dayjs from 'dayjs';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -379,41 +378,49 @@ const Dashboard: React.FC = () => {
       {/* 统计卡片 */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} lg={6}>
-          <MemoizedStatsCard
-            title="今日消息"
-            value={todayMessages}
-            icon={<MessageOutlined />}
-            color="#1890ff"
-            loading={statsLoading}
-          />
+          <div className="glass-card-3d">
+            <MemoizedStatsCard
+              title="今日消息"
+              value={todayMessages}
+              icon={<MessageOutlined />}
+              color="#1890ff"
+              loading={statsLoading}
+            />
+          </div>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <MemoizedStatsCard
-            title="转发成功率"
-            value={successRate}
-            suffix="%"
-            icon={<CheckCircleOutlined />}
-            color="#52c41a"
-            loading={statsLoading}
-          />
+          <div className="glass-card-3d">
+            <MemoizedStatsCard
+              title="转发成功率"
+              value={successRate}
+              suffix="%"
+              icon={<CheckCircleOutlined />}
+              color="#52c41a"
+              loading={statsLoading}
+            />
+          </div>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <MemoizedStatsCard
-            title="活跃规则"
-            value={activeRules}
-            icon={<ClockCircleOutlined />}
-            color="#faad14"
-            loading={rulesLoading}
-          />
+          <div className="glass-card-3d">
+            <MemoizedStatsCard
+              title="活跃规则"
+              value={activeRules}
+              icon={<ClockCircleOutlined />}
+              color="#faad14"
+              loading={rulesLoading}
+            />
+          </div>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <MemoizedStatsCard
-            title="总规则数"
-            value={totalRules}
-            icon={<SettingOutlined />}
-            color="#722ed1"
-            loading={rulesLoading}
-          />
+          <div className="glass-card-3d">
+            <MemoizedStatsCard
+              title="总规则数"
+              value={totalRules}
+              icon={<SettingOutlined />}
+              color="#722ed1"
+              loading={rulesLoading}
+            />
+          </div>
         </Col>
       </Row>
 
@@ -648,62 +655,120 @@ const Dashboard: React.FC = () => {
                   })}
                 </div>
                 
-                {/* 圆环图 */}
-                <Pie
-                  data={todayStats.chartData}
-                  angleField="count"
-                  colorField="rule"
-                  radius={0.8}
-                  innerRadius={0.5}
-                  height={300}
-                  color={['#00D4FF', '#52c41a', '#fa8c16', '#eb2f96']}
-                  legend={false}
-                  label={false}
-                  statistic={{
-                    title: {
-                      style: {
-                        color: '#ffffff',
-                        fontSize: '16px',
-                        fontWeight: 'bold',
-                      },
-                      content: '总计',
-                    },
-                    content: {
-                      style: {
-                        color: '#00D4FF',
-                        fontSize: '24px',
-                        fontWeight: 'bold',
-                      },
-                      content: todayStats.chartData.reduce((sum: number, item: any) => sum + item.count, 0).toString(),
-                    },
-                  }}
-                  tooltip={{
-                    showTitle: false,
-                    showMarkers: true,
-                    customItems: (originalItems: unknown[]) => {
-                      console.log('🔍 Pie CustomItems调试 - originalItems:', originalItems);
-                      console.log('🔍 完整originalItems结构:', JSON.stringify(originalItems, null, 2));
+                {/* 使用Recharts圆环图 */}
+                <div style={{ position: 'relative', height: '300px' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={(() => {
+                          // 健壮的饼图数据转换
+                          const convertPieData = (rawData: any[]) => {
+                            if (!Array.isArray(rawData) || rawData.length === 0) {
+                              console.warn('📊 饼图: 数据为空或格式错误', rawData);
+                              return [];
+                            }
+
+                            return rawData.map((item, index) => {
+                              try {
+                                const name = String(item?.rule || item?.name || item?.label || `规则${index + 1}`);
+                                const value = Number(item?.count || item?.value || item?.size || 0);
+                                
+                                return {
+                                  name: name.trim(),
+                                  value: value,
+                                  id: `pie-${index}` // 添加唯一ID
+                                };
+                              } catch (error) {
+                                console.error('📊 饼图数据转换错误:', error, item);
+                                return {
+                                  name: `规则${index + 1}`,
+                                  value: 0,
+                                  id: `pie-${index}`
+                                };
+                              }
+                            }).filter(item => item.value > 0); // 过滤掉0值
+                          };
+
+                          const convertedData = convertPieData(todayStats.chartData || []);
+                          console.log('📊 饼图转换结果:', convertedData);
+                          return convertedData;
+                        })()}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={120}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {/* 动态颜色分配 */}
+                        {(() => {
+                          const colors = ['#00D4FF', '#52c41a', '#fa8c16', '#eb2f96', '#722ed1', '#13c2c2', '#f5222d'];
+                          const data = todayStats?.chartData || [];
+                          
+                          return data.map((_entry: any, index: number) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={colors[index % colors.length]}
+                              stroke="none"
+                            />
+                          ));
+                        })()}
+                      </Pie>
                       
-                      return originalItems.map((item: unknown) => {
-                        const typedItem = item as Record<string, unknown>;
-                        console.log('🔍 Pie Item调试:', typedItem);
-                        
-                        // 尝试多种方式获取数值 - 圆环图的数据结构
-                        const itemData = typedItem.data as Record<string, unknown> | undefined;
-                        const value = typedItem.value || typedItem.count || itemData?.count || 0;
-                        const name = typedItem.name || itemData?.rule || '未知规则';
-                        
-                        console.log(`🔍 Pie解析结果 - name: ${name}, value: ${value}`);
-                        
-                        return {
-                          ...typedItem,
-                          name: name,
-                          value: `${value}条消息`
-                        };
-                      });
-                    }
-                  }}
-                />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                          border: 'none',
+                          borderRadius: '8px',
+                          color: '#ffffff',
+                          fontSize: '13px',
+                          backdropFilter: 'blur(10px)',
+                        }}
+                        formatter={(value: any, name: any) => [`${value}条消息`, name]}
+                        labelStyle={{ color: '#ffffff', fontWeight: 'bold' }}
+                      />
+                      
+                      <Legend
+                        verticalAlign="bottom"
+                        height={36}
+                        iconType="circle"
+                        wrapperStyle={{
+                          color: '#ffffff',
+                          fontSize: '12px',
+                          paddingTop: '10px'
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  
+                  {/* 中心统计文字 */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    textAlign: 'center',
+                    pointerEvents: 'none'
+                  }}>
+                    <div style={{
+                      color: '#ffffff',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      marginBottom: '4px'
+                    }}>
+                      总计
+                    </div>
+                    <div style={{
+                      color: '#00D4FF',
+                      fontSize: '20px',
+                      fontWeight: 'bold'
+                    }}>
+                      {todayStats?.chartData ? 
+                        todayStats.chartData.reduce((sum: number, item: any) => sum + (item.count || 0), 0) : 0
+                      }
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               <div style={{ 
