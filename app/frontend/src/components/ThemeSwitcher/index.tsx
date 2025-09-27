@@ -266,42 +266,13 @@ const ThemeSwitcher: React.FC = () => {
               <div
                 key={option.key}
                 onClick={() => setSelectedTheme(option.key as ThemeType)}
-                style={{
-                  padding: '12px',
-                  background: selectedTheme === option.key ? 
-                    'rgba(24, 144, 255, 0.2)' : 
-                    'rgba(255, 255, 255, 0.1)',
-                  border: selectedTheme === option.key ? 
-                    '2px solid #1890ff' : 
-                    '1px solid rgba(255, 255, 255, 0.2)',
-                  borderRadius: '8px',
-                  backdropFilter: 'blur(10px)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  textAlign: 'center'
-                }}
-                onMouseEnter={(e) => {
-                  if (selectedTheme !== option.key) {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (selectedTheme !== option.key) {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                  }
-                }}
+                className={`theme-card ${selectedTheme === option.key ? 'selected' : ''}`}
               >
                 {option.preview && (
                   <div
+                    className="theme-preview"
                     style={{
-                      width: '100%',
-                      height: '40px',
-                      background: option.preview,
-                      borderRadius: '4px',
-                      marginBottom: '8px',
-                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                      background: option.preview
                     }}
                   />
                 )}

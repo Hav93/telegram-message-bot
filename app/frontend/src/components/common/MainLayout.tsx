@@ -20,7 +20,6 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import ThemeSwitcher from '../ThemeSwitcher';
-import GlassSettings from '../GlassSettings';
 
 const { Header, Sider } = Layout;
 const { Text } = Typography;
@@ -290,9 +289,8 @@ const MainLayout: React.FC = () => {
               </div>
             </div>
 
-            {/* 右侧：玻璃设置、主题切换器和用户信息 */}
+            {/* 右侧：主题切换器和用户信息 */}
             <Space align="center" size={12}>
-              <GlassSettings />
               <ThemeSwitcher />
               <Avatar
                 size={40}

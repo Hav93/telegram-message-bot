@@ -353,6 +353,44 @@ a:hover, .ant-typography a:hover {
   transform: translateY(-2px) !important; /* 参照测试页面悬停效果 */
 }
 
+/* 消息类型快捷按钮特殊样式 - 保持原有颜色状态 */
+.ant-table .ant-btn[type="text"] {
+  background: transparent !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  font-size: 14px !important;
+  padding: 2px !important;
+  text-shadow: none !important;
+  border-radius: 4px !important;
+  transform: none !important;
+  color: inherit !important; /* 继承内联样式的颜色 */
+}
+
+.ant-table .ant-btn[type="text"]:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: none !important;
+  border: none !important;
+  color: inherit !important; /* 悬停时也保持原有颜色 */
+}
+
+/* 更具体的选择器确保消息类型按钮颜色正确显示 */
+.ant-table tbody .ant-btn.ant-btn-text {
+  background: transparent !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  font-size: 14px !important;
+  padding: 2px !important;
+  text-shadow: none !important;
+  border-radius: 4px !important;
+  transform: none !important;
+}
+
+.ant-table tbody .ant-btn.ant-btn-text:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: none !important;
+  border: none !important;
+}
+
 /* 标签样式 */
 .ant-tag {
   background: rgba(255, 255, 255, 0.1) !important;
@@ -1078,11 +1116,11 @@ body.theme-custom .ant-alert-description {
 }
 
 /* 强制移除所有可能的灰色图层 */
-.glass-modal .ant-modal-content,
-.glass-modal .ant-modal-content *,
 .glass-modal .ant-modal-header,
 .glass-modal .ant-modal-body,
-.glass-modal .ant-modal-footer {
+.glass-modal .ant-modal-footer,
+.glass-modal .ant-modal-content > * {
+  background: transparent !important;
   background-color: transparent !important;
   background-image: none !important;
   backdrop-filter: none !important;
@@ -1090,14 +1128,56 @@ body.theme-custom .ant-alert-description {
 
 /* 只在content容器上保留玻璃效果 */
 .glass-modal .ant-modal-content {
-  backdrop-filter: var(--glass-filter) !important;
-  -webkit-backdrop-filter: var(--glass-filter) !important;
+  background: var(--glass-color, rgba(255, 255, 255, 0.08)) !important;
+  backdrop-filter: var(--glass-filter, blur(12px) brightness(1.05) saturate(1.1)) !important;
+  -webkit-backdrop-filter: var(--glass-filter, blur(12px) brightness(1.05) saturate(1.1)) !important;
 }
 
 /* 优化Collapse组件内的背景 */
 .glass-modal .ant-collapse-content-box {
   background: transparent !important;
   padding: 16px !important;
+}
+
+/* 主题颜色预览样式 - 确保不受全局样式影响 */
+.theme-preview {
+  width: 100% !important;
+  height: 40px !important;
+  border-radius: 4px !important;
+  margin-bottom: 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 主题选择卡片样式 */
+.theme-card {
+  padding: 12px !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(10px) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-align: center !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.theme-card.selected {
+  background: rgba(24, 144, 255, 0.2) !important;
+  border: 2px solid #1890ff !important;
+}
+
+.theme-card:not(.selected) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.theme-card:not(.selected):hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
 .glass-modal .ant-collapse-item {

@@ -11,23 +11,133 @@ import {
   InputNumber,
   Select,
   message,
-  Alert
+  Alert,
+  Slider,
+  ColorPicker,
+  Divider,
+  Collapse
 } from 'antd';
 import { 
   SaveOutlined, 
-  ExperimentOutlined
+  ExperimentOutlined,
+  SettingOutlined,
+  BgColorsOutlined,
+  DownOutlined
 } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { settingsApi } from '../../services/settings';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 const { Option } = Select;
+
+// 玻璃质感设置接口
+interface GlassSettings {
+  enabled: boolean;
+  blur: number;
+  brightness: number;
+  saturation: number;
+  color: {
+    h: number;
+    s: number;
+    l: number;
+    a: number;
+  };
+  texture: 'rice-paper' | 'egg-shell' | 'ink-jet' | 'coarse' | 'topology';
+}
+
+const defaultGlassSettings: GlassSettings = {
+  enabled: true,
+  blur: 5,
+  brightness: 0.8,
+  saturation: 1,
+  color: {
+    h: 180,
+    s: 80,
+    l: 10,
+    a: 0.2
+  },
+  texture: 'rice-paper'
+};
+
+const textureOptions = [
+  { value: 'rice-paper', label: 'Rice Paper', url: 'https://www.transparenttextures.com/patterns/rice-paper.png' },
+  { value: 'egg-shell', label: 'Egg Shell', url: 'https://www.transparenttextures.com/patterns/egg-shell.png' },
+  { value: 'ink-jet', label: 'Ink Jet', url: 'https://www.transparenttextures.com/patterns/ink-jet.png' },
+  { value: 'coarse', label: 'Coarse', url: 'https://www.transparenttextures.com/patterns/coarse.png' },
+  { value: 'topology', label: 'Topology', url: 'https://www.transparenttextures.com/patterns/topology.png' }
+];
 
 const SettingsPage: React.FC = () => {
   const [proxyForm] = Form.useForm();
   const [systemForm] = Form.useForm();
   const [activeTab, setActiveTab] = useState('proxy');
+  
+  // 玻璃质感设置状态
+  const [glassSettings, setGlassSettings] = useState<GlassSettings>(() => {
+    try {
+      const saved = localStorage.getItem('glass-settings');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...defaultGlassSettings, ...parsed };
+      }
+    } catch (error) {
+      console.error('加载玻璃质感设置失败:', error);
+      localStorage.removeItem('glass-settings');
+    }
+    return defaultGlassSettings;
+  });
+
+  // 应用玻璃质感设置到CSS变量
+  const applyGlassSettings = (newSettings: GlassSettings) => {
+    const root = document.documentElement;
+    
+    if (newSettings.enabled) {
+      const { h, s, l, a } = newSettings.color;
+      const textureUrl = textureOptions.find(t => t.value === newSettings.texture)?.url || '';
+      
+      root.style.setProperty('--glass-filter', 
+        `blur(${newSettings.blur}px) brightness(${newSettings.brightness}) saturate(${newSettings.saturation})`
+      );
+      root.style.setProperty('--glass-color', 
+        `hsl(${h} ${s}% ${l}% / ${a})`
+      );
+      root.style.setProperty('--glass-texture', 
+        textureUrl ? `url("${textureUrl}")` : 'none'
+      );
+    } else {
+      root.style.setProperty('--glass-filter', 'none');
+      root.style.setProperty('--glass-color', 'rgba(255, 255, 255, 0.06)');
+      root.style.setProperty('--glass-texture', 'none');
+    }
+  };
+
+  // 初始化应用玻璃质感设置
+  useEffect(() => {
+    applyGlassSettings(glassSettings);
+  }, [glassSettings]);
+
+  // 更新玻璃质感设置
+  const updateGlassSettings = (newSettings: Partial<GlassSettings>) => {
+    const updated = { ...glassSettings, ...newSettings };
+    setGlassSettings(updated);
+    applyGlassSettings(updated);
+    
+    try {
+      localStorage.setItem('glass-settings', JSON.stringify(updated));
+    } catch (error) {
+      console.error('保存玻璃质感设置失败:', error);
+      message.error('保存设置失败');
+    }
+  };
+
+  // 重置玻璃质感设置
+  const resetGlassSettings = () => {
+    setGlassSettings(defaultGlassSettings);
+    applyGlassSettings(defaultGlassSettings);
+    localStorage.setItem('glass-settings', JSON.stringify(defaultGlassSettings));
+    message.success('已重置为默认设置');
+  };
 
   // 获取当前配置
   const { data: currentConfig, isLoading, refetch } = useQuery({
@@ -214,6 +324,173 @@ const SettingsPage: React.FC = () => {
         />
         
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
+          <TabPane tab="界面设置" key="ui">
+            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+              <Alert
+                message="界面外观设置"
+                description="自定义应用的玻璃质感效果，打造个性化的视觉体验"
+                type="info"
+                showIcon
+                style={{ marginBottom: '24px' }}
+              />
+
+              {/* 主开关 */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <Text style={{ color: 'white', fontSize: '16px', fontWeight: '600' }}>
+                    <BgColorsOutlined style={{ marginRight: 8 }} />
+                    启用玻璃质感效果
+                  </Text>
+                  <Switch
+                    checked={glassSettings.enabled}
+                    onChange={(checked) => updateGlassSettings({ enabled: checked })}
+                    size="default"
+                  />
+                </div>
+              </div>
+
+              {glassSettings.enabled && (
+                <Collapse
+                  defaultActiveKey={['backdrop']}
+                  expandIcon={({ isActive }) => <DownOutlined rotate={isActive ? 180 : 0} />}
+                  style={{ background: 'transparent', border: 'none' }}
+                >
+                  <Collapse.Panel 
+                    header={<Text style={{ color: 'white', fontWeight: '500' }}>backdrop-filter 滤镜效果</Text>} 
+                    key="backdrop"
+                    style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}
+                  >
+                    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                      <div>
+                        <Text style={{ color: 'rgba(255, 255, 255, 0.9)', display: 'block', marginBottom: 8 }}>
+                          模糊强度: {glassSettings.blur}px
+                        </Text>
+                        <Slider
+                          min={0}
+                          max={20}
+                          step={1}
+                          value={glassSettings.blur}
+                          onChange={(value) => updateGlassSettings({ blur: value })}
+                          tooltip={{ formatter: (value) => `${value}px` }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <Text style={{ color: 'rgba(255, 255, 255, 0.9)', display: 'block', marginBottom: 8 }}>
+                          亮度: {Math.round(glassSettings.brightness * 100)}%
+                        </Text>
+                        <Slider
+                          min={0.1}
+                          max={2.0}
+                          step={0.1}
+                          value={glassSettings.brightness}
+                          onChange={(value) => updateGlassSettings({ brightness: value })}
+                          tooltip={{ formatter: (value) => `${Math.round(value * 100)}%` }}
+                        />
+                      </div>
+                      
+                      <div>
+                        <Text style={{ color: 'rgba(255, 255, 255, 0.9)', display: 'block', marginBottom: 8 }}>
+                          饱和度: {Math.round(glassSettings.saturation * 100)}%
+                        </Text>
+                        <Slider
+                          min={0.1}
+                          max={3.0}
+                          step={0.1}
+                          value={glassSettings.saturation}
+                          onChange={(value) => updateGlassSettings({ saturation: value })}
+                          tooltip={{ formatter: (value) => `${Math.round(value * 100)}%` }}
+                        />
+                      </div>
+                    </Space>
+                  </Collapse.Panel>
+
+                  <Collapse.Panel 
+                    header={<Text style={{ color: 'white', fontWeight: '500' }}>color 背景颜色</Text>} 
+                    key="color"
+                    style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}
+                  >
+                    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                      <div>
+                        <Text style={{ color: 'rgba(255, 255, 255, 0.9)', display: 'block', marginBottom: 8 }}>
+                          背景颜色
+                        </Text>
+                        <ColorPicker
+                          value={`hsl(${glassSettings.color.h}, ${glassSettings.color.s}%, ${glassSettings.color.l}%)`}
+                          onChange={(color) => {
+                            const hsb = color.toHsb();
+                            updateGlassSettings({
+                              color: {
+                                h: Math.round(hsb.h || 0),
+                                s: Math.round(hsb.s || 0),
+                                l: Math.round(hsb.b || 0), // HSB的b对应HSL的l
+                                a: glassSettings.color.a
+                              }
+                            });
+                          }}
+                          showText={(color) => `HSL(${glassSettings.color.h}, ${glassSettings.color.s}%, ${glassSettings.color.l}%)`}
+                          size="large"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Text style={{ color: 'rgba(255, 255, 255, 0.9)', display: 'block', marginBottom: 8 }}>
+                          透明度: {Math.round(glassSettings.color.a * 100)}%
+                        </Text>
+                        <Slider
+                          min={0.01}
+                          max={0.5}
+                          step={0.01}
+                          value={glassSettings.color.a}
+                          onChange={(value) => updateGlassSettings({ 
+                            color: { ...glassSettings.color, a: value }
+                          })}
+                          tooltip={{ formatter: (value) => `${Math.round(value * 100)}%` }}
+                        />
+                      </div>
+                    </Space>
+                  </Collapse.Panel>
+
+                  <Collapse.Panel 
+                    header={<Text style={{ color: 'white', fontWeight: '500' }}>texture 纹理效果</Text>} 
+                    key="texture"
+                    style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}
+                  >
+                    <div>
+                      <Text style={{ color: 'rgba(255, 255, 255, 0.9)', display: 'block', marginBottom: 8 }}>
+                        选择纹理样式
+                      </Text>
+                      <Select
+                        value={glassSettings.texture}
+                        onChange={(value) => updateGlassSettings({ texture: value })}
+                        style={{ width: '100%' }}
+                        size="large"
+                      >
+                        {textureOptions.map(option => (
+                          <Option key={option.value} value={option.value}>
+                            {option.label}
+                          </Option>
+                        ))}
+                      </Select>
+                    </div>
+                  </Collapse.Panel>
+                </Collapse>
+              )}
+
+              <Divider style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }} />
+              
+              <Space>
+                <Button
+                  type="default"
+                  onClick={resetGlassSettings}
+                  style={{ minWidth: '120px' }}
+                >
+                  重置默认
+                </Button>
+              </Space>
+            </Space>
+          </TabPane>
+
           <TabPane tab="代理设置" key="proxy">
             <Form
               form={proxyForm}

@@ -237,11 +237,29 @@ const GlassSettings: React.FC = () => {
         title={
           <Space>
             <SettingOutlined />
-            <span>玻璃质感设置</span>
+            <span style={{ color: '#ffffff' }}>玻璃质感设置</span>
           </Space>
         }
         open={visible}
         onCancel={() => setVisible(false)}
+        className="glass-modal"
+        width={450}
+        styles={{
+          content: {
+            background: 'transparent',
+            padding: 0
+          },
+          body: {
+            background: 'transparent',
+            padding: '16px 24px',
+            maxHeight: '480px',
+            overflowY: 'auto'
+          },
+          footer: {
+            background: 'transparent',
+            borderTop: 'none'
+          }
+        }}
         footer={[
           <Button key="export" onClick={exportSettings}>
             导出设置
@@ -264,20 +282,6 @@ const GlassSettings: React.FC = () => {
             完成
           </Button>
         ]}
-        width={450}
-        height={600}
-        className="glass-modal"
-        styles={{
-          body: {
-            maxHeight: '480px',
-            overflowY: 'auto',
-            padding: '16px 24px',
-            background: 'transparent'
-          },
-          content: {
-            background: 'transparent'
-          }
-        }}
       >
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           
