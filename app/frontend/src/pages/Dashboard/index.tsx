@@ -660,33 +660,12 @@ const Dashboard: React.FC = () => {
                     },
                   }}
                   tooltip={{
-                    customContent: (title: any, data: any[]) => {
-                      console.log('🔍 Pie tooltip - title:', title, 'data:', data);
-                      if (!data || data.length === 0) return '';
-                      const item = data[0];
-                      console.log('🔍 Pie tooltip - item:', item);
-                      console.log('🔍 Pie tooltip - item.data:', item?.data);
-                      
-                      // 尝试多种方式获取数据
-                      let rule = '';
-                      let count = 0;
-                      
-                      if (item.data) {
-                        rule = item.data.rule || item.data.type || '未知规则';
-                        count = item.data.count || item.data.value || 0;
-                      } else {
-                        rule = item.rule || item.type || title || '未知规则';
-                        count = item.count || item.value || item.y || 0;
-                      }
-                      
-                      console.log('🔍 Pie tooltip - 最终数据:', { rule, count });
-                      
-                      return `
-                        <div style="padding: 8px 12px; background: rgba(0, 0, 0, 0.8); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.2);">
-                          <div style="color: #ffffff; font-weight: 600; margin-bottom: 4px;">${rule}</div>
-                          <div style="color: #00D4FF; font-size: 14px;">${count} 条消息</div>
-                        </div>
-                      `;
+                    formatter: (datum: any) => {
+                      console.log('🔍 Pie tooltip formatter - datum:', datum);
+                      return {
+                        name: datum.rule,
+                        value: `${datum.count} 条消息`
+                      };
                     }
                   }}
                 />
@@ -787,8 +766,10 @@ const Dashboard: React.FC = () => {
               background: 'transparent',
             }}
             columnStyle={{
-              fillOpacity: 0.8,
+              fillOpacity: 0.85,
+              radius: [4, 4, 0, 0], // 顶部圆角
             }}
+            columnWidthRatio={0.6} // 增加柱子粗细，参考图片的粗细比例
             interactions={[
               {
                 type: 'element-active',
@@ -799,7 +780,7 @@ const Dashboard: React.FC = () => {
                 enable: false, // 禁用悬停高亮效果
               }
             ]}
-            color={['#1890ff', '#52c41a', '#ff4d4f', '#faad14', '#722ed1', '#eb2f96', '#13c2c2', '#fa8c16']} // 多种颜色区分规则
+            color={['#6366f1', '#06b6d4', '#10b981']} // 参考图片配色：紫色、蓝色、绿色
             xAxis={{
               label: {
                 style: {

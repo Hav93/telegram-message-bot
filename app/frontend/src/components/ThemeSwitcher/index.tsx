@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Button, 
   Dropdown, 
@@ -6,24 +6,72 @@ import {
   Modal, 
   Input, 
   message, 
-  Typography 
+  Typography,
+  Upload,
+  Tabs 
 } from 'antd';
 import { 
   BgColorsOutlined, 
   PictureOutlined, 
   CheckOutlined,
-  SettingOutlined 
+  SettingOutlined,
+  UploadOutlined,
+  LinkOutlined,
+  InboxOutlined 
 } from '@ant-design/icons';
 import { useTheme, ThemeType } from '../../hooks/useTheme';
 import type { MenuProps } from 'antd';
 
 const { Text } = Typography;
+const { Dragger } = Upload;
 
 const ThemeSwitcher: React.FC = () => {
   const { themeConfig, changeTheme, getThemeName, defaultThemes } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [customImageUrl, setCustomImageUrl] = useState(themeConfig.customImageUrl || '');
   const [selectedTheme, setSelectedTheme] = useState<ThemeType>(themeConfig.type);
+  const [uploadMethod, setUploadMethod] = useState<'url' | 'file'>('url');
+  const [uploadedImageBase64, setUploadedImageBase64] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 将文件转换为Base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  // 处理文件上传
+  const handleFileUpload = async (file: File) => {
+    // 验证文件类型
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      message.error('仅支持 JPG、PNG、WebP、GIF 格式的图片');
+      return false;
+    }
+
+    // 验证文件大小 (最大5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      message.error('图片大小不能超过 5MB');
+      return false;
+    }
+
+    try {
+      const base64 = await fileToBase64(file);
+      setUploadedImageBase64(base64);
+      console.log('✅ 图片上传成功，Base64长度:', base64.length);
+      message.success('图片上传成功');
+      return false; // 阻止默认上传
+    } catch (error) {
+      console.error('❌ 图片转换失败:', error);
+      message.error('图片转换失败');
+      return false;
+    }
+  };
 
   const handleThemeChange = (type: ThemeType) => {
     if (type === 'custom') {
@@ -36,25 +84,56 @@ const ThemeSwitcher: React.FC = () => {
 
   const handleCustomThemeConfirm = () => {
     if (selectedTheme === 'custom') {
-      if (!customImageUrl.trim()) {
-        message.error('请输入图片URL');
-        return;
+      if (uploadMethod === 'file') {
+        // 使用上传的文件
+        if (!uploadedImageBase64) {
+          message.error('请先上传图片文件');
+          return;
+        }
+        
+        console.log('✅ 应用上传的图片:', uploadedImageBase64.substring(0, 50) + '...');
+        changeTheme('custom', uploadedImageBase64);
+        message.success('自定义背景已应用');
+        setModalVisible(false);
+        
+      } else {
+        // 使用URL链接
+        if (!customImageUrl.trim()) {
+          message.error('请输入图片URL');
+          return;
+        }
+        
+        // 简单验证URL格式
+        try {
+          new URL(customImageUrl);
+        } catch {
+          message.error('请输入有效的图片URL');
+          return;
+        }
+        
+        // 预加载图片验证
+        const img = new Image();
+        img.crossOrigin = 'anonymous'; // 尝试跨域访问
+        
+        img.onload = () => {
+          console.log('✅ 图片加载成功:', customImageUrl);
+          changeTheme('custom', customImageUrl);
+          message.success('自定义背景已应用');
+          setModalVisible(false);
+        };
+        
+        img.onerror = () => {
+          console.error('❌ 图片加载失败:', customImageUrl);
+          message.error('图片加载失败，请检查URL是否正确或尝试其他图片');
+        };
+        
+        // 开始加载图片
+        img.src = customImageUrl;
       }
-      
-      // 简单验证URL格式
-      try {
-        new URL(customImageUrl);
-      } catch {
-        message.error('请输入有效的图片URL');
-        return;
-      }
-      
-      changeTheme('custom', customImageUrl);
-      message.success('自定义背景已应用');
     } else {
       changeTheme(selectedTheme);
+      setModalVisible(false);
     }
-    setModalVisible(false);
   };
 
   const themeOptions = [
@@ -141,10 +220,24 @@ const ThemeSwitcher: React.FC = () => {
         }}
         okText="应用"
         cancelText="取消"
-        className="glass-modal"
+        className="glass-modal theme-modal"
         width={600}
+        styles={{
+          content: {
+            background: 'transparent',
+            padding: 0
+          },
+          body: {
+            background: 'transparent',
+            padding: '16px 24px'
+          },
+          footer: {
+            background: 'transparent',
+            borderTop: 'none'
+          }
+        }}
       >
-        <div style={{ padding: '16px 0' }}>
+        <div>
           <Text style={{ color: 'rgba(255, 255, 255, 0.9)', marginBottom: 16, display: 'block' }}>
             选择背景主题：
           </Text>
@@ -205,31 +298,110 @@ const ThemeSwitcher: React.FC = () => {
 
           {selectedTheme === 'custom' && (
             <div style={{ marginTop: '20px' }}>
-              <Text style={{ color: 'rgba(255, 255, 255, 0.9)', marginBottom: 8, display: 'block' }}>
-                图片URL：
-              </Text>
-              <Input
-                placeholder="请输入图片URL (支持 https://... 或图床链接)"
-                value={customImageUrl}
-                onChange={(e) => setCustomImageUrl(e.target.value)}
-                prefix={<PictureOutlined />}
+              <Tabs
+                activeKey={uploadMethod}
+                onChange={(key) => setUploadMethod(key as 'url' | 'file')}
+                items={[
+                  {
+                    key: 'url',
+                    label: (
+                      <span style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                        <LinkOutlined style={{ marginRight: 4 }} />
+                        图片链接
+                      </span>
+                    ),
+                    children: (
+                      <div style={{ paddingTop: '12px' }}>
+                        <Text style={{ color: 'rgba(255, 255, 255, 0.9)', marginBottom: 8, display: 'block' }}>
+                          输入图片URL：
+                        </Text>
+                        <Input
+                          placeholder="https://example.com/image.jpg"
+                          value={customImageUrl}
+                          onChange={(e) => setCustomImageUrl(e.target.value)}
+                          prefix={<LinkOutlined />}
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            color: '#ffffff'
+                          }}
+                        />
+                        <Text 
+                          type="secondary" 
+                          style={{ 
+                            color: 'rgba(255, 255, 255, 0.6)', 
+                            fontSize: '12px',
+                            marginTop: '8px',
+                            display: 'block'
+                          }}
+                        >
+                          🔸 建议使用直接图片链接 (以 .jpg/.png/.webp 结尾)<br/>
+                          🔸 确保图片允许跨域访问，避免使用需要登录的链接<br/>
+                          🔸 推荐使用免费图床：sm.ms、imgbb.com、telegraph.ph
+                        </Text>
+                      </div>
+                    )
+                  },
+                  {
+                    key: 'file',
+                    label: (
+                      <span style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                        <UploadOutlined style={{ marginRight: 4 }} />
+                        本地上传
+                      </span>
+                    ),
+                    children: (
+                      <div style={{ paddingTop: '12px' }}>
+                        <Text style={{ color: 'rgba(255, 255, 255, 0.9)', marginBottom: 8, display: 'block' }}>
+                          选择本地图片：
+                        </Text>
+                        <Dragger
+                          beforeUpload={handleFileUpload}
+                          showUploadList={false}
+                          accept="image/*"
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            border: '2px dashed rgba(255, 255, 255, 0.3)',
+                            borderRadius: '8px',
+                          }}
+                        >
+                          <p className="ant-upload-drag-icon">
+                            <InboxOutlined style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '48px' }} />
+                          </p>
+                          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '16px', margin: '0 0 4px 0' }}>
+                            点击或拖拽图片到此区域上传
+                          </p>
+                          <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px', margin: 0 }}>
+                            支持 JPG、PNG、WebP、GIF 格式，最大 5MB
+                          </p>
+                        </Dragger>
+                        
+                        {uploadedImageBase64 && (
+                          <div style={{ 
+                            marginTop: '12px', 
+                            padding: '8px', 
+                            background: 'rgba(82, 196, 26, 0.1)',
+                            border: '1px solid rgba(82, 196, 26, 0.3)',
+                            borderRadius: '6px'
+                          }}>
+                            <Text style={{ color: '#52c41a', fontSize: '12px' }}>
+                              ✅ 图片上传成功，大小: {Math.round(uploadedImageBase64.length / 1024)}KB
+                            </Text>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  }
+                ]}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  color: '#ffffff'
+                  '& .ant-tabs-tab': {
+                    color: 'rgba(255, 255, 255, 0.7) !important'
+                  },
+                  '& .ant-tabs-tab-active': {
+                    color: '#1890ff !important'
+                  }
                 }}
               />
-              <Text 
-                type="secondary" 
-                style={{ 
-                  color: 'rgba(255, 255, 255, 0.6)', 
-                  fontSize: '12px',
-                  marginTop: '8px',
-                  display: 'block'
-                }}
-              >
-                建议使用高质量图片，支持 JPG、PNG、WebP 格式
-              </Text>
             </div>
           )}
         </div>

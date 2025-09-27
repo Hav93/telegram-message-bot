@@ -516,6 +516,147 @@ a:hover, .ant-typography a:hover {
   border-radius: 8px !important;
 }
 
+/* 主题设置Modal专用样式 - 移除多余背景层 */
+.theme-modal .ant-modal-content {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+.theme-modal .ant-modal-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 16px 24px !important;
+}
+
+.theme-modal .ant-modal-body {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.theme-modal .ant-modal-footer {
+  background: transparent !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 12px 24px 16px !important;
+}
+
+.theme-modal .ant-modal-footer .ant-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.theme-modal .ant-modal-footer .ant-btn:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.theme-modal .ant-modal-footer .ant-btn-primary {
+  background: rgba(24, 144, 255, 0.6) !important;
+  border-color: rgba(24, 144, 255, 0.8) !important;
+}
+
+.theme-modal .ant-modal-footer .ant-btn-primary:hover {
+  background: rgba(24, 144, 255, 0.8) !important;
+  border-color: rgba(24, 144, 255, 1) !important;
+}
+
+/* 修复Tabs组件的背景 */
+.theme-modal .ant-tabs {
+  background: transparent !important;
+}
+
+.theme-modal .ant-tabs .ant-tabs-tab {
+  background: transparent !important;
+  border: none !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.theme-modal .ant-tabs .ant-tabs-tab-active {
+  background: transparent !important;
+  color: #1890ff !important;
+}
+
+.theme-modal .ant-tabs .ant-tabs-content {
+  background: transparent !important;
+}
+
+.theme-modal .ant-tabs .ant-tabs-tabpane {
+  background: transparent !important;
+}
+
+/* 全局Tabs组件样式优化 - 提升可读性 */
+.glass-card .ant-tabs {
+  background: transparent !important;
+}
+
+.glass-card .ant-tabs .ant-tabs-tab {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 8px 8px 0 0 !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  margin-right: 8px !important;
+  padding: 8px 16px !important;
+  backdrop-filter: blur(10px) !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  transition: all 0.3s ease !important;
+}
+
+.glass-card .ant-tabs .ant-tabs-tab:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  transform: translateY(-1px) !important;
+}
+
+.glass-card .ant-tabs .ant-tabs-tab-active {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.glass-card .ant-tabs .ant-tabs-content {
+  background: transparent !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+  margin-top: -1px !important;
+  padding-top: 24px !important;
+}
+
+.glass-card .ant-tabs .ant-tabs-tabpane {
+  background: transparent !important;
+}
+
+.glass-card .ant-tabs .ant-tabs-ink-bar {
+  display: none !important; /* 隐藏默认的下划线 */
+}
+
+/* 不同主题下的Tabs优化 */
+body.theme-dark .glass-card .ant-tabs .ant-tabs-tab-active {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+body.theme-gray .glass-card .ant-tabs .ant-tabs-tab-active {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.22) !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85) !important;
+}
+
+body.theme-custom .glass-card .ant-tabs .ant-tabs-tab-active {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.3) !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95) !important;
+  font-weight: 700 !important;
+}
+
 .ant-alert-info {
   background: rgba(24, 144, 255, 0.08) !important;
   border-color: rgba(24, 144, 255, 0.2) !important;

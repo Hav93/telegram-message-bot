@@ -44,9 +44,11 @@ export const useTheme = () => {
     let background = '';
     
     if (themeConfig.type === 'custom' && themeConfig.customImageUrl) {
-      background = `url(${themeConfig.customImageUrl})`;
+      background = `url("${themeConfig.customImageUrl}")`;
+      console.log('🎨 应用自定义背景:', themeConfig.customImageUrl);
     } else {
       background = defaultThemes[themeConfig.type].background;
+      console.log('🎨 应用预设主题:', themeConfig.type, background);
     }
     
     setCurrentBackground(background);
@@ -62,17 +64,38 @@ export const useTheme = () => {
     body.classList.add(`theme-${themeConfig.type}`);
     
     if (themeConfig.type === 'custom' && themeConfig.customImageUrl) {
-      body.style.background = `url(${themeConfig.customImageUrl}) center center / cover no-repeat fixed`;
+      const customBg = `url("${themeConfig.customImageUrl}") center center / cover no-repeat fixed`;
+      body.style.background = customBg;
+      body.style.backgroundSize = 'cover';
+      body.style.backgroundPosition = 'center center';
+      body.style.backgroundRepeat = 'no-repeat';
+      body.style.backgroundAttachment = 'fixed';
+      
       if (root) {
-        root.style.background = `url(${themeConfig.customImageUrl}) center center / cover no-repeat fixed`;
+        root.style.background = customBg;
+        root.style.backgroundSize = 'cover';
+        root.style.backgroundPosition = 'center center';
+        root.style.backgroundRepeat = 'no-repeat';
+        root.style.backgroundAttachment = 'fixed';
       }
+      
+      console.log('✅ 自定义背景样式已应用:', customBg);
     } else {
       body.style.background = background;
       body.style.backgroundAttachment = 'fixed';
+      body.style.backgroundSize = '';
+      body.style.backgroundPosition = '';
+      body.style.backgroundRepeat = '';
+      
       if (root) {
         root.style.background = background;
         root.style.backgroundAttachment = 'fixed';
+        root.style.backgroundSize = '';
+        root.style.backgroundPosition = '';
+        root.style.backgroundRepeat = '';
       }
+      
+      console.log('✅ 预设主题样式已应用');
     }
     
     // 保存到 localStorage
