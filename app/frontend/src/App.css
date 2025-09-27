@@ -409,20 +409,16 @@ a:hover, .ant-typography a:hover {
   /* 移除任何可能覆盖的颜色样式 */
 }
 
-/* 强制重置所有可能影响的样式 */
-.glass-card .ant-table .ant-btn[type="text"].ant-btn-text,
-.ant-table .ant-btn[type="text"].ant-btn-text {
-  color: unset !important; /* 使用unset让内联样式生效 */
+/* 强制重置所有可能影响的样式 - 让内联样式生效 */
+.ant-table .ant-btn[type="text"][style*="color"] {
+  /* 完全不设置color，让内联样式自然生效 */
 }
 
-/* 最终解决方案 - 直接覆盖所有可能的按钮样式 */
-.ant-table .ant-btn[type="text"] {
-  color: inherit !important;
-}
-
+/* 最终解决方案 - 确保内联样式优先 */
 .ant-table .ant-btn[type="text"]:not([style*="color"]) {
-  color: #ffffff !important; /* 默认白色 */
+  color: #ffffff !important; /* 只对没有内联颜色的按钮设置默认白色 */
 }
+
 
 /* 确保图标颜色跟随按钮颜色 */
 .ant-table .ant-btn[type="text"] .anticon {
@@ -1181,8 +1177,9 @@ body.theme-custom .ant-alert-description {
 .glass-modal .ant-collapse-content-box,
 .ant-modal .ant-collapse-content-box,
 .ant-collapse-content-box {
-  background: rgba(0, 0, 0, 0.15) !important;
+  background: rgba(0, 0, 0, 0.5) !important; /* 更深的背景确保白字清晰 */
   padding: 16px !important;
+  border-radius: 0 0 12px 12px !important;
 }
 
 /* 强制覆盖所有可能的白色背景 */
@@ -1190,7 +1187,7 @@ body.theme-custom .ant-alert-description {
 .ant-modal .ant-collapse .ant-collapse-content,
 .glass-modal .ant-collapse-item,
 .ant-modal .ant-collapse-item {
-  background: rgba(0, 0, 0, 0.1) !important;
+  background: rgba(0, 0, 0, 0.4) !important; /* 更深的背景确保对比度 */
 }
 
 /* 界面设置页面的内容区域玻璃质感 */
@@ -1201,11 +1198,23 @@ body.theme-custom .ant-alert-description {
 
 .glass-card .ant-card-body > .ant-space > div,
 .glass-card-3d .ant-card-body > .ant-space > div {
-  background: rgba(0, 0, 0, 0.1) !important;
+  background: rgba(0, 0, 0, 0.2) !important; /* 更深的背景 */
   backdrop-filter: blur(8px) !important;
   border-radius: 12px !important;
   padding: 16px !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important; /* 更明显的边框 */
+}
+
+/* 确保所有文字在深色背景上清晰可见 */
+.glass-modal .ant-typography,
+.ant-modal .ant-typography,
+.glass-modal .ant-collapse .ant-typography,
+.ant-modal .ant-collapse .ant-typography,
+.glass-modal label,
+.ant-modal label,
+.glass-modal span,
+.ant-modal span {
+  color: #ffffff !important;
 }
 
 /* 确保Slider组件背景不是白色 */
@@ -1235,29 +1244,31 @@ body.theme-custom .ant-alert-description {
 /* 主题设置和界面设置的输入框玻璃质感 */
 .glass-modal .ant-input,
 .ant-modal .ant-input {
-  background: rgba(0, 0, 0, 0.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(0, 0, 0, 0.6) !important; /* 更深的背景确保对比度 */
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
   color: #ffffff !important;
   backdrop-filter: blur(8px) !important;
   border-radius: 8px !important;
+  font-weight: 500 !important;
 }
 
 .glass-modal .ant-input:hover,
 .ant-modal .ant-input:hover {
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  background: rgba(0, 0, 0, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(0, 0, 0, 0.7) !important; /* 悬停时更深 */
 }
 
 .glass-modal .ant-input:focus,
 .ant-modal .ant-input:focus {
   border-color: #667eea !important;
-  background: rgba(0, 0, 0, 0.3) !important;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+  background: rgba(0, 0, 0, 0.8) !important; /* 焦点时最深 */
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3) !important;
+  color: #ffffff !important;
 }
 
 .glass-modal .ant-input::placeholder,
 .ant-modal .ant-input::placeholder {
-  color: rgba(255, 255, 255, 0.6) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 /* 主题颜色预览样式 - 确保不受全局样式影响 */
