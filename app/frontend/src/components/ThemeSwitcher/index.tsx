@@ -239,7 +239,7 @@ const ThemeSwitcher: React.FC = () => {
         }}
         okText="应用"
         cancelText="取消"
-        className="glass-modal theme-modal"
+        className="glass-modal"
         width={600}
         styles={{
           content: {

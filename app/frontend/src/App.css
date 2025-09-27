@@ -737,12 +737,12 @@ a:hover, .ant-typography a:hover {
 }
 
 .glass-card .ant-tabs .ant-tabs-tab-active {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
-  color: #ffffff !important;
+  background: rgba(255, 165, 0, 0.2) !important;
+  border-color: rgba(255, 165, 0, 0.4) !important;
+  color: #ffa500 !important; /* 橙色 */
   font-weight: 600 !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  text-shadow: none !important; /* 移除阴影 */
+  box-shadow: 0 4px 12px rgba(255, 165, 0, 0.2) !important;
 }
 
 .glass-card .ant-tabs .ant-tabs-content {
@@ -762,21 +762,21 @@ a:hover, .ant-typography a:hover {
 
 /* 不同主题下的Tabs优化 */
 body.theme-dark .glass-card .ant-tabs .ant-tabs-tab-active {
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.25) !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+  color: #ffa500 !important; /* 橙色 */
+  background: rgba(255, 165, 0, 0.25) !important;
+  text-shadow: none !important; /* 移除阴影 */
 }
 
 body.theme-gray .glass-card .ant-tabs .ant-tabs-tab-active {
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.22) !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85) !important;
+  color: #ffa500 !important; /* 橙色 */
+  background: rgba(255, 165, 0, 0.22) !important;
+  text-shadow: none !important; /* 移除阴影 */
 }
 
 body.theme-custom .glass-card .ant-tabs .ant-tabs-tab-active {
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.3) !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95) !important;
+  color: #ffa500 !important; /* 橙色 */
+  background: rgba(255, 165, 0, 0.3) !important;
+  text-shadow: none !important; /* 移除阴影 */
   font-weight: 700 !important;
 }
 
@@ -1193,6 +1193,21 @@ body.theme-custom .ant-alert-description {
   background: rgba(0, 0, 0, 0.1) !important;
 }
 
+/* 界面设置页面的内容区域玻璃质感 */
+.glass-card .ant-space,
+.glass-card-3d .ant-space {
+  width: 100% !important;
+}
+
+.glass-card .ant-card-body > .ant-space > div,
+.glass-card-3d .ant-card-body > .ant-space > div {
+  background: rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(8px) !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
 /* 确保Slider组件背景不是白色 */
 .glass-modal .ant-slider,
 .ant-modal .ant-slider {
@@ -1215,6 +1230,34 @@ body.theme-custom .ant-alert-description {
 .ant-modal .ant-select-dropdown {
   background: rgba(0, 0, 0, 0.9) !important;
   backdrop-filter: blur(12px) !important;
+}
+
+/* 主题设置和界面设置的输入框玻璃质感 */
+.glass-modal .ant-input,
+.ant-modal .ant-input {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(8px) !important;
+  border-radius: 8px !important;
+}
+
+.glass-modal .ant-input:hover,
+.ant-modal .ant-input:hover {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+}
+
+.glass-modal .ant-input:focus,
+.ant-modal .ant-input:focus {
+  border-color: #667eea !important;
+  background: rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+}
+
+.glass-modal .ant-input::placeholder,
+.ant-modal .ant-input::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
 /* 主题颜色预览样式 - 确保不受全局样式影响 */
