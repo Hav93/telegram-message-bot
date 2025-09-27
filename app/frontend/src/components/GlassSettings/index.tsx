@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Slider, Switch, Button, Space, Typography, ColorPicker, Divider } from 'antd';
-import { SettingOutlined } from '@ant-design/icons';
+import { Modal, Slider, Switch, Button, Space, Typography, ColorPicker, Divider, Collapse, Select } from 'antd';
+import { SettingOutlined, DownOutlined } from '@ant-design/icons';
 import type { Color } from 'antd/es/color-picker';
 
 const { Text } = Typography;
@@ -264,160 +264,193 @@ const GlassSettings: React.FC = () => {
             完成
           </Button>
         ]}
-        width={500}
+        width={450}
+        height={600}
         className="glass-modal"
+        styles={{
+          body: {
+            maxHeight: '480px',
+            overflowY: 'auto',
+            padding: '16px 24px'
+          }
+        }}
       >
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           
-          {/* 启用开关 */}
+          {/* 主开关 */}
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <Text strong style={{ color: '#ffffff' }}>backdrop-filter</Text>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Text strong style={{ color: '#ffffff', fontSize: '16px' }}>启用玻璃质感效果</Text>
               <Switch
                 checked={settings.enabled}
                 onChange={(enabled) => updateSettings({ enabled })}
+                size="default"
               />
             </div>
           </div>
 
           {settings.enabled && (
-            <>
-              {/* 模糊度 */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <Text style={{ color: 'rgba(255, 255, 255, 0.9)' }}>✓ blur</Text>
-                  <Text style={{ color: '#1890ff', fontWeight: 'bold' }}>{settings.blur}</Text>
-                </div>
-                <Slider
-                  min={0}
-                  max={20}
-                  step={1}
-                  value={settings.blur}
-                  onChange={(blur) => updateSettings({ blur })}
-                  trackStyle={{ backgroundColor: '#1890ff' }}
-                  handleStyle={{ borderColor: '#1890ff' }}
-                />
-              </div>
+            <Collapse
+              ghost
+              expandIcon={({ isActive }) => <DownOutlined rotate={isActive ? 180 : 0} style={{ color: '#ffffff' }} />}
+              style={{ 
+                background: 'transparent',
+                border: 'none'
+              }}
+              items={[
+                {
+                  key: 'backdrop-filter',
+                  label: (
+                    <Text strong style={{ color: '#ffffff', fontSize: '15px' }}>
+                      backdrop-filter 滤镜效果
+                    </Text>
+                  ),
+                  children: (
+                    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                      {/* 模糊度 */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                          <Text style={{ color: 'rgba(255, 255, 255, 0.9)' }}>✓ blur 模糊</Text>
+                          <Text style={{ color: '#1890ff', fontWeight: 'bold' }}>{settings.blur}px</Text>
+                        </div>
+                        <Slider
+                          min={0}
+                          max={20}
+                          step={1}
+                          value={settings.blur}
+                          onChange={(blur) => updateSettings({ blur })}
+                          trackStyle={{ backgroundColor: '#1890ff' }}
+                          handleStyle={{ borderColor: '#1890ff' }}
+                        />
+                      </div>
 
-              {/* 亮度 */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <Text style={{ color: 'rgba(255, 255, 255, 0.9)' }}>✓ brightness</Text>
-                  <Text style={{ color: '#1890ff', fontWeight: 'bold' }}>{settings.brightness}</Text>
-                </div>
-                <Slider
-                  min={0}
-                  max={2}
-                  step={0.1}
-                  value={settings.brightness}
-                  onChange={(brightness) => updateSettings({ brightness })}
-                  trackStyle={{ backgroundColor: '#1890ff' }}
-                  handleStyle={{ borderColor: '#1890ff' }}
-                />
-              </div>
+                      {/* 亮度 */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                          <Text style={{ color: 'rgba(255, 255, 255, 0.9)' }}>✓ brightness 亮度</Text>
+                          <Text style={{ color: '#1890ff', fontWeight: 'bold' }}>{settings.brightness}</Text>
+                        </div>
+                        <Slider
+                          min={0}
+                          max={2}
+                          step={0.1}
+                          value={settings.brightness}
+                          onChange={(brightness) => updateSettings({ brightness })}
+                          trackStyle={{ backgroundColor: '#1890ff' }}
+                          handleStyle={{ borderColor: '#1890ff' }}
+                        />
+                      </div>
 
-              {/* 饱和度 */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <Text style={{ color: 'rgba(255, 255, 255, 0.9)' }}>✓ saturation</Text>
-                  <Text style={{ color: '#1890ff', fontWeight: 'bold' }}>{settings.saturation}</Text>
-                </div>
-                <Slider
-                  min={0}
-                  max={2}
-                  step={0.1}
-                  value={settings.saturation}
-                  onChange={(saturation) => updateSettings({ saturation })}
-                  trackStyle={{ backgroundColor: '#1890ff' }}
-                  handleStyle={{ borderColor: '#1890ff' }}
-                />
-              </div>
-
-              <Divider style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }} />
-
-              {/* 颜色设置 */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <Text strong style={{ color: '#ffffff' }}>color</Text>
-                </div>
+                      {/* 饱和度 */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                          <Text style={{ color: 'rgba(255, 255, 255, 0.9)' }}>✓ saturation 饱和度</Text>
+                          <Text style={{ color: '#1890ff', fontWeight: 'bold' }}>{settings.saturation}</Text>
+                        </div>
+                        <Slider
+                          min={0}
+                          max={2}
+                          step={0.1}
+                          value={settings.saturation}
+                          onChange={(saturation) => updateSettings({ saturation })}
+                          trackStyle={{ backgroundColor: '#1890ff' }}
+                          handleStyle={{ borderColor: '#1890ff' }}
+                        />
+                      </div>
+                    </Space>
+                  )
+                },
+                {
+                  key: 'color',
+                  label: (
+                    <Text strong style={{ color: '#ffffff', fontSize: '15px' }}>
+                      color 背景颜色
+                    </Text>
+                  ),
+                  children: (
+                    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                 
-                {/* HSL颜色选择器 */}
-                <div style={{ marginBottom: 16 }}>
-                  <ColorPicker
-                    value={`hsl(${settings.color.h}, ${settings.color.s}%, ${settings.color.l}%, ${settings.color.a})`}
-                    onChange={handleColorChange}
-                    showText={(_color) => (
-                      <span style={{ color: '#ffffff' }}>
-                        hsl({settings.color.h} {settings.color.s}% {settings.color.l}% / {settings.color.a})
-                      </span>
-                    )}
-                    size="large"
-                  />
-                </div>
+                      {/* HSL颜色选择器 */}
+                      <div style={{ marginBottom: 16 }}>
+                        <ColorPicker
+                          value={`hsl(${settings.color.h}, ${settings.color.s}%, ${settings.color.l}%, ${settings.color.a})`}
+                          onChange={handleColorChange}
+                          showText={(_color) => (
+                            <span style={{ color: '#ffffff' }}>
+                              hsl({settings.color.h} {settings.color.s}% {settings.color.l}% / {settings.color.a})
+                            </span>
+                          )}
+                          size="large"
+                        />
+                      </div>
 
-                {/* 透明度单独调节 */}
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <Text style={{ color: 'rgba(255, 255, 255, 0.9)' }}>L</Text>
-                    <Text style={{ color: '#1890ff', fontWeight: 'bold' }}>{settings.color.a}</Text>
-                  </div>
-                  <Slider
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    value={settings.color.a}
-                    onChange={(a) => updateSettings({ 
-                      color: { ...settings.color, a } 
-                    })}
-                    trackStyle={{ backgroundColor: '#1890ff' }}
-                    handleStyle={{ borderColor: '#1890ff' }}
-                  />
-                </div>
-              </div>
-
-              <Divider style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }} />
-
-              {/* 纹理选择 */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <Text strong style={{ color: '#ffffff' }}>texture</Text>
-                </div>
-                
-                <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                  {textureOptions.map((option) => (
-                    <div
-                      key={option.value}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        background: settings.texture === option.value 
-                          ? 'rgba(24, 144, 255, 0.2)' 
-                          : 'rgba(255, 255, 255, 0.05)',
-                        border: settings.texture === option.value 
-                          ? '1px solid #1890ff' 
-                          : '1px solid rgba(255, 255, 255, 0.1)',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease'
-                      }}
-                      onClick={() => updateSettings({ texture: option.value as any })}
-                    >
-                      <div
-                        style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          background: settings.texture === option.value ? '#1890ff' : 'rgba(255, 255, 255, 0.3)',
-                          marginRight: '8px'
-                        }}
-                      />
-                      <Text style={{ color: '#ffffff' }}>{option.label}</Text>
-                    </div>
-                  ))}
-                </Space>
-              </div>
-            </>
+                      {/* 透明度单独调节 */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                          <Text style={{ color: 'rgba(255, 255, 255, 0.9)' }}>透明度</Text>
+                          <Text style={{ color: '#1890ff', fontWeight: 'bold' }}>{settings.color.a}</Text>
+                        </div>
+                        <Slider
+                          min={0}
+                          max={1}
+                          step={0.01}
+                          value={settings.color.a}
+                          onChange={(a) => updateSettings({ 
+                            color: { ...settings.color, a } 
+                          })}
+                          trackStyle={{ backgroundColor: '#1890ff' }}
+                          handleStyle={{ borderColor: '#1890ff' }}
+                        />
+                      </div>
+                    </Space>
+                  )
+                },
+                {
+                  key: 'texture',
+                  label: (
+                    <Text strong style={{ color: '#ffffff', fontSize: '15px' }}>
+                      texture 纹理效果
+                    </Text>
+                  ),
+                  children: (
+                    <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                      {textureOptions.map((option) => (
+                        <div
+                          key={option.value}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            background: settings.texture === option.value 
+                              ? 'rgba(24, 144, 255, 0.2)' 
+                              : 'rgba(255, 255, 255, 0.05)',
+                            border: settings.texture === option.value 
+                              ? '1px solid #1890ff' 
+                              : '1px solid rgba(255, 255, 255, 0.1)',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onClick={() => updateSettings({ texture: option.value as any })}
+                        >
+                          <div
+                            style={{
+                              width: '8px',
+                              height: '8px',
+                              borderRadius: '50%',
+                              background: settings.texture === option.value ? '#1890ff' : 'rgba(255, 255, 255, 0.3)',
+                              marginRight: '8px'
+                            }}
+                          />
+                          <Text style={{ color: '#ffffff' }}>{option.label}</Text>
+                        </div>
+                      ))}
+                    </Space>
+                  )
+                }
+              ]}
+              defaultActiveKey={['backdrop-filter']}
+            />
           )}
         </Space>
       </Modal>

@@ -1615,3 +1615,712 @@ body.theme-custom .glass3d {
   font-weight: 600 !important;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
 }
+
+/* 优化弹窗样式 - 玻璃质感设计 */
+.ant-modal {
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+.ant-modal .ant-modal-content {
+  background: var(--color-glass3d, rgba(255, 255, 255, 0.08)) !important;
+  backdrop-filter: var(--glass-filter, blur(12px) brightness(0.9) saturate(1.2)) !important;
+  -webkit-backdrop-filter: var(--glass-filter, blur(12px) brightness(0.9) saturate(1.2)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 16px !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.ant-modal .ant-modal-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--glass-texture, linear-gradient(45deg, transparent 25%, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.02) 50%, transparent 50%, transparent 75%, rgba(255,255,255,0.02) 75%));
+  background-size: 20px 20px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* 弹窗标题样式 */
+.ant-modal .ant-modal-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+  padding: 20px 24px 16px !important;
+  position: relative;
+  z-index: 1;
+}
+
+.ant-modal .ant-modal-title {
+  color: #ffffff !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* 弹窗内容区域 */
+.ant-modal .ant-modal-body {
+  background: transparent !important;
+  color: #ffffff !important;
+  padding: 24px !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* 弹窗底部按钮区域 */
+.ant-modal .ant-modal-footer {
+  background: transparent !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+  padding: 16px 24px 20px !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* 弹窗内的表单元素样式 */
+.ant-modal .ant-form-item-label > label {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.ant-modal .ant-input,
+.ant-modal .ant-input-password {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(8px) !important;
+  border-radius: 8px !important;
+}
+
+.ant-modal .ant-input::placeholder,
+.ant-modal .ant-input-password::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.ant-modal .ant-input:focus,
+.ant-modal .ant-input-password:focus,
+.ant-modal .ant-input:hover,
+.ant-modal .ant-input-password:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Select下拉框样式 */
+.ant-modal .ant-select .ant-select-selector {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(8px) !important;
+  border-radius: 8px !important;
+}
+
+.ant-modal .ant-select .ant-select-selection-placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.ant-modal .ant-select .ant-select-selection-item {
+  color: #ffffff !important;
+}
+
+/* Tabs组件在弹窗中的样式 */
+.ant-modal .ant-tabs .ant-tabs-tab {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.ant-modal .ant-tabs .ant-tabs-tab-active {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.ant-modal .ant-tabs .ant-tabs-tab:hover {
+  color: #ffffff !important;
+}
+
+.ant-modal .ant-tabs .ant-tabs-ink-bar {
+  background: #ffffff !important;
+}
+
+.ant-modal .ant-tabs .ant-tabs-content-holder {
+  color: #ffffff !important;
+}
+
+/* Upload组件样式 */
+.ant-modal .ant-upload-drag {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 2px dashed rgba(255, 255, 255, 0.3) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.ant-modal .ant-upload-drag:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.ant-modal .ant-upload-drag .ant-upload-drag-icon {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.ant-modal .ant-upload-drag .ant-upload-text {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+.ant-modal .ant-upload-drag .ant-upload-hint {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* 弹窗关闭按钮 */
+.ant-modal .ant-modal-close {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.ant-modal .ant-modal-close:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 50% !important;
+}
+
+/* 按钮在弹窗中的样式优化 */
+.ant-modal .ant-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+  font-weight: 500 !important;
+}
+
+.ant-modal .ant-btn-primary:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
+  transform: translateY(-1px) !important;
+}
+
+.ant-modal .ant-btn-default {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(8px) !important;
+  font-weight: 500 !important;
+}
+
+.ant-modal .ant-btn-default:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Select下拉菜单样式 */
+.ant-select-dropdown {
+  background: rgba(30, 30, 30, 0.95) !important;
+  backdrop-filter: blur(20px) brightness(0.8) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(20px) brightness(0.8) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 6px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  overflow: hidden !important;
+}
+
+.ant-select-dropdown .ant-select-item {
+  color: rgba(255, 255, 255, 0.9) !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  margin: 4px 8px !important;
+  padding: 8px 12px !important;
+  transition: all 0.2s ease !important;
+}
+
+.ant-select-dropdown .ant-select-item:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected {
+  background: rgba(102, 126, 234, 0.3) !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-active {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+/* ColorPicker弹出面板样式 */
+.ant-popover {
+  z-index: 2000 !important;
+}
+
+.ant-popover .ant-popover-inner {
+  background: rgba(30, 30, 30, 0.95) !important;
+  backdrop-filter: blur(20px) brightness(0.8) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(20px) brightness(0.8) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 6px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.ant-popover .ant-popover-arrow::before {
+  background: rgba(30, 30, 30, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* 滑块组件样式优化 */
+.ant-modal .ant-slider {
+  margin: 16px 0 !important;
+}
+
+.ant-modal .ant-slider-rail {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.ant-modal .ant-slider-track {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.ant-modal .ant-slider-handle {
+  background: #ffffff !important;
+  border: 2px solid #667eea !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+}
+
+.ant-modal .ant-slider-handle:hover {
+  border-color: #5a67d8 !important;
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6) !important;
+}
+
+/* Switch开关样式 */
+.ant-modal .ant-switch {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.ant-modal .ant-switch-checked {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.ant-modal .ant-switch:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.ant-modal .ant-switch-checked:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+}
+
+/* 弹窗中的提示文字样式 */
+.ant-modal .ant-typography,
+.ant-modal p,
+.ant-modal span {
+  color: rgba(255, 255, 255, 0.9) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.ant-modal .ant-typography-caption,
+.ant-modal .ant-form-item-explain,
+.ant-modal .ant-form-item-extra {
+  color: rgba(255, 255, 255, 0.7) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Collapse组件在弹窗中的样式 */
+.ant-modal .ant-collapse {
+  background: transparent !important;
+  border: none !important;
+}
+
+.ant-modal .ant-collapse > .ant-collapse-item {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  margin-bottom: 12px !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.ant-modal .ant-collapse > .ant-collapse-item:last-child {
+  margin-bottom: 0 !important;
+}
+
+.ant-modal .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+  background: transparent !important;
+  border-bottom: none !important;
+  padding: 16px 20px !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+}
+
+.ant-modal .ant-collapse > .ant-collapse-item.ant-collapse-item-active > .ant-collapse-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.ant-modal .ant-collapse > .ant-collapse-item > .ant-collapse-content {
+  background: transparent !important;
+  border-top: none !important;
+}
+
+.ant-modal .ant-collapse > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
+  padding: 20px !important;
+  background: transparent !important;
+}
+
+.ant-modal .ant-collapse .ant-collapse-expand-icon {
+  color: rgba(255, 255, 255, 0.8) !important;
+  transition: all 0.2s ease !important;
+}
+
+.ant-modal .ant-collapse .ant-collapse-expand-icon:hover {
+  color: #ffffff !important;
+}
+
+/* 玻璃质感弹窗滚动条样式 */
+.glass-modal .ant-modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.glass-modal .ant-modal-body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.glass-modal .ant-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.glass-modal .ant-modal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* 对于Firefox浏览器的滚动条样式 */
+.glass-modal .ant-modal-body {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
+}
+
+/* 玻璃卡片内的表单样式优化 */
+.glass-card .ant-form-item-label > label,
+.glass-card-3d .ant-form-item-label > label {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+  font-size: 14px !important;
+}
+
+.glass-card .ant-form-item-label > label.ant-form-item-required::before,
+.glass-card-3d .ant-form-item-label > label.ant-form-item-required::before {
+  color: #ff4d4f !important;
+}
+
+.glass-card .ant-input,
+.glass-card .ant-input-password,
+.glass-card .ant-input-number,
+.glass-card .ant-select .ant-select-selector,
+.glass-card .ant-picker,
+.glass-card-3d .ant-input,
+.glass-card-3d .ant-input-password,
+.glass-card-3d .ant-input-number,
+.glass-card-3d .ant-select .ant-select-selector,
+.glass-card-3d .ant-picker {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(8px) !important;
+  border-radius: 8px !important;
+}
+
+.glass-card .ant-input::placeholder,
+.glass-card .ant-input-password::placeholder,
+.glass-card .ant-input-number-input::placeholder,
+.glass-card-3d .ant-input::placeholder,
+.glass-card-3d .ant-input-password::placeholder,
+.glass-card-3d .ant-input-number-input::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.glass-card .ant-input:focus,
+.glass-card .ant-input-password:focus,
+.glass-card .ant-input-number:focus,
+.glass-card .ant-select .ant-select-selector:focus,
+.glass-card .ant-picker:focus,
+.glass-card .ant-input:hover,
+.glass-card .ant-input-password:hover,
+.glass-card .ant-input-number:hover,
+.glass-card .ant-select .ant-select-selector:hover,
+.glass-card .ant-picker:hover,
+.glass-card-3d .ant-input:focus,
+.glass-card-3d .ant-input-password:focus,
+.glass-card-3d .ant-input-number:focus,
+.glass-card-3d .ant-select .ant-select-selector:focus,
+.glass-card-3d .ant-picker:focus,
+.glass-card-3d .ant-input:hover,
+.glass-card-3d .ant-input-password:hover,
+.glass-card-3d .ant-input-number:hover,
+.glass-card-3d .ant-select .ant-select-selector:hover,
+.glass-card-3d .ant-picker:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1) !important;
+}
+
+.glass-card .ant-select .ant-select-selection-placeholder,
+.glass-card-3d .ant-select .ant-select-selection-placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.glass-card .ant-select .ant-select-selection-item,
+.glass-card-3d .ant-select .ant-select-selection-item {
+  color: #ffffff !important;
+}
+
+.glass-card .ant-picker-input > input,
+.glass-card-3d .ant-picker-input > input {
+  color: #ffffff !important;
+}
+
+.glass-card .ant-picker-input > input::placeholder,
+.glass-card-3d .ant-picker-input > input::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* 分割线样式 */
+.glass-card .ant-divider,
+.glass-card-3d .ant-divider {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.glass-card .ant-divider-inner-text,
+.glass-card-3d .ant-divider-inner-text {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Switch开关在玻璃卡片中的样式 */
+.glass-card .ant-switch,
+.glass-card-3d .ant-switch {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.glass-card .ant-switch-checked,
+.glass-card-3d .ant-switch-checked {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.glass-card .ant-switch:hover,
+.glass-card-3d .ant-switch:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.glass-card .ant-switch-checked:hover,
+.glass-card-3d .ant-switch-checked:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+}
+
+/* 表单提示文字 */
+.glass-card .ant-form-item-explain,
+.glass-card .ant-form-item-extra,
+.glass-card-3d .ant-form-item-explain,
+.glass-card-3d .ant-form-item-extra {
+  color: rgba(255, 255, 255, 0.7) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* InputNumber 数字输入框 */
+.glass-card .ant-input-number-input,
+.glass-card-3d .ant-input-number-input {
+  background: transparent !important;
+  color: #ffffff !important;
+}
+
+.glass-card .ant-input-number-handler-wrap,
+.glass-card-3d .ant-input-number-handler-wrap {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.glass-card .ant-input-number-handler,
+.glass-card-3d .ant-input-number-handler {
+  color: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.glass-card .ant-input-number-handler:hover,
+.glass-card-3d .ant-input-number-handler:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 空状态组件样式优化 */
+.glass-card .ant-empty,
+.glass-card-3d .ant-empty {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.glass-card .ant-empty-description,
+.glass-card-3d .ant-empty-description {
+  color: rgba(255, 255, 255, 0.7) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.glass-card .ant-empty-image,
+.glass-card-3d .ant-empty-image {
+  opacity: 0.6 !important;
+  filter: invert(1) opacity(0.8) !important;
+}
+
+/* 确保所有卡片内容都有玻璃质感背景 */
+.glass-card,
+.glass-card-3d {
+  background: var(--color-glass3d, rgba(255, 255, 255, 0.08)) !important;
+  backdrop-filter: var(--glass-filter, blur(12px) brightness(0.9) saturate(1.2)) !important;
+  -webkit-backdrop-filter: var(--glass-filter, blur(12px) brightness(0.9) saturate(1.2)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 16px !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  position: relative !important;
+}
+
+.glass-card::before,
+.glass-card-3d::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--glass-texture, linear-gradient(45deg, transparent 25%, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.02) 50%, transparent 50%, transparent 75%, rgba(255,255,255,0.02) 75%));
+  background-size: 20px 20px;
+  pointer-events: none;
+  opacity: 0.6;
+  border-radius: inherit;
+}
+
+/* 卡片内容区域 */
+.glass-card .ant-card-body,
+.glass-card-3d .ant-card-body {
+  background: transparent !important;
+  position: relative;
+  z-index: 1;
+}
+
+.glass-card .ant-card-head,
+.glass-card-3d .ant-card-head {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* 确保卡片标题是白色 */
+.glass-card .ant-card-head-title,
+.glass-card-3d .ant-card-head-title {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* 卡片内的额外操作按钮 */
+.glass-card .ant-card-extra,
+.glass-card-3d .ant-card-extra {
+  position: relative;
+  z-index: 1;
+}
+
+/* 表格整体背景透明 */
+.glass-card .ant-table-wrapper,
+.glass-card-3d .ant-table-wrapper {
+  background: transparent !important;
+}
+
+.glass-card .ant-table-container,
+.glass-card-3d .ant-table-container {
+  background: transparent !important;
+}
+
+.glass-card .ant-table,
+.glass-card-3d .ant-table {
+  background: transparent !important;
+}
+
+.glass-card .ant-table-content,
+.glass-card-3d .ant-table-content {
+  background: transparent !important;
+}
+
+/* 分页器样式 */
+.glass-card .ant-pagination,
+.glass-card-3d .ant-pagination {
+  margin-top: 16px !important;
+}
+
+.glass-card .ant-pagination .ant-pagination-item,
+.glass-card-3d .ant-pagination .ant-pagination-item {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.glass-card .ant-pagination .ant-pagination-item:hover,
+.glass-card-3d .ant-pagination .ant-pagination-item:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.glass-card .ant-pagination .ant-pagination-item-active,
+.glass-card-3d .ant-pagination .ant-pagination-item-active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-color: #667eea !important;
+  color: #ffffff !important;
+}
+
+.glass-card .ant-pagination .ant-pagination-prev,
+.glass-card .ant-pagination .ant-pagination-next,
+.glass-card .ant-pagination .ant-pagination-jump-prev,
+.glass-card .ant-pagination .ant-pagination-jump-next,
+.glass-card-3d .ant-pagination .ant-pagination-prev,
+.glass-card-3d .ant-pagination .ant-pagination-next,
+.glass-card-3d .ant-pagination .ant-pagination-jump-prev,
+.glass-card-3d .ant-pagination .ant-pagination-jump-next {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.glass-card .ant-pagination .ant-pagination-prev:hover,
+.glass-card .ant-pagination .ant-pagination-next:hover,
+.glass-card-3d .ant-pagination .ant-pagination-prev:hover,
+.glass-card-3d .ant-pagination .ant-pagination-next:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+}
+
+.glass-card .ant-pagination .ant-pagination-options,
+.glass-card-3d .ant-pagination .ant-pagination-options {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.glass-card .ant-pagination .ant-pagination-total-text,
+.glass-card-3d .ant-pagination .ant-pagination-total-text {
+  color: rgba(255, 255, 255, 0.9) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}

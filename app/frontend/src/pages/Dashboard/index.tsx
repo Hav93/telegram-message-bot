@@ -975,13 +975,17 @@ const Dashboard: React.FC = () => {
                 }}
                 cursor={false} // 完全禁用悬停背景
                 formatter={(value: any, name: any, props: any) => {
-                  console.log('📊 柱状图Tooltip调试:', { value, name, props });
+                  console.log('📊 柱状图Tooltip调试:', { value, name, props, payload: props?.payload });
+                  
+                  // 尝试从多个来源获取规则名
+                  const ruleName = name || props?.name || props?.dataKey || props?.payload?.name || '未知规则';
+                  
                   return [
                     <span style={{ color: '#ffffff', fontSize: '15px', fontWeight: '600' }}>
                       {value}条
                     </span>, 
                     <span style={{ color: '#ffffff', fontSize: '14px', fontWeight: '500' }}>
-                      {name || '未知规则'}
+                      {ruleName}
                     </span>
                   ];
                 }}
