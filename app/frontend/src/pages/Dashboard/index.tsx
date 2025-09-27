@@ -11,7 +11,7 @@ import {
 } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Column, Bar } from '@ant-design/plots';
+import { Column, Bar, Pie } from '@ant-design/plots';
 import dayjs from 'dayjs';
 
 // Services
@@ -548,14 +548,14 @@ const Dashboard: React.FC = () => {
 
       {/* 今日统计图表和日志表格 */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        {/* 今日规则统计图表 */}
+        {/* 今日规则统计图表 - 圆环图 */}
         <Col xs={24} lg={12}>
           <Card
             className="glass-card"
             title={
               <span style={{ color: '#ffffff' }}>
                 <BarChartOutlined style={{ marginRight: 8 }} />
-                今日规则统计
+                资产统计
               </span>
             }
             style={{ height: 400 }}
@@ -565,56 +565,81 @@ const Dashboard: React.FC = () => {
                 <Spin size="large" />
               </div>
             ) : todayStats?.chartData?.length ? (
-              <Bar
-                data={todayStats.chartData}
-                xField="count"
-                yField="rule"
-                height={300}
-                color={(datum: any) => {
-                  const colors = ['#1890ff', '#52c41a', '#fa8c16', '#eb2f96', '#722ed1', '#13c2c2', '#f5222d', '#faad14'];
-                  const index = todayStats.chartData.findIndex((item: any) => item.rule === datum.rule);
-                  return colors[index % colors.length];
-                }}
-                barWidthRatio={0.6}
-                legend={false}
-                barStyle={{
-                  fillOpacity: 0.8,
-                  radius: [0, 4, 4, 0],
-                }}
-                xAxis={{
-                  label: {
-                    style: {
-                      fill: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: 12,
-                    },
-                  },
-                  grid: {
-                    line: {
+              <div style={{ position: 'relative', height: 300 }}>
+                {/* 左上角标签统计 */}
+                <div style={{ 
+                  position: 'absolute', 
+                  top: 20, 
+                  left: 20, 
+                  zIndex: 10,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
+                }}>
+                  {todayStats.chartData.map((item: any, index: number) => {
+                    const colors = ['#00D4FF', '#52c41a', '#fa8c16', '#eb2f96'];
+                    const color = colors[index % colors.length];
+                    return (
+                      <div key={item.rule} style={{ 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        fontSize: '12px',
+                        color: '#ffffff'
+                      }}>
+                        <div style={{ 
+                          width: 8, 
+                          height: 8, 
+                          backgroundColor: color,
+                          borderRadius: '50%',
+                          marginRight: 8
+                        }} />
+                        <span style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+                          {item.rule}: {item.count}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {/* 圆环图 */}
+                <Pie
+                  data={todayStats.chartData}
+                  angleField="count"
+                  colorField="rule"
+                  radius={0.8}
+                  innerRadius={0.5}
+                  height={300}
+                  color={['#00D4FF', '#52c41a', '#fa8c16', '#eb2f96']}
+                  legend={false}
+                  label={false}
+                  statistic={{
+                    title: {
                       style: {
-                        stroke: 'rgba(255, 255, 255, 0.15)',
-                        lineDash: [2, 2],
+                        color: '#ffffff',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
                       },
+                      content: '总计',
                     },
-                  },
-                }}
-                yAxis={{
-                  label: {
-                    style: {
-                      fill: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: 12,
+                    content: {
+                      style: {
+                        color: '#00D4FF',
+                        fontSize: '24px',
+                        fontWeight: 'bold',
+                      },
+                      content: todayStats.chartData.reduce((sum: number, item: any) => sum + item.count, 0).toString(),
                     },
-                  },
-                }}
-                tooltip={{
-                  formatter: (datum: any) => {
-                    console.log('🔍 Tooltip formatter 被调用:', datum);
-                    return {
-                      name: datum.rule,
-                      value: datum.count + '条消息'
-                    };
-                  }
-                }}
-              />
+                  }}
+                  tooltip={{
+                    formatter: (datum: any) => {
+                      return {
+                        name: datum.rule,
+                        value: datum.count + '条消息'
+                      };
+                    }
+                  }}
+                />
+              </div>
             ) : (
               <div style={{ 
                 textAlign: 'center', 

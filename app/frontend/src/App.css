@@ -35,7 +35,9 @@ html, body {
 
 .ant-modal-mask {
   z-index: 10000 !important;
-  background-color: rgba(0, 0, 0, 0.45) !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
 }
 
 .ant-modal-wrap {
@@ -375,25 +377,174 @@ a:hover, .ant-typography a:hover {
   color: rgba(255, 255, 255, 0.7) !important;
 }
 
-/* 模态框样式 */
+/* 模态框样式 - 优化可读性的玻璃质感 */
 .ant-modal-content {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.25) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 16px !important;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
 }
 
 .ant-modal-header {
-  background: transparent !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 16px 16px 0 0 !important;
 }
 
 .ant-modal-title {
   color: white !important;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    0 1px 2px rgba(0, 0, 0, 0.8) !important;
+  font-weight: 600 !important;
 }
 
 .ant-modal-body {
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.6),
+    0 1px 1px rgba(0, 0, 0, 0.8) !important;
+}
+
+.ant-modal-footer {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 0 0 16px 16px !important;
+}
+
+/* 模态框中的按钮样式优化 */
+.ant-modal-footer .ant-btn {
+  backdrop-filter: blur(10px) !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-modal-footer .ant-btn-default {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
   color: rgba(255, 255, 255, 0.9) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.ant-modal-footer .ant-btn-default:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+}
+
+.ant-modal-footer .ant-btn-primary {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%) !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
+}
+
+.ant-modal-footer .ant-btn-primary:hover {
+  background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4) !important;
+}
+
+.ant-modal-footer .ant-btn-danger {
+  background: linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%) !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3) !important;
+}
+
+.ant-modal-footer .ant-btn-danger:hover {
+  background: linear-gradient(135deg, #ff7875 0%, #ff4d4f 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(255, 77, 79, 0.4) !important;
+}
+
+/* Steps组件样式优化（登录模态框） */
+.ant-modal .ant-steps {
+  background: transparent !important;
+}
+
+.ant-modal .ant-steps-item-title {
+  color: rgba(255, 255, 255, 0.9) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.ant-modal .ant-steps-item-description {
+  color: rgba(255, 255, 255, 0.7) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.ant-modal .ant-steps-item-icon {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.ant-modal .ant-steps-item-process .ant-steps-item-icon {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%) !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
+}
+
+.ant-modal .ant-steps-item-finish .ant-steps-item-icon {
+  background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%) !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3) !important;
+}
+
+.ant-modal .ant-steps-item-tail::after {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.ant-modal .ant-steps-item-finish .ant-steps-item-tail::after {
+  background: linear-gradient(90deg, #52c41a 0%, rgba(82, 196, 26, 0.3) 100%) !important;
+}
+
+/* Alert组件在模态框中的样式优化 */
+.ant-modal .ant-alert {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 8px !important;
+}
+
+.ant-modal .ant-alert-info {
+  background: rgba(24, 144, 255, 0.1) !important;
+  border-color: rgba(24, 144, 255, 0.3) !important;
+}
+
+.ant-modal .ant-alert-success {
+  background: rgba(82, 196, 26, 0.1) !important;
+  border-color: rgba(82, 196, 26, 0.3) !important;
+}
+
+.ant-modal .ant-alert-warning {
+  background: rgba(250, 140, 22, 0.1) !important;
+  border-color: rgba(250, 140, 22, 0.3) !important;
+}
+
+.ant-modal .ant-alert-error {
+  background: rgba(255, 77, 79, 0.1) !important;
+  border-color: rgba(255, 77, 79, 0.3) !important;
+}
+
+.ant-modal .ant-alert-message {
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  font-weight: 600 !important;
+}
+
+.ant-modal .ant-alert-description {
+  color: rgba(255, 255, 255, 0.8) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* 开关样式 */
@@ -520,4 +671,174 @@ a:hover, .ant-typography a:hover {
 .ant-input-affix-wrapper:focus-within {
   border-color: #667eea !important;
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+}
+
+/* 主题切换器模态框样式 - 优化可读性 */
+.glass-modal .ant-modal-content {
+  background: rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 12px !important;
+}
+
+.glass-modal .ant-modal-header {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.glass-modal .ant-modal-footer {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.glass-modal .ant-modal-body {
+  background: transparent !important;
+}
+
+.glass-modal .ant-radio-button-wrapper {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.glass-modal .ant-radio-button-wrapper-checked {
+  background: rgba(24, 144, 255, 0.3) !important;
+  border-color: #1890ff !important;
+  color: #ffffff !important;
+}
+
+.glass-modal .ant-radio-button-wrapper:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* 不同主题下的模态框适应性样式 */
+
+/* 深色主题下的模态框优化 */
+body.theme-dark .ant-modal-content {
+  background: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+body.theme-dark .ant-modal-header {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.theme-dark .ant-modal-footer {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 深色主题下的自定义模态框 */
+body.theme-dark .custom-modal {
+  background: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+body.theme-dark .custom-modal-header {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.theme-dark .custom-modal-footer {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 灰色主题下的模态框优化 */
+body.theme-gray .ant-modal-content {
+  background: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+}
+
+body.theme-gray .custom-modal {
+  background: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+}
+
+body.theme-gray .ant-modal-header {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+body.theme-gray .ant-modal-footer {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+body.theme-gray .custom-modal-header {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+body.theme-gray .custom-modal-footer {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* 自定义背景下的模态框强化 */
+body.theme-custom .ant-modal-content {
+  background: rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+body.theme-custom .ant-modal-header {
+  background: rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(15px) !important;
+}
+
+body.theme-custom .ant-modal-footer {
+  background: rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(15px) !important;
+}
+
+body.theme-custom .custom-modal {
+  background: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(25px) !important;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+body.theme-custom .custom-modal-header {
+  background: rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(15px) !important;
+}
+
+body.theme-custom .custom-modal-footer {
+  background: rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(15px) !important;
+}
+
+/* 自定义背景下的文字增强 */
+body.theme-custom .ant-modal-title,
+body.theme-custom .custom-modal-title {
+  text-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.8),
+    0 1px 3px rgba(0, 0, 0, 0.9),
+    0 0 1px rgba(0, 0, 0, 1) !important;
+}
+
+body.theme-custom .ant-modal-body,
+body.theme-custom .custom-modal-content p {
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* 自定义背景下的按钮文字增强 */
+body.theme-custom .ant-modal-footer .ant-btn,
+body.theme-custom .custom-modal-button {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7) !important;
 }

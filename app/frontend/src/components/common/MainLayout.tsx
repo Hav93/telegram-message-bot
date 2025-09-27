@@ -19,6 +19,7 @@ import {
   MenuUnfoldOutlined,
   UserOutlined,
 } from '@ant-design/icons';
+import ThemeSwitcher from '../ThemeSwitcher';
 
 const { Header, Sider } = Layout;
 const { Text } = Typography;
@@ -288,8 +289,9 @@ const MainLayout: React.FC = () => {
               </div>
             </div>
 
-            {/* 右侧：用户信息（更大的头像和文字） */}
-            <Space align="center" size={12}>
+            {/* 右侧：主题切换器和用户信息 */}
+            <Space align="center" size={16}>
+              <ThemeSwitcher />
               <Avatar
                 size={40}
                 icon={<UserOutlined />}
