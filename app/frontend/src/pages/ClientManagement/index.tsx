@@ -351,12 +351,23 @@ const ClientManagement: React.FC = () => {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <Title level={2}>客户端管理</Title>
-        <Text type="secondary">
+      <Card className="glass-card-3d" style={{ marginBottom: '24px' }}>
+        <Title level={2} style={{ 
+          color: '#ffffff', 
+          fontWeight: 600,
+          textShadow: '0 2px 4px rgba(0, 0, 0, 0.6)',
+          marginBottom: '8px'
+        }}>
+          客户端管理
+        </Title>
+        <Text style={{ 
+          color: 'rgba(255, 255, 255, 0.8)', 
+          fontSize: '14px',
+          textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
+        }}>
           管理Telegram客户端实例，支持多用户和机器人客户端并发运行
         </Text>
-      </div>
+      </Card>
 
       {/* 统计信息 */}
       {systemStatus?.enhanced_mode && (

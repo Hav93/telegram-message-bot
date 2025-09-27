@@ -1462,3 +1462,156 @@ body.theme-custom .glass3d {
   display: none !important;
   opacity: 0 !important;
 }
+
+/* 表格文字样式优化 - 确保在玻璃质感背景下的可读性 */
+.glass-card .ant-table {
+  background: transparent !important;
+}
+
+.glass-card .ant-table-thead > tr > th {
+  background: transparent !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.glass-card .ant-table-tbody > tr > td {
+  background: transparent !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.glass-card .ant-table-tbody > tr:hover > td {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+/* 表格内的Text组件样式 */
+.glass-card .ant-table .ant-typography {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+}
+
+.glass-card .ant-table .ant-typography-caption {
+  color: rgba(255, 255, 255, 0.8) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* 表格内的Tag组件样式优化 */
+.glass-card .ant-table .ant-tag {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+  font-weight: 500 !important;
+}
+
+.glass-card .ant-table .ant-tag-success {
+  background: rgba(82, 196, 26, 0.3) !important;
+  border-color: rgba(82, 196, 26, 0.5) !important;
+}
+
+.glass-card .ant-table .ant-tag-processing {
+  background: rgba(24, 144, 255, 0.3) !important;
+  border-color: rgba(24, 144, 255, 0.5) !important;
+}
+
+.glass-card .ant-table .ant-tag-error {
+  background: rgba(255, 77, 79, 0.3) !important;
+  border-color: rgba(255, 77, 79, 0.5) !important;
+}
+
+.glass-card .ant-table .ant-tag-blue {
+  background: rgba(24, 144, 255, 0.3) !important;
+  border-color: rgba(24, 144, 255, 0.5) !important;
+}
+
+.glass-card .ant-table .ant-tag-green {
+  background: rgba(82, 196, 26, 0.3) !important;
+  border-color: rgba(82, 196, 26, 0.5) !important;
+}
+
+/* 表格内的图标样式 */
+.glass-card .ant-table .anticon {
+  color: #ffffff !important;
+}
+
+/* 表格空状态文字 */
+.glass-card .ant-table .ant-empty-description {
+  color: rgba(255, 255, 255, 0.8) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* StatsCard组件样式优化 */
+.glass-card-3d .ant-statistic {
+  color: #ffffff !important;
+}
+
+.glass-card-3d .ant-statistic-title {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+  font-size: 14px !important;
+}
+
+.glass-card-3d .ant-statistic-content {
+  color: #ffffff !important;
+  font-weight: bold !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+.glass-card-3d .ant-statistic-content-value {
+  color: inherit !important;
+  text-shadow: inherit !important;
+}
+
+.glass-card-3d .ant-statistic-content-suffix,
+.glass-card-3d .ant-statistic-content-prefix {
+  color: inherit !important;
+  text-shadow: inherit !important;
+}
+
+/* Skeleton组件在玻璃卡片中的样式 */
+.glass-card-3d .ant-skeleton-title {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 25%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0.2) 75%) !important;
+}
+
+.glass-card-3d .ant-skeleton-paragraph > li {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 25%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0.2) 75%) !important;
+}
+
+.glass-card-3d .ant-skeleton-input {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 25%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0.2) 75%) !important;
+}
+
+/* 页面标题和描述文字统一样式 */
+.glass-card-3d .ant-typography h1,
+.glass-card-3d .ant-typography h2,
+.glass-card-3d .ant-typography h3,
+.glass-card-3d .ant-typography h4,
+.glass-card-3d .ant-typography h5 {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+  margin-bottom: 8px !important;
+}
+
+.glass-card-3d .ant-typography {
+  color: rgba(255, 255, 255, 0.8) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.glass-card-3d .ant-typography.ant-typography-secondary {
+  color: rgba(255, 255, 255, 0.7) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 确保Card标题也是白色 */
+.glass-card-3d .ant-card-head-title {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+}
