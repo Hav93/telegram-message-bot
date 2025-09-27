@@ -3,6 +3,13 @@
   box-sizing: border-box;
 }
 
+/* 玻璃质感CSS变量 - 可通过JS动态调整 */
+:root {
+  --glass-filter: blur(5px) brightness(0.8) saturate(1);
+  --glass-color: hsl(180 80% 10% / 0.2);
+  --glass-texture: url("https://www.transparenttextures.com/patterns/rice-paper.png");
+}
+
 /* 性能优化 - 启用硬件加速 */
 .glass-card,
 .glass-card-3d,
@@ -1229,7 +1236,7 @@ body.theme-custom .glass3d {
   --filter-glass3d: blur(6px) brightness(0.7) saturate(1.2);
 }
 
-/* 性能优化的3D玻璃卡片 */
+/* 可定制的3D玻璃卡片 - 使用CSS变量 */
 .glass-card-3d {
   position: relative; 
   z-index: 4; 
@@ -1243,10 +1250,10 @@ body.theme-custom .glass3d {
     0 2px 8px rgba(0, 0, 0, 0.15),
     0 8px 32px rgba(0, 0, 0, 0.08) !important;
   
-  /* 直接背景，避免backdrop-filter */
-  background: rgba(255, 255, 255, 0.06) !important;
-  backdrop-filter: blur(4px) !important; /* 减少模糊半径 */
-  -webkit-backdrop-filter: blur(4px) !important;
+  /* 使用CSS变量的动态背景 */
+  background: var(--glass-color) !important;
+  backdrop-filter: var(--glass-filter) !important;
+  -webkit-backdrop-filter: var(--glass-filter) !important;
 }
 
 .glass-card-3d::before { 
@@ -1257,12 +1264,15 @@ body.theme-custom .glass3d {
   border-radius: inherit; 
   z-index: 1; 
   
-  /* 简化的渐变背景替代纹理 */
-  background: linear-gradient(
-    135deg, 
-    rgba(255, 255, 255, 0.1) 0%, 
-    rgba(255, 255, 255, 0.02) 100%
-  );
+  /* 使用CSS变量的动态纹理背景 */
+  background-image: var(--glass-texture);
+  background-size: 100px;
+  background-repeat: repeat;
+  opacity: 0.3;
+  
+  /* 渐变叠加 */
+  background-blend-mode: overlay;
+  background-color: transparent;
 }
 
 .glass-card-3d::after { 
@@ -1273,7 +1283,7 @@ body.theme-custom .glass3d {
   border-radius: inherit; 
   z-index: 2; 
   
-  /* 简化的内嵌高光 */
+  /* 内嵌高光 */
   box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2); 
 }
 
@@ -1283,30 +1293,31 @@ body.theme-custom .glass3d {
 }
 
 .glass-card-3d:hover {
-  transform: translateY(-2px) !important; /* 减少变形 */
+  transform: translateY(-2px) !important;
   box-shadow:  
     0 4px 16px rgba(0, 0, 0, 0.2),
     0 12px 48px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* 性能优化的玻璃卡片效果 */
+/* 统一使用可定制的玻璃卡片效果 */
 .glass-card {
+  /* 继承glass-card-3d的所有样式 */
   position: relative; 
-  z-index: 4;
+  z-index: 4; 
   border-radius: 12px !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease !important;
   
-  /* 简化的阴影 */
+  /* 简化的阴影 - 减少层数提升性能 */
   box-shadow:  
-    0 2px 8px rgba(0, 0, 0, 0.1), 
-    0 8px 32px rgba(0, 0, 0, 0.05) !important;
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.08) !important;
   
-  /* 直接背景，减少backdrop-filter使用 */
-  background: rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(6px) !important; /* 减少模糊半径 */
-  -webkit-backdrop-filter: blur(6px) !important;
+  /* 使用CSS变量的动态背景 */
+  background: var(--glass-color) !important;
+  backdrop-filter: var(--glass-filter) !important;
+  -webkit-backdrop-filter: var(--glass-filter) !important;
 }
 
 .glass-card::before { 
@@ -1317,13 +1328,15 @@ body.theme-custom .glass3d {
   border-radius: inherit; 
   z-index: 1; 
   
-  /* 简化的渐变背景 */
-  background: linear-gradient(
-    135deg, 
-    rgba(255, 255, 255, 0.12) 0%, 
-    rgba(255, 255, 255, 0.03) 100%
-  );
-  opacity: 0.6;
+  /* 使用CSS变量的动态纹理背景 */
+  background-image: var(--glass-texture);
+  background-size: 100px;
+  background-repeat: repeat;
+  opacity: 0.3;
+  
+  /* 渐变叠加 */
+  background-blend-mode: overlay;
+  background-color: transparent;
 }
 
 .glass-card::after { 
@@ -1334,8 +1347,8 @@ body.theme-custom .glass3d {
   border-radius: inherit; 
   z-index: 2; 
   
-  /* 简化的内嵌高光 */
-  box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.25); 
+  /* 内嵌高光 */
+  box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.2); 
 }
 
 .glass-card > * { 
@@ -1346,8 +1359,8 @@ body.theme-custom .glass3d {
 .glass-card:hover {
   transform: translateY(-2px) !important;
   box-shadow:  
-    0 4px 16px rgba(0, 0, 0, 0.15), 
-    0 12px 48px rgba(0, 0, 0, 0.08) !important;
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    0 12px 48px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* ============================================

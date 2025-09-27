@@ -629,17 +629,21 @@ const Dashboard: React.FC = () => {
                       <div key={item.rule} style={{ 
                         display: 'flex', 
                         alignItems: 'center',
-                        fontSize: '12px',
-                        color: '#ffffff'
+                        fontSize: '15px',
+                        color: '#ffffff',
+                        fontWeight: '500'
                       }}>
                         <div style={{ 
-                          width: 8, 
-                          height: 8, 
+                          width: 10, 
+                          height: 10, 
                           backgroundColor: color,
                           borderRadius: '50%',
-                          marginRight: 8
+                          marginRight: 10
                         }} />
-                        <span style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+                        <span style={{ 
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
+                        }}>
                           {item.rule}: {item.count}
                         </span>
                       </div>
@@ -970,20 +974,27 @@ const Dashboard: React.FC = () => {
                   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
                 }}
                 cursor={false} // 完全禁用悬停背景
-                formatter={(value: any, name: any) => [
-                  <span style={{ color: '#ffffff', fontSize: '15px', fontWeight: '600' }}>
-                    {value}条
-                  </span>, 
-                  <span style={{ color: '#ffffff', fontSize: '14px', fontWeight: '500' }}>
-                    {name}
-                  </span>
-                ]}
-                labelStyle={{ 
-                  color: '#ffffff', 
-                  fontWeight: 'bold',
-                  fontSize: '16px',
-                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
+                formatter={(value: any, name: any, props: any) => {
+                  console.log('📊 柱状图Tooltip调试:', { value, name, props });
+                  return [
+                    <span style={{ color: '#ffffff', fontSize: '15px', fontWeight: '600' }}>
+                      {value}条
+                    </span>, 
+                    <span style={{ color: '#ffffff', fontSize: '14px', fontWeight: '500' }}>
+                      {name || '未知规则'}
+                    </span>
+                  ];
                 }}
+                labelFormatter={(label: any) => (
+                  <span style={{ 
+                    color: '#ffffff', 
+                    fontWeight: 'bold',
+                    fontSize: '16px',
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
+                  }}>
+                    {label}
+                  </span>
+                )}
               />
               {/* 动态生成Bar组件，健壮地处理各种数据类型 */}
               {(() => {
