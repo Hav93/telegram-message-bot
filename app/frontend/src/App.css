@@ -405,19 +405,23 @@ a:hover, .ant-typography a:hover {
   color: #ffadd2 !important;
 }
 
-/* 全局输入框样式 - 仅应用于非玻璃质感容器 */
-body:not(.glass-modal) .ant-input:not(.glass-card .ant-input):not(.glass-card-3d .ant-input), 
-body:not(.glass-modal) .ant-select-selector:not(.glass-card .ant-select-selector):not(.glass-card-3d .ant-select-selector), 
-body:not(.glass-modal) .ant-textarea:not(.glass-card .ant-textarea):not(.glass-card-3d .ant-textarea),
-body:not(.glass-modal) .ant-input-password:not(.glass-card .ant-input-password):not(.glass-card-3d .ant-input-password),
-body:not(.glass-modal) .ant-input-password .ant-input:not(.glass-card .ant-input):not(.glass-card-3d .ant-input),
-body:not(.glass-modal) .ant-input-number:not(.glass-card .ant-input-number):not(.glass-card-3d .ant-input-number),
-body:not(.glass-modal) .ant-input-number .ant-input-number-input:not(.glass-card .ant-input-number-input):not(.glass-card-3d .ant-input-number-input) {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  color: white !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
+/* 全局输入框透明玻璃质感 */
+.ant-input, 
+.ant-select-selector, 
+.ant-textarea,
+.ant-input-password,
+.ant-input-password .ant-input,
+.ant-input-number,
+.ant-input-number .ant-input-number-input {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(12px) brightness(1.1) !important;
+  -webkit-backdrop-filter: blur(12px) brightness(1.1) !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .ant-input::placeholder, 
@@ -922,19 +926,19 @@ body.theme-custom .ant-alert-description {
   box-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
 }
 
-/* 搜索框输入文字样式 */
+/* 搜索框输入文字样式 - 也使用玻璃质感 */
 .ant-input-affix-wrapper .ant-input {
-  color: #1a1a1a !important;
-  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
   font-weight: 500 !important;
 }
 
 .ant-input-affix-wrapper .ant-input::placeholder {
-  color: #999 !important;
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
 .ant-input-affix-wrapper {
-  background-color: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
   border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
@@ -2546,6 +2550,22 @@ body.theme-custom .glass3d {
 .glass-card-3d .ant-input::placeholder,
 .glass-card-3d .ant-input-affix-wrapper input::placeholder {
   color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 防止页面标题文字换行显示 */
+.ant-typography h1,
+.ant-typography h2,
+.ant-typography h3,
+.ant-typography h4,
+.ant-typography h5,
+.ant-typography h6,
+h1, h2, h3, h4, h5, h6,
+.ant-page-header-heading-title,
+.glass-card .ant-card-head-title,
+.glass-card-3d .ant-card-head-title {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 /* 优化空状态样式 */
