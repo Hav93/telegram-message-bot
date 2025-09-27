@@ -14,10 +14,31 @@ import gzip
 import shutil
 import asyncio
 from typing import Optional
-import sys
+
+# 确保能找到配置文件 - Docker和本地环境兼容
 import os
-sys.path.append('app/backend')
-from config import Config
+if os.path.exists('app/backend/config.py'):
+    # 本地开发环境
+    sys.path.append('app/backend')
+elif os.path.exists('config.py'):
+    # Docker环境或根目录运行
+    pass
+else:
+    # 尝试添加可能的路径
+    sys.path.append('app/backend')
+
+try:
+    from config import Config
+except ImportError as e:
+    print(f"无法导入配置文件: {e}")
+    # 提供默认配置
+    class Config:
+        MAX_LOG_SIZE = 100
+        ENABLE_LOG_CLEANUP = True
+        LOG_RETENTION_DAYS = 30
+        LOG_CLEANUP_TIME = "02:00"
+        LOG_LEVEL = "INFO"
+        LOGS_DIR = "logs"
 
 
 class LogRotationHandler(logging.handlers.RotatingFileHandler):

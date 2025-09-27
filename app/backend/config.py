@@ -42,7 +42,7 @@ class Config:
     
     # === 应用信息 ===
     APP_NAME = os.getenv('APP_NAME', 'telegram-message')
-    APP_VERSION = os.getenv('APP_VERSION', '3.8.0')
+    APP_VERSION = os.getenv('APP_VERSION', '3.9.0')
     APP_DESCRIPTION = os.getenv('APP_DESCRIPTION', 'Telegram消息转发机器人v3.6')
     
     # === Telegram API 配置 ===
