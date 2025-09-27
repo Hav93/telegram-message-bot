@@ -533,8 +533,10 @@ const RulesList: React.FC = () => {
               type="text"
               size="small"
               icon={<LinkOutlined />}
+              className={`feature-btn ${record.enable_link_preview ? 'enabled' : 'disabled'}`}
+              data-feature-type="link_preview"
+              data-enabled={record.enable_link_preview}
               style={{ 
-                color: record.enable_link_preview ? '#722ed1' : '#d9d9d9',
                 border: 'none',
                 padding: '2px'
               }}
