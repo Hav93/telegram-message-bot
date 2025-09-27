@@ -397,14 +397,28 @@ async def main():
             allow_headers=["*"],
         )
         
-        # 挂载React前端
-        frontend_dist = Path("frontend/dist")
-        if frontend_dist.exists():
+        # 挂载React前端 - 修复路径问题
+        # 尝试多个可能的前端路径
+        possible_paths = [
+            Path("app/frontend/dist"),  # 从项目根目录运行时
+            Path("frontend/dist"),      # 从app目录运行时  
+            Path("../frontend/dist"),   # 从backend目录运行时
+        ]
+        
+        frontend_dist = None
+        for path in possible_paths:
+            if path.exists():
+                frontend_dist = path
+                break
+        
+        if frontend_dist:
             app.mount("/assets", StaticFiles(directory=frontend_dist / "assets"), name="react-assets")
             app.mount("/static", StaticFiles(directory=frontend_dist), name="react-static")
-            logger.info("✅ React前端已挂载")
+            logger.info(f"✅ React前端已挂载，路径: {frontend_dist.absolute()}")
         else:
-            logger.warning("⚠️ React前端构建文件不存在")
+            logger.warning("⚠️ React前端构建文件不存在，检查路径:")
+            for path in possible_paths:
+                logger.warning(f"   - {path.absolute()}: {'存在' if path.exists() else '不存在'}")
         
         # 增强版API - 客户端管理
         @app.get("/api/clients")
@@ -2959,13 +2973,13 @@ async def main():
         @app.get("/")
         async def serve_react_root():
             """服务React应用根路径"""
-            if frontend_dist.exists():
+            if frontend_dist and frontend_dist.exists():
                 index_file = frontend_dist / "index.html"
                 if index_file.exists():
                     with open(index_file, 'r', encoding='utf-8') as f:
                         content = f.read()
                     return HTMLResponse(content=content)
-            return HTMLResponse(content="<h1>增强版机器人Web界面</h1><p>React前端未构建，请运行 cd frontend && npm run build</p>")
+            return HTMLResponse(content="<h1>增强版机器人Web界面</h1><p>React前端未构建，请运行构建命令</p>")
         
         @app.get("/{path:path}")
         async def serve_react_spa(path: str):
@@ -2974,7 +2988,7 @@ async def main():
             if path.startswith('api/'):
                 return JSONResponse(content={"detail": "API路径不存在"}, status_code=404)
                 
-            if frontend_dist.exists():
+            if frontend_dist and frontend_dist.exists():
                 index_file = frontend_dist / "index.html"
                 if index_file.exists():
                     with open(index_file, 'r', encoding='utf-8') as f:
