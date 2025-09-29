@@ -100,6 +100,147 @@ html, body {
   border-radius: 8px;
 }
 
+/* 日期选择器弹出面板样式 */
+.ant-picker-dropdown {
+  z-index: 2000 !important;
+}
+
+.ant-picker-dropdown .ant-picker-panel-container {
+  background: rgba(30, 30, 30, 0.95) !important;
+  backdrop-filter: blur(20px) brightness(0.8) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(20px) brightness(0.8) saturate(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 6px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  overflow: hidden !important;
+}
+
+.ant-picker-dropdown .ant-picker-panel {
+  background: transparent !important;
+  border: none !important;
+}
+
+.ant-picker-dropdown .ant-picker-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.ant-picker-dropdown .ant-picker-header button {
+  color: rgba(255, 255, 255, 0.8) !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.ant-picker-dropdown .ant-picker-header button:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ant-picker-dropdown .ant-picker-content {
+  background: transparent !important;
+}
+
+.ant-picker-dropdown .ant-picker-body {
+  background: transparent !important;
+}
+
+.ant-picker-dropdown .ant-picker-cell {
+  color: rgba(255, 255, 255, 0.9) !important;
+  background: transparent !important;
+}
+
+.ant-picker-dropdown .ant-picker-cell:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ant-picker-dropdown .ant-picker-cell-selected {
+  background: rgba(24, 144, 255, 0.6) !important;
+  color: #ffffff !important;
+}
+
+.ant-picker-dropdown .ant-picker-cell-in-range {
+  background: rgba(24, 144, 255, 0.2) !important;
+}
+
+.ant-picker-dropdown .ant-picker-cell-range-start,
+.ant-picker-dropdown .ant-picker-cell-range-end {
+  background: rgba(24, 144, 255, 0.6) !important;
+  color: #ffffff !important;
+}
+
+.ant-picker-dropdown .ant-picker-today-btn {
+  color: #1890ff !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.ant-picker-dropdown .ant-picker-today-btn:hover {
+  color: #40a9ff !important;
+  background: rgba(24, 144, 255, 0.1) !important;
+}
+
+.ant-picker-dropdown .ant-picker-month-panel,
+.ant-picker-dropdown .ant-picker-year-panel,
+.ant-picker-dropdown .ant-picker-decade-panel {
+  background: transparent !important;
+}
+
+.ant-picker-dropdown .ant-picker-time-panel {
+  background: transparent !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.ant-picker-dropdown .ant-picker-time-panel-column {
+  background: transparent !important;
+}
+
+.ant-picker-dropdown .ant-picker-time-panel-cell {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.ant-picker-dropdown .ant-picker-time-panel-cell:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ant-picker-dropdown .ant-picker-time-panel-cell-selected {
+  background: rgba(24, 144, 255, 0.6) !important;
+  color: #ffffff !important;
+}
+
+/* 范围选择器特殊样式 */
+.ant-picker-dropdown .ant-picker-range-wrapper {
+  background: transparent !important;
+}
+
+.ant-picker-dropdown .ant-picker-footer {
+  background: transparent !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.ant-picker-dropdown .ant-picker-footer .ant-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.ant-picker-dropdown .ant-picker-footer .ant-btn:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.ant-picker-dropdown .ant-picker-footer .ant-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+}
+
+.ant-picker-dropdown .ant-picker-footer .ant-btn-primary:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+}
+
 /* 玻璃质感卡片 */
 .glass-card {
   background: rgba(255, 255, 255, 0.1);
@@ -1321,6 +1462,7 @@ body.theme-custom .ant-alert-description {
   box-shadow: 
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 20px 40px rgba(0, 0, 0, 0.3) !important;
+  overflow: hidden !important; /* 防止内容溢出 */
 }
 
 .glass-modal.theme-settings-modal .ant-modal-header {
@@ -1350,6 +1492,8 @@ body.theme-custom .ant-alert-description {
   margin-right: 4px !important;
   backdrop-filter: blur(8px) !important;
   color: rgba(255, 255, 255, 0.8) !important;
+  white-space: nowrap !important; /* 防止文字换行 */
+  overflow: hidden !important; /* 隐藏溢出内容 */
 }
 
 .glass-modal.theme-settings-modal .ant-tabs .ant-tabs-tab:hover {
@@ -1370,6 +1514,25 @@ body.theme-custom .ant-alert-description {
   border-radius: 0 8px 8px 8px !important;
   backdrop-filter: blur(6px) !important;
   padding: 16px !important;
+  overflow: hidden !important; /* 防止内容溢出 */
+}
+
+/* 主题设置弹窗的布局控制 */
+.glass-modal.theme-settings-modal .ant-modal-body {
+  padding: 16px 20px !important; /* 减少内边距防止溢出 */
+  overflow: hidden !important;
+}
+
+/* 主题卡片容器防止溢出 */
+.glass-modal.theme-settings-modal .theme-card {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+}
+
+/* 上传区域防止溢出 */
+.glass-modal.theme-settings-modal .ant-upload-drag {
+  margin: 0 !important;
+  box-sizing: border-box !important;
 }
 
 /* 主题设置输入框玻璃质感 */
@@ -1413,6 +1576,8 @@ body.theme-custom .ant-alert-description {
   box-shadow: 
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  display: block !important; /* 确保显示 */
+  min-height: 40px !important; /* 最小高度 */
 }
 
 /* 主题选择卡片玻璃质感样式 */

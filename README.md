@@ -4,8 +4,8 @@
 [![Docker Image Version](https://img.shields.io/docker/v/hav93/telegram-message-bot)](https://hub.docker.com/r/hav93/telegram-message-bot/tags)
 [![Docker Image Size](https://img.shields.io/docker/image-size/hav93/telegram-message-bot/latest)](https://hub.docker.com/r/hav93/telegram-message-bot)
 
-**版本**: v4.0.0  
-**更新时间**: 2025年9月27日
+**版本**: test  
+**更新时间**: 2025年9月29日
 
 一个功能强大的Telegram消息转发机器人，支持多客户端管理、智能过滤、关键词替换等高级功能。
 

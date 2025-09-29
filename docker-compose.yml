@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   telegram-message-bot:
-    image: hav93/telegram-message-bot:latest
+    image: hav93/telegram-message-bot:test
     container_name: telegram-message-bot
     restart: always
 

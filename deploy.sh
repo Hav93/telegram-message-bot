@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Telegram Message Bot v3.0 部署脚本
+# Telegram Message Bot test 部署脚本
 # 适配 NAS 环境优化版本
 
 echo "========================================="
-echo "  Telegram Message Bot v3.0 部署脚本"
+echo "  Telegram Message Bot test 部署脚本"
 echo "========================================="
 
 # 检查 Docker
@@ -43,7 +43,7 @@ cd ../..
 
 # 构建镜像
 echo "🔨 构建 Docker 镜像..."
-docker build -t telegram-message-bot:v3.0 .
+docker build -t telegram-message-bot:test .
 
 if [ $? -ne 0 ]; then
     echo "❌ 镜像构建失败"

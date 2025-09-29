@@ -98,9 +98,14 @@ export const useTheme = () => {
       console.log('✅ 预设主题样式已应用');
     }
     
-    // 保存到 localStorage
+    // 保存到 localStorage（确保自定义背景的持久化）
     try {
-      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(themeConfig));
+      const configToSave = {
+        type: themeConfig.type,
+        customImageUrl: themeConfig.customImageUrl
+      };
+      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(configToSave));
+      console.log('💾 主题配置已保存到localStorage:', configToSave);
     } catch (error) {
       console.warn('无法保存主题配置到 localStorage:', error);
     }

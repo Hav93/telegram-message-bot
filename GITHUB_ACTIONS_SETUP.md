@@ -75,5 +75,5 @@
 配置成功后，每次推送到main分支时：
 - ✅ 自动构建Docker镜像
 - ✅ 推送到Docker Hub
-- ✅ 更新latest和v3.6标签
+- ✅ 更新latest和test标签
 - ✅ 在Actions页面显示构建状态

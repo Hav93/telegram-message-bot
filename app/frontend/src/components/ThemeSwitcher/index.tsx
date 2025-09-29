@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
   Button, 
   Dropdown, 
@@ -8,7 +8,11 @@ import {
   message, 
   Typography,
   Upload,
-  Tabs 
+  Tabs,
+  Image,
+  Tooltip,
+  Card,
+  Empty
 } from 'antd';
 import { 
   BgColorsOutlined, 
@@ -17,32 +21,98 @@ import {
   SettingOutlined,
   UploadOutlined,
   LinkOutlined,
-  InboxOutlined 
+  InboxOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  HistoryOutlined
 } from '@ant-design/icons';
 import { useTheme, ThemeType } from '../../hooks/useTheme';
 import type { MenuProps } from 'antd';
+
+interface BackgroundImage {
+  filename: string;
+  url: string;
+  size: number;
+  uploaded_at: string;
+  modified_at: string;
+}
 
 const { Text } = Typography;
 const { Dragger } = Upload;
 
 const ThemeSwitcher: React.FC = () => {
-  const { themeConfig, changeTheme, getThemeName, defaultThemes } = useTheme();
+  const { themeConfig, changeTheme, getThemeName } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [customImageUrl, setCustomImageUrl] = useState(themeConfig.customImageUrl || '');
   const [selectedTheme, setSelectedTheme] = useState<ThemeType>(themeConfig.type);
-  const [uploadMethod, setUploadMethod] = useState<'url' | 'file'>('url');
+  const [uploadMethod, setUploadMethod] = useState<'url' | 'file' | 'history'>('url');
   const [uploadedImageBase64, setUploadedImageBase64] = useState<string>('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [historyImages, setHistoryImages] = useState<BackgroundImage[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [selectedHistoryImage, setSelectedHistoryImage] = useState<string>('');
 
-  // 将文件转换为Base64
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
+  // 获取历史背景图片
+  const fetchHistoryImages = async () => {
+    setLoadingHistory(true);
+    try {
+      const response = await fetch('/api/system/backgrounds');
+      const result = await response.json();
+      
+      if (result.success) {
+        setHistoryImages(result.backgrounds);
+        console.log('✅ 获取历史背景图片成功:', result.backgrounds);
+      } else {
+        console.error('❌ 获取历史背景图片失败:', result.message);
+        message.error('获取历史图片失败');
+      }
+    } catch (error) {
+      console.error('❌ 获取历史背景图片失败:', error);
+      message.error('获取历史图片失败');
+    } finally {
+      setLoadingHistory(false);
+    }
   };
+
+  // 删除背景图片
+  const deleteHistoryImage = async (filename: string) => {
+    try {
+      const response = await fetch(`/api/system/backgrounds/${filename}`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      
+      if (result.success) {
+        message.success('删除成功');
+        fetchHistoryImages(); // 重新获取列表
+        
+        // 如果删除的是当前使用的背景，切换回默认主题
+        if (themeConfig.customImageUrl?.includes(filename)) {
+          changeTheme('gradient');
+          message.info('当前背景已删除，已切换回默认主题');
+        }
+      } else {
+        message.error(`删除失败: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('❌ 删除背景图片失败:', error);
+      message.error('删除失败');
+    }
+  };
+
+  // 格式化文件大小
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // 格式化时间
+  const formatDate = (isoString: string): string => {
+    return new Date(isoString).toLocaleString('zh-CN');
+  };
+
 
   // 处理文件上传到服务器
   const handleFileUpload = async (file: File) => {
@@ -115,6 +185,18 @@ const ThemeSwitcher: React.FC = () => {
         message.success('自定义背景已应用');
         setModalVisible(false);
         
+      } else if (uploadMethod === 'history') {
+        // 使用历史图片
+        if (!selectedHistoryImage) {
+          message.error('请选择一张历史图片');
+          return;
+        }
+        
+        console.log('✅ 应用历史图片:', selectedHistoryImage);
+        changeTheme('custom', selectedHistoryImage);
+        message.success('自定义背景已应用');
+        setModalVisible(false);
+        
       } else {
         // 使用URL链接
         if (!customImageUrl.trim()) {
@@ -148,6 +230,14 @@ const ThemeSwitcher: React.FC = () => {
         
         // 开始加载图片
         img.src = customImageUrl;
+        
+        // 添加超时处理
+        setTimeout(() => {
+          if (!img.complete) {
+            console.error('❌ 图片加载超时:', customImageUrl);
+            message.error('图片加载超时，请检查URL或尝试其他图片');
+          }
+        }, 10000); // 10秒超时
       }
     } else {
       changeTheme(selectedTheme);
@@ -290,7 +380,13 @@ const ThemeSwitcher: React.FC = () => {
             <div style={{ marginTop: '20px' }}>
               <Tabs
                 activeKey={uploadMethod}
-                onChange={(key) => setUploadMethod(key as 'url' | 'file')}
+                onChange={(key) => {
+                  const newMethod = key as 'url' | 'file' | 'history';
+                  setUploadMethod(newMethod);
+                  if (newMethod === 'history') {
+                    fetchHistoryImages();
+                  }
+                }}
                 items={[
                   {
                     key: 'url',
@@ -366,34 +462,164 @@ const ThemeSwitcher: React.FC = () => {
                           </p>
                         </Dragger>
                         
-                               {uploadedImageBase64 && (
-                                 <div style={{ 
-                                   marginTop: '12px', 
-                                   padding: '8px', 
-                                   background: 'rgba(82, 196, 26, 0.1)',
-                                   border: '1px solid rgba(82, 196, 26, 0.3)',
-                                   borderRadius: '6px'
-                                 }}>
-                                   <Text style={{ color: '#52c41a', fontSize: '12px' }}>
-                                     ✅ 图片上传成功，已保存到服务器
-                                   </Text>
-                                   <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '10px', marginTop: '4px' }}>
-                                     {uploadedImageBase64}
-                                   </div>
-                                 </div>
-                               )}
+                        {uploadedImageBase64 && (
+                          <div style={{ 
+                            marginTop: '12px', 
+                            padding: '8px', 
+                            background: 'rgba(82, 196, 26, 0.1)',
+                            border: '1px solid rgba(82, 196, 26, 0.3)',
+                            borderRadius: '6px'
+                          }}>
+                            <Text style={{ color: '#52c41a', fontSize: '12px' }}>
+                              ✅ 图片上传成功，已保存到服务器
+                            </Text>
+                            <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '10px', marginTop: '4px', wordBreak: 'break-all' }}>
+                              {uploadedImageBase64.length > 50 ? uploadedImageBase64.substring(0, 50) + '...' : uploadedImageBase64}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  },
+                  {
+                    key: 'history',
+                    label: (
+                      <span style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                        <HistoryOutlined style={{ marginRight: 4 }} />
+                        历史图片
+                      </span>
+                    ),
+                    children: (
+                      <div style={{ paddingTop: '12px' }}>
+                        <Text style={{ color: 'rgba(255, 255, 255, 0.9)', marginBottom: 8, display: 'block' }}>
+                          选择已上传的图片：
+                        </Text>
+                        
+                        {loadingHistory ? (
+                          <div style={{ textAlign: 'center', padding: '20px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                            加载中...
+                          </div>
+                        ) : historyImages.length === 0 ? (
+                          <Empty
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            description={
+                              <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                                暂无历史图片
+                              </span>
+                            }
+                            style={{
+                              background: 'rgba(255, 255, 255, 0.05)',
+                              borderRadius: '8px',
+                              padding: '20px',
+                              border: '1px solid rgba(255, 255, 255, 0.1)'
+                            }}
+                          />
+                        ) : (
+                          <div style={{ 
+                            maxHeight: '300px', 
+                            overflowY: 'auto',
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                            gap: '8px'
+                          }}>
+                            {historyImages.map((img) => (
+                              <Card
+                                key={img.filename}
+                                size="small"
+                                hoverable
+                                style={{
+                                  background: selectedHistoryImage === img.url 
+                                    ? 'rgba(24, 144, 255, 0.2)' 
+                                    : 'rgba(255, 255, 255, 0.05)',
+                                  border: selectedHistoryImage === img.url 
+                                    ? '2px solid #1890ff' 
+                                    : '1px solid rgba(255, 255, 255, 0.1)',
+                                  borderRadius: '8px',
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => setSelectedHistoryImage(img.url)}
+                                bodyStyle={{ padding: '8px' }}
+                                actions={[
+                                  <Tooltip title="预览" key="preview">
+                                    <EyeOutlined 
+                                      style={{ color: 'rgba(255, 255, 255, 0.8)' }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        Modal.info({
+                                          title: '图片预览',
+                                          content: (
+                                            <div style={{ textAlign: 'center' }}>
+                                              <img 
+                                                src={img.url} 
+                                                alt={img.filename}
+                                                style={{ maxWidth: '100%', maxHeight: '400px' }}
+                                              />
+                                            </div>
+                                          ),
+                                          width: 600,
+                                          okText: '关闭'
+                                        });
+                                      }}
+                                    />
+                                  </Tooltip>,
+                                  <Tooltip title="删除" key="delete">
+                                    <DeleteOutlined 
+                                      style={{ color: '#ff4d4f' }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        Modal.confirm({
+                                          title: '确认删除',
+                                          content: '确定要删除这张图片吗？',
+                                          okText: '删除',
+                                          cancelText: '取消',
+                                          okType: 'danger',
+                                          onOk: () => deleteHistoryImage(img.filename)
+                                        });
+                                      }}
+                                    />
+                                  </Tooltip>
+                                ]}
+                              >
+                                <div style={{ textAlign: 'center' }}>
+                                  <Image
+                                    src={img.url}
+                                    alt={img.filename}
+                                    width={80}
+                                    height={60}
+                                    style={{ 
+                                      objectFit: 'cover',
+                                      borderRadius: '4px'
+                                    }}
+                                    preview={false}
+                                  />
+                                  <div style={{ 
+                                    marginTop: '4px',
+                                    fontSize: '10px',
+                                    color: 'rgba(255, 255, 255, 0.6)',
+                                    textOverflow: 'ellipsis',
+                                    overflow: 'hidden',
+                                    whiteSpace: 'nowrap'
+                                  }}>
+                                    {formatFileSize(img.size)}
+                                  </div>
+                                  <div style={{ 
+                                    fontSize: '9px',
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    textOverflow: 'ellipsis',
+                                    overflow: 'hidden',
+                                    whiteSpace: 'nowrap'
+                                  }}>
+                                    {formatDate(img.uploaded_at)}
+                                  </div>
+                                </div>
+                              </Card>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )
                   }
                 ]}
-                style={{
-                  '& .ant-tabs-tab': {
-                    color: 'rgba(255, 255, 255, 0.7) !important'
-                  },
-                  '& .ant-tabs-tab-active': {
-                    color: '#1890ff !important'
-                  }
-                }}
               />
             </div>
           )}

@@ -640,6 +640,82 @@ async def main():
                     "message": f"服务失败: {str(e)}"
                 }, status_code=500)
         
+        @app.get("/api/system/backgrounds")
+        async def list_background_images():
+            """获取所有已上传的背景图片列表"""
+            try:
+                import os
+                from datetime import datetime
+                
+                upload_dir = Path("data/uploads/backgrounds")
+                
+                if not upload_dir.exists():
+                    return JSONResponse(content={
+                        "success": True,
+                        "backgrounds": []
+                    })
+                
+                backgrounds = []
+                allowed_extensions = {'.jpg', '.jpeg', '.png', '.webp', '.gif'}
+                
+                for file_path in upload_dir.iterdir():
+                    if file_path.is_file() and file_path.suffix.lower() in allowed_extensions:
+                        try:
+                            stat = file_path.stat()
+                            backgrounds.append({
+                                "filename": file_path.name,
+                                "url": f"/api/system/backgrounds/{file_path.name}",
+                                "size": stat.st_size,
+                                "uploaded_at": datetime.fromtimestamp(stat.st_ctime).isoformat(),
+                                "modified_at": datetime.fromtimestamp(stat.st_mtime).isoformat()
+                            })
+                        except Exception as e:
+                            logger.warning(f"⚠️ 读取文件信息失败: {file_path}, 错误: {e}")
+                            continue
+                
+                # 按上传时间倒序排列
+                backgrounds.sort(key=lambda x: x['uploaded_at'], reverse=True)
+                
+                return JSONResponse(content={
+                    "success": True,
+                    "backgrounds": backgrounds
+                })
+                
+            except Exception as e:
+                logger.error(f"❌ 获取背景图片列表失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"获取失败: {str(e)}"
+                }, status_code=500)
+        
+        @app.delete("/api/system/backgrounds/{filename}")
+        async def delete_background_image(filename: str):
+            """删除背景图片"""
+            try:
+                file_path = Path("data/uploads/backgrounds") / filename
+                
+                if not file_path.exists():
+                    return JSONResponse(content={
+                        "success": False,
+                        "message": "文件不存在"
+                    }, status_code=404)
+                
+                # 删除文件
+                file_path.unlink()
+                
+                logger.info(f"✅ 背景图片删除成功: {file_path}")
+                return JSONResponse(content={
+                    "success": True,
+                    "message": "删除成功"
+                })
+                
+            except Exception as e:
+                logger.error(f"❌ 删除背景图片失败: {e}")
+                return JSONResponse(content={
+                    "success": False,
+                    "message": f"删除失败: {str(e)}"
+                }, status_code=500)
+        
         # 基础API代理 - 转发到传统API（如果需要）
         @app.get("/api/rules")
         async def get_rules():

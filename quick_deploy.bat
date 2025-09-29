@@ -1,7 +1,7 @@
 @echo off
-REM Telegram Message Bot v3.6 - Windows快速部署脚本
+REM Telegram Message Bot test - Windows快速部署脚本
 
-echo 🚀 Telegram Message Bot v3.6 - 快速部署
+echo 🚀 Telegram Message Bot test - 快速部署
 echo ============================================
 
 REM 检查Docker是否安装
@@ -31,7 +31,7 @@ cd ..\..
 
 REM 构建新镜像
 echo 🔨 构建Docker镜像...
-docker build -t telegram-message-bot:v3.6 .
+docker build -t telegram-message-bot:test .
 
 REM 启动服务
 echo 🌟 启动服务...
