@@ -1706,17 +1706,31 @@ html body .theme-preview[style*="#1a1a1a"] {
 
 .glass-modal.theme-settings-modal .ant-modal-content {
   max-height: 90vh !important;
-  overflow-y: auto !important;
+  overflow-y: visible !important; /* 改为visible让内部容器控制滚动 */
+}
+
+.glass-modal.theme-settings-modal .ant-modal-body {
+  overflow-y: visible !important;
+  max-height: none !important;
+  padding: 16px 20px !important;
 }
 
 /* 确保历史图片网格布局正确显示 */
 .glass-modal .ant-tabs-tabpane {
   overflow: visible !important;
-  min-height: 550px !important; /* 增加高度确保显示多行图片 */
+  min-height: 500px !important; /* 合适的高度 */
+  max-height: none !important; /* 移除最大高度限制 */
 }
 
 .glass-modal .ant-tabs-tabpane > div {
   overflow: visible !important;
+}
+
+/* 特别针对历史图片标签页 */
+.glass-modal .ant-tabs-tabpane[data-node-key="history"] {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
 }
 
 /* 优化历史图片网格容器滚动条样式 */
@@ -1748,6 +1762,45 @@ html body .theme-preview[style*="#1a1a1a"] {
 /* 确保网格容器有正确的滚动行为 */
 .glass-modal .ant-tabs-tabpane div[style*="grid"] {
   scroll-behavior: smooth !important;
+}
+
+/* 专门针对历史图片网格的滚动样式 */
+.history-images-grid {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255,255,255,0.4) rgba(255,255,255,0.1) !important;
+}
+
+.history-images-grid::-webkit-scrollbar {
+  width: 10px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 5px !important;
+}
+
+.history-images-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 5px !important;
+  margin: 8px !important;
+}
+
+.history-images-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-radius: 5px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  transition: background 0.3s ease !important;
+}
+
+.history-images-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+
+.history-images-grid::-webkit-scrollbar-thumb:active {
+  background: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* 确保网格内容超出容器时能滚动 */
+.history-images-grid {
+  contain: layout style paint !important;
+  will-change: scroll-position !important;
 }
 
 /* 确保卡片在网格中正确显示 */

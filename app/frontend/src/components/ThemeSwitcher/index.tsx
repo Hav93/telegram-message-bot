@@ -547,21 +547,42 @@ const ThemeSwitcher: React.FC = () => {
                             }}
                           />
                         ) : (
-                          <div style={{ 
-                            maxHeight: '450px', 
-                            overflowY: 'auto',
-                            overflowX: 'hidden',
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-                            gridAutoRows: 'minmax(140px, auto)',
-                            gap: '12px',
-                            padding: '8px 8px 60px 8px', // 增加顶部、底部和左右padding
-                            scrollbarWidth: 'thin',
-                            scrollbarColor: 'rgba(255,255,255,0.4) rgba(255,255,255,0.1)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            borderRadius: '8px',
-                            background: 'rgba(255, 255, 255, 0.02)'
-                          }}>
+                          <div 
+                            className="history-images-grid"
+                            style={{ 
+                              height: '400px', // 固定高度而不是maxHeight
+                              overflowY: 'scroll', // 强制显示滚动条
+                              overflowX: 'hidden',
+                              display: 'grid',
+                              gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                              gridAutoRows: 'minmax(140px, auto)',
+                              gap: '12px',
+                              padding: '12px 12px 40px 12px',
+                              scrollbarWidth: 'thin',
+                              scrollbarColor: 'rgba(255,255,255,0.4) rgba(255,255,255,0.1)',
+                              border: '1px solid rgba(255, 255, 255, 0.2)',
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.03)',
+                              position: 'relative',
+                              WebkitOverflowScrolling: 'touch' // 移动端滚动优化
+                            }}
+                            onScroll={(e) => {
+                              console.log('📜 历史图片容器滚动:', e.currentTarget.scrollTop);
+                            }}
+                          >
+                            {/* 调试信息 */}
+                            <div style={{ 
+                              gridColumn: '1 / -1', 
+                              padding: '4px 8px', 
+                              background: 'rgba(255,255,255,0.1)', 
+                              borderRadius: '4px', 
+                              fontSize: '12px', 
+                              color: 'rgba(255,255,255,0.7)',
+                              textAlign: 'center',
+                              marginBottom: '8px'
+                            }}>
+                              共 {historyImages.length} 张图片 - 可向下滚动查看更多
+                            </div>
                             {historyImages.map((img) => (
                               <Card
                                 key={img.filename}
