@@ -391,23 +391,55 @@ const ThemeSwitcher: React.FC = () => {
                 className={`theme-card ${selectedTheme === option.key ? 'selected' : ''}`}
               >
                 {option.preview && (
-                  <div
-                    className="theme-preview"
-                    style={{
-                      background: option.preview,
-                      backgroundImage: option.preview.includes('linear-gradient') ? option.preview : 'none',
-                      backgroundColor: option.preview.includes('linear-gradient') ? 'transparent' : option.preview,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundAttachment: 'scroll',
-                      backgroundOrigin: 'padding-box',
-                      backgroundClip: 'padding-box'
-                    }}
-                    onMouseEnter={() => {
-                      console.log(`🎨 主题预览 ${option.label}:`, option.preview);
-                    }}
-                  />
+                  <div style={{ marginBottom: '8px' }}>
+                    {/* 主要预览 */}
+                    <div
+                      style={{
+                        width: '100%',
+                        height: '40px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255, 255, 255, 0.25)',
+                        boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1)',
+                        display: 'block',
+                        background: option.preview,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                        backdropFilter: 'none',
+                        WebkitBackdropFilter: 'none',
+                        filter: 'none',
+                        outline: '2px solid red'
+                      }}
+                      onMouseEnter={() => {
+                        console.log(`🎨 主题预览 ${option.label}:`, option.preview);
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        alert(`主题预览: ${option.label}\n背景值: ${option.preview}`);
+                      }}
+                    />
+                    
+                    {/* 简单测试预览 - 使用最基本的方式 */}
+                    <div style={{ 
+                      width: '100%', 
+                      height: '20px', 
+                      backgroundColor: option.preview.includes('gradient') ? '#667eea' : option.preview,
+                      borderRadius: '4px',
+                      border: '1px solid yellow',
+                      marginTop: '4px'
+                    }} />
+                    
+                    {/* 调试信息 */}
+                    <div style={{ 
+                      fontSize: '10px', 
+                      color: 'white', 
+                      textAlign: 'center',
+                      marginTop: '2px',
+                      wordBreak: 'break-all'
+                    }}>
+                      {option.preview}
+                    </div>
+                  </div>
                 )}
                 <Space>
                   {option.icon}
