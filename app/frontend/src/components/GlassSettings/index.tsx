@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Slider, Switch, Button, Space, Typography, ColorPicker, Divider, Collapse, Select } from 'antd';
+import { Modal, Slider, Switch, Button, Space, Typography, ColorPicker, Collapse } from 'antd';
 import { SettingOutlined, DownOutlined } from '@ant-design/icons';
 import type { Color } from 'antd/es/color-picker';
 
@@ -158,15 +158,30 @@ const GlassSettings: React.FC = () => {
 
   // 颜色选择器变化
   const handleColorChange = (color: Color) => {
+    // 使用toHex()然后转换为HSL，或者使用更可靠的方法
     const hsb = color.toHsb();
-    // 将HSB转换为HSL（近似转换）
+    
+    // 正确的HSB到HSL转换公式
     const h = Math.round(hsb.h || 0);
-    const s = Math.round(hsb.s || 0);
-    const l = Math.round((100 - hsb.s / 2) * hsb.b / 100); // HSB to HSL近似转换
+    const s_hsb = (hsb.s || 0) / 100;
+    const v = (hsb.b || 0) / 100;
+    
+    // HSB to HSL转换
+    const l = v * (2 - s_hsb) / 2;
+    const s_hsl = l !== 0 && l !== 1 ? (v - l) / Math.min(l, 1 - l) : 0;
+    
+    const s = Math.round(s_hsl * 100);
+    const lightness = Math.round(l * 100);
     const a = Number((hsb.a || 1).toFixed(2));
     
+    console.log('🎨 颜色选择器变化:', { 
+      hsb, 
+      converted: { h, s, l: lightness, a },
+      cssValue: `hsl(${h} ${s}% ${lightness}% / ${a})`
+    });
+    
     updateSettings({
-      color: { h, s, l, a }
+      color: { h, s, l: lightness, a }
     });
   };
 
