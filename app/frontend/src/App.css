@@ -1596,8 +1596,6 @@ body.theme-custom .ant-alert-description {
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  backdrop-filter: blur(4px) !important;
-  -webkit-backdrop-filter: blur(4px) !important;
   box-shadow: 
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 4px 8px rgba(0, 0, 0, 0.1) !important;
@@ -1605,21 +1603,46 @@ body.theme-custom .ant-alert-description {
   min-height: 40px !important; /* 最小高度 */
   position: relative !important;
   overflow: hidden !important;
+  /* 移除backdrop-filter，它会覆盖背景色 */
 }
 
 /* 确保主题预览在模态框中正确显示 */
 .glass-modal .theme-preview {
   background-attachment: scroll !important; /* 修复渐变背景显示 */
+  backdrop-filter: none !important; /* 关闭毛玻璃效果 */
+  -webkit-backdrop-filter: none !important;
 }
 
-/* 修复深色主题预览 */
+/* 修复深色主题预览 - 使用更强的优先级 */
+.glass-modal .theme-preview[style*="#1a1a1a"],
 .theme-preview[style*="#1a1a1a"] {
   background: #1a1a1a !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
-/* 修复渐变主题预览 */
+/* 修复渐变主题预览 - 使用更强的优先级 */
+.glass-modal .theme-preview[style*="linear-gradient"],
 .theme-preview[style*="linear-gradient"] {
   background-attachment: scroll !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 紫蓝渐变主题专门修复 */
+.glass-modal .theme-preview[style*="667eea"],
+.theme-preview[style*="667eea"] {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 灰色渐变主题专门修复 */
+.glass-modal .theme-preview[style*="2c3e50"],
+.theme-preview[style*="2c3e50"] {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 /* 主题选择卡片玻璃质感样式 */

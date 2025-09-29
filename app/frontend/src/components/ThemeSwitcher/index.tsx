@@ -55,19 +55,24 @@ const ThemeSwitcher: React.FC = () => {
   const fetchHistoryImages = async () => {
     setLoadingHistory(true);
     try {
+      console.log('🔄 开始获取历史背景图片...');
       const response = await fetch('/api/system/backgrounds');
+      console.log('📡 API响应状态:', response.status, response.statusText);
+      
       const result = await response.json();
+      console.log('📋 API响应数据:', result);
       
       if (result.success) {
         setHistoryImages(result.backgrounds);
         console.log('✅ 获取历史背景图片成功:', result.backgrounds);
+        message.success(`成功加载 ${result.backgrounds.length} 张历史图片`);
       } else {
         console.error('❌ 获取历史背景图片失败:', result.message);
-        message.error('获取历史图片失败');
+        message.error(`获取历史图片失败: ${result.message}`);
       }
     } catch (error) {
       console.error('❌ 获取历史背景图片失败:', error);
-      message.error('获取历史图片失败');
+      message.error(`网络错误: ${error instanceof Error ? error.message : '未知错误'}`);
     } finally {
       setLoadingHistory(false);
     }
@@ -76,13 +81,21 @@ const ThemeSwitcher: React.FC = () => {
   // 删除背景图片
   const deleteHistoryImage = async (filename: string) => {
     try {
-      const response = await fetch(`/api/system/backgrounds/${filename}`, {
+      console.log('🗑️ 开始删除背景图片:', filename);
+      const deleteUrl = `/api/system/backgrounds/${filename}`;
+      console.log('🔗 删除URL:', deleteUrl);
+      
+      const response = await fetch(deleteUrl, {
         method: 'DELETE'
       });
+      
+      console.log('📡 删除API响应状态:', response.status, response.statusText);
       const result = await response.json();
+      console.log('📋 删除API响应数据:', result);
       
       if (result.success) {
         message.success('删除成功');
+        console.log('✅ 图片删除成功，重新获取列表...');
         fetchHistoryImages(); // 重新获取列表
         
         // 如果删除的是当前使用的背景，切换回默认主题
@@ -91,11 +104,12 @@ const ThemeSwitcher: React.FC = () => {
           message.info('当前背景已删除，已切换回默认主题');
         }
       } else {
+        console.error('❌ 删除失败:', result.message);
         message.error(`删除失败: ${result.message}`);
       }
     } catch (error) {
       console.error('❌ 删除背景图片失败:', error);
-      message.error('删除失败');
+      message.error(`删除失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }
   };
 
@@ -550,8 +564,9 @@ const ThemeSwitcher: React.FC = () => {
                                       style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '16px' }}
                                       onClick={(e) => {
                                         e.stopPropagation();
+                                        console.log('👁️ 预览图片:', img.filename, img.url);
                                         Modal.info({
-                                          title: '图片预览',
+                                          title: `图片预览 - ${img.filename}`,
                                           content: (
                                             <div style={{ textAlign: 'center', padding: '20px' }}>
                                               <img 
@@ -563,7 +578,11 @@ const ThemeSwitcher: React.FC = () => {
                                                   borderRadius: '8px',
                                                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
                                                 }}
+                                                onLoad={() => {
+                                                  console.log('✅ 预览图片加载成功:', img.url);
+                                                }}
                                                 onError={(e) => {
+                                                  console.error('❌ 预览图片加载失败:', img.url);
                                                   const target = e.target as HTMLImageElement;
                                                   target.style.display = 'none';
                                                   const errorDiv = target.nextElementSibling as HTMLElement;
@@ -578,11 +597,21 @@ const ThemeSwitcher: React.FC = () => {
                                                 marginTop: '20px',
                                                 fontSize: '14px'
                                               }}>
-                                                图片加载失败
+                                                图片加载失败: {img.url}
+                                              </div>
+                                              <div style={{ 
+                                                marginTop: '16px',
+                                                fontSize: '12px',
+                                                color: '#666',
+                                                wordBreak: 'break-all'
+                                              }}>
+                                                文件名: {img.filename}<br/>
+                                                大小: {formatFileSize(img.size)}<br/>
+                                                URL: {img.url}
                                               </div>
                                             </div>
                                           ),
-                                          width: 600,
+                                          width: 700,
                                           okText: '关闭',
                                           className: 'glass-modal'
                                         });
