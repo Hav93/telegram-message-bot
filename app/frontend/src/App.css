@@ -1494,6 +1494,31 @@ body.theme-custom .ant-alert-description {
   color: rgba(255, 255, 255, 0.8) !important;
   white-space: nowrap !important; /* 防止文字换行 */
   overflow: hidden !important; /* 隐藏溢出内容 */
+  text-overflow: ellipsis !important; /* 显示省略号 */
+  max-width: 120px !important; /* 限制最大宽度 */
+  padding: 8px 12px !important; /* 适当内边距 */
+  font-size: 13px !important; /* 稍小字体 */
+  flex-shrink: 0 !important; /* 防止标签收缩 */
+}
+
+/* 标签页容器宽度限制 */
+.glass-modal.theme-settings-modal .ant-tabs .ant-tabs-nav {
+  overflow: hidden !important;
+  margin-bottom: 16px !important;
+}
+
+/* 标签页内容区域调整 */
+.glass-modal.theme-settings-modal .ant-tabs .ant-tabs-nav-list {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE/Edge */
+}
+
+.glass-modal.theme-settings-modal .ant-tabs .ant-tabs-nav-list::-webkit-scrollbar {
+  display: none !important; /* Chrome/Safari */
 }
 
 .glass-modal.theme-settings-modal .ant-tabs .ant-tabs-tab:hover {
@@ -1578,6 +1603,23 @@ body.theme-custom .ant-alert-description {
     0 4px 8px rgba(0, 0, 0, 0.1) !important;
   display: block !important; /* 确保显示 */
   min-height: 40px !important; /* 最小高度 */
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* 确保主题预览在模态框中正确显示 */
+.glass-modal .theme-preview {
+  background-attachment: scroll !important; /* 修复渐变背景显示 */
+}
+
+/* 修复深色主题预览 */
+.theme-preview[style*="#1a1a1a"] {
+  background: #1a1a1a !important;
+}
+
+/* 修复渐变主题预览 */
+.theme-preview[style*="linear-gradient"] {
+  background-attachment: scroll !important;
 }
 
 /* 主题选择卡片玻璃质感样式 */
@@ -2897,10 +2939,58 @@ h1, h2, h3, h4, h5, h6,
 .glass-card .ant-picker-input > input,
 .glass-card-3d .ant-picker-input > input {
   color: #ffffff !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .glass-card .ant-picker-input > input::placeholder,
 .glass-card-3d .ant-picker-input > input::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* 日期选择器整体背景修复 */
+.glass-card .ant-picker,
+.glass-card-3d .ant-picker,
+.glass-card .ant-picker-range,
+.glass-card-3d .ant-picker-range {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 日期选择器焦点状态 */
+.glass-card .ant-picker-focused,
+.glass-card-3d .ant-picker-focused,
+.glass-card .ant-picker-range.ant-picker-focused,
+.glass-card-3d .ant-picker-range.ant-picker-focused {
+  border-color: rgba(24, 144, 255, 0.6) !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* 日期选择器悬停状态 */
+.glass-card .ant-picker:hover,
+.glass-card-3d .ant-picker:hover,
+.glass-card .ant-picker-range:hover,
+.glass-card-3d .ant-picker-range:hover {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* 日期选择器图标样式 */
+.glass-card .ant-picker-suffix,
+.glass-card-3d .ant-picker-suffix,
+.glass-card .ant-picker-clear,
+.glass-card-3d .ant-picker-clear,
+.glass-card .ant-picker-separator,
+.glass-card-3d .ant-picker-separator {
   color: rgba(255, 255, 255, 0.6) !important;
 }
 
@@ -3214,6 +3304,7 @@ html body .ant-table .ant-btn.feature-btn .anticon {
 /* 终极解决方案 - 使用更高的特异性 */
 html body div.ant-table-container table.ant-table tbody tr td .ant-btn[type="text"] {
   /* 完全不设置color，让内联样式生效 */
+  color: inherit;
 }
 
 html body div.ant-table-container table.ant-table tbody tr td .ant-btn[type="text"] .anticon {

@@ -213,7 +213,7 @@ const ThemeSwitcher: React.FC = () => {
         }
         
         // 预加载图片验证
-        const img = new Image();
+        const img = new window.Image();
         img.crossOrigin = 'anonymous'; // 尝试跨域访问
         
         img.onload = () => {
@@ -462,22 +462,22 @@ const ThemeSwitcher: React.FC = () => {
                           </p>
                         </Dragger>
                         
-                        {uploadedImageBase64 && (
-                          <div style={{ 
-                            marginTop: '12px', 
-                            padding: '8px', 
-                            background: 'rgba(82, 196, 26, 0.1)',
-                            border: '1px solid rgba(82, 196, 26, 0.3)',
-                            borderRadius: '6px'
-                          }}>
-                            <Text style={{ color: '#52c41a', fontSize: '12px' }}>
-                              ✅ 图片上传成功，已保存到服务器
-                            </Text>
+                               {uploadedImageBase64 && (
+                                 <div style={{ 
+                                   marginTop: '12px', 
+                                   padding: '8px', 
+                                   background: 'rgba(82, 196, 26, 0.1)',
+                                   border: '1px solid rgba(82, 196, 26, 0.3)',
+                                   borderRadius: '6px'
+                                 }}>
+                                   <Text style={{ color: '#52c41a', fontSize: '12px' }}>
+                                     ✅ 图片上传成功，已保存到服务器
+                                   </Text>
                             <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '10px', marginTop: '4px', wordBreak: 'break-all' }}>
                               {uploadedImageBase64.length > 50 ? uploadedImageBase64.substring(0, 50) + '...' : uploadedImageBase64}
-                            </div>
-                          </div>
-                        )}
+                                   </div>
+                                 </div>
+                               )}
                       </div>
                     )
                   },
@@ -529,58 +529,107 @@ const ThemeSwitcher: React.FC = () => {
                                 hoverable
                                 style={{
                                   background: selectedHistoryImage === img.url 
-                                    ? 'rgba(24, 144, 255, 0.2)' 
+                                    ? 'rgba(24, 144, 255, 0.3)' 
                                     : 'rgba(255, 255, 255, 0.05)',
                                   border: selectedHistoryImage === img.url 
                                     ? '2px solid #1890ff' 
                                     : '1px solid rgba(255, 255, 255, 0.1)',
                                   borderRadius: '8px',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
+                                  transition: 'all 0.3s ease',
+                                  transform: selectedHistoryImage === img.url ? 'scale(1.02)' : 'scale(1)',
+                                  boxShadow: selectedHistoryImage === img.url 
+                                    ? '0 4px 16px rgba(24, 144, 255, 0.4), 0 0 0 1px rgba(24, 144, 255, 0.2)' 
+                                    : '0 2px 8px rgba(0, 0, 0, 0.1)'
                                 }}
                                 onClick={() => setSelectedHistoryImage(img.url)}
                                 bodyStyle={{ padding: '8px' }}
                                 actions={[
                                   <Tooltip title="预览" key="preview">
                                     <EyeOutlined 
-                                      style={{ color: 'rgba(255, 255, 255, 0.8)' }}
+                                      style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '16px' }}
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         Modal.info({
                                           title: '图片预览',
                                           content: (
-                                            <div style={{ textAlign: 'center' }}>
+                                            <div style={{ textAlign: 'center', padding: '20px' }}>
                                               <img 
                                                 src={img.url} 
                                                 alt={img.filename}
-                                                style={{ maxWidth: '100%', maxHeight: '400px' }}
+                                                style={{ 
+                                                  maxWidth: '100%', 
+                                                  maxHeight: '400px',
+                                                  borderRadius: '8px',
+                                                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                                                }}
+                                                onError={(e) => {
+                                                  const target = e.target as HTMLImageElement;
+                                                  target.style.display = 'none';
+                                                  const errorDiv = target.nextElementSibling as HTMLElement;
+                                                  if (errorDiv) {
+                                                    errorDiv.style.display = 'block';
+                                                  }
+                                                }}
                                               />
+                                              <div style={{ 
+                                                display: 'none', 
+                                                color: '#ff4d4f', 
+                                                marginTop: '20px',
+                                                fontSize: '14px'
+                                              }}>
+                                                图片加载失败
+                                              </div>
                                             </div>
                                           ),
                                           width: 600,
-                                          okText: '关闭'
+                                          okText: '关闭',
+                                          className: 'glass-modal'
                                         });
                                       }}
                                     />
                                   </Tooltip>,
                                   <Tooltip title="删除" key="delete">
                                     <DeleteOutlined 
-                                      style={{ color: '#ff4d4f' }}
+                                      style={{ color: '#ff4d4f', fontSize: '16px' }}
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         Modal.confirm({
                                           title: '确认删除',
-                                          content: '确定要删除这张图片吗？',
+                                          content: '确定要删除这张图片吗？此操作不可恢复。',
                                           okText: '删除',
                                           cancelText: '取消',
                                           okType: 'danger',
-                                          onOk: () => deleteHistoryImage(img.filename)
+                                          className: 'glass-modal',
+                                          onOk: () => {
+                                            console.log('删除图片:', img.filename);
+                                            deleteHistoryImage(img.filename);
+                                          }
                                         });
                                       }}
                                     />
                                   </Tooltip>
                                 ]}
                               >
-                                <div style={{ textAlign: 'center' }}>
+                                <div style={{ textAlign: 'center', position: 'relative' }}>
+                                  {selectedHistoryImage === img.url && (
+                                    <div style={{
+                                      position: 'absolute',
+                                      top: '4px',
+                                      right: '4px',
+                                      width: '20px',
+                                      height: '20px',
+                                      borderRadius: '50%',
+                                      background: '#1890ff',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      zIndex: 2,
+                                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                                    }}>
+                                      <CheckOutlined style={{ fontSize: '12px', color: 'white' }} />
+                                    </div>
+                                  )}
                                   <Image
                                     src={img.url}
                                     alt={img.filename}
@@ -588,17 +637,19 @@ const ThemeSwitcher: React.FC = () => {
                                     height={60}
                                     style={{ 
                                       objectFit: 'cover',
-                                      borderRadius: '4px'
+                                      borderRadius: '4px',
+                                      filter: selectedHistoryImage === img.url ? 'brightness(1.1)' : 'brightness(1)'
                                     }}
                                     preview={false}
                                   />
                                   <div style={{ 
                                     marginTop: '4px',
                                     fontSize: '10px',
-                                    color: 'rgba(255, 255, 255, 0.6)',
+                                    color: selectedHistoryImage === img.url ? '#1890ff' : 'rgba(255, 255, 255, 0.6)',
                                     textOverflow: 'ellipsis',
                                     overflow: 'hidden',
-                                    whiteSpace: 'nowrap'
+                                    whiteSpace: 'nowrap',
+                                    fontWeight: selectedHistoryImage === img.url ? 'bold' : 'normal'
                                   }}>
                                     {formatFileSize(img.size)}
                                   </div>
