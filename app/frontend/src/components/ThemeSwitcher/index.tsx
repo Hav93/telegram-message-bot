@@ -400,19 +400,57 @@ const ThemeSwitcher: React.FC = () => {
                       border: '1px solid rgba(255, 255, 255, 0.25)',
                       boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1)',
                       display: 'block',
-                      // 分别处理渐变和纯色
-                      backgroundColor: option.preview.includes('gradient') ? 'transparent' : option.preview,
-                      backgroundImage: option.preview.includes('gradient') ? option.preview : 'none',
+                      // 使用最强制的方式设置背景
+                      ...(option.preview.includes('gradient') 
+                        ? { 
+                            background: option.preview,
+                            backgroundImage: option.preview,
+                            backgroundColor: 'transparent'
+                          }
+                        : { 
+                            background: option.preview,
+                            backgroundColor: option.preview,
+                            backgroundImage: 'none'
+                          }
+                      ),
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                       backgroundRepeat: 'no-repeat',
+                      backgroundAttachment: 'scroll',
+                      backgroundClip: 'padding-box',
                       // 确保没有任何干扰
                       backdropFilter: 'none',
                       WebkitBackdropFilter: 'none',
-                      filter: 'none'
+                      filter: 'none',
+                      // 最高优先级
+                      position: 'relative',
+                      zIndex: 9999
                     }}
                     onMouseEnter={() => {
                       console.log(`🎨 主题预览 ${option.label}:`, option.preview);
+                    }}
+                    onClick={() => {
+                      // 临时测试 - 在浏览器中创建一个独立元素
+                      const testDiv = document.createElement('div');
+                      testDiv.style.cssText = `
+                        position: fixed;
+                        top: 50px;
+                        right: 50px;
+                        width: 200px;
+                        height: 100px;
+                        z-index: 99999;
+                        border: 3px solid red;
+                        ${option.preview.includes('gradient') 
+                          ? `background: ${option.preview}; background-image: ${option.preview};`
+                          : `background-color: ${option.preview}; background: ${option.preview};`
+                        }
+                      `;
+                      testDiv.innerHTML = `<div style="color: white; padding: 10px; background: rgba(0,0,0,0.5);">${option.label}<br/>${option.preview}</div>`;
+                      document.body.appendChild(testDiv);
+                      
+                      setTimeout(() => {
+                        document.body.removeChild(testDiv);
+                      }, 3000);
                     }}
                   />
                 )}
