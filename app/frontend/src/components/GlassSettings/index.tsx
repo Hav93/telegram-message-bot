@@ -175,43 +175,71 @@ const GlassSettings: React.FC = () => {
 
   // 颜色选择器变化
   const handleColorChange = (color: Color) => {
-    console.log('ColorPicker onChange - available methods:', Object.getOwnPropertyNames(color));
+    console.log('🎨 ColorPicker onChange triggered');
+    console.log('Available methods:', Object.getOwnPropertyNames(color));
     
-    const hsb = color.toHsb();
-    console.log('Using toHsb():', hsb);
-    
-    // HSB值已经是0-1范围的小数
-    const h = Math.round(hsb.h || 0);
-    const s_hsb = hsb.s || 0;
-    const v = hsb.b || 0;
-    const a = Number((hsb.a || 1).toFixed(2));
-    
-    console.log('HSB components:', { h, s_hsb, v, a });
-    
-    // 正确的HSB到HSL转换公式
-    const l = v * (2 - s_hsb) / 2;
-    console.log('Lightness calculation: v * (2 - s_hsb) / 2 =', v, '* (2 -', s_hsb, ') / 2 =', l);
-    
-    const s_hsl = (l !== 0 && l !== 1) ? (v - l) / Math.min(l, 1 - l) : 0;
-    console.log('Saturation calculation: (v - l) / min(l, 1-l) = (', v, '-', l, ') /', Math.min(l, 1 - l), '=', s_hsl);
-    
-    // 转换为百分比（0-100），但先检查计算结果
-    const s_percent = s_hsl * 100;
-    const l_percent = l * 100;
-    
-    console.log('Before rounding:', { s_percent, l_percent });
-    
-    const s = Math.round(s_percent);
-    const lightness = Math.round(l_percent);
-    
-    console.log('Final HSL values:', { h, s, l: lightness });
-    
-    const cssValue = `hsl(${h} ${s}% ${lightness}% / ${a})`;
-    console.log('CSS value:', cssValue);
-    
-    updateSettings({
-      color: { h, s, l: lightness, a }
-    });
+    // 尝试多种方法获取颜色值
+    try {
+      const hsb = color.toHsb();
+      console.log('HSB values:', hsb);
+      
+      // 尝试使用hex转换
+      const hex = color.toHex();
+      console.log('HEX value:', hex);
+      
+      // 手动从hex计算HSL
+      const hexToHsl = (hex: string) => {
+        // 移除#号
+        const cleanHex = hex.replace('#', '');
+        const r = parseInt(cleanHex.substr(0, 2), 16) / 255;
+        const g = parseInt(cleanHex.substr(2, 2), 16) / 255;
+        const b = parseInt(cleanHex.substr(4, 2), 16) / 255;
+        
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        let h = 0;
+        let s = 0;
+        const l = (max + min) / 2;
+        
+        if (max !== min) {
+          const d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          
+          switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+          }
+          h /= 6;
+        }
+        
+        return {
+          h: Math.round(h * 360),
+          s: Math.round(s * 100),
+          l: Math.round(l * 100)
+        };
+      };
+      
+      const hslFromHex = hexToHsl(hex);
+      console.log('HSL calculated from HEX:', hslFromHex);
+      
+      const a = Number((hsb.a || 1).toFixed(2));
+      
+      const cssValue = `hsl(${hslFromHex.h} ${hslFromHex.s}% ${hslFromHex.l}% / ${a})`;
+      console.log('Final CSS value:', cssValue);
+      
+      updateSettings({
+        color: { 
+          h: hslFromHex.h, 
+          s: hslFromHex.s, 
+          l: hslFromHex.l, 
+          a 
+        }
+      });
+      
+    } catch (error) {
+      console.error('Color conversion error:', error);
+    }
   };
 
   // 导出设置
