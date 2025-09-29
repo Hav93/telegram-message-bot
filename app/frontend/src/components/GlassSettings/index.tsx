@@ -33,6 +33,9 @@ const defaultSettings: GlassSettings = {
   texture: 'rice-paper'
 };
 
+// DEBUG: Force build change - this should appear in built files
+const BUILD_VERSION = 'FINAL-BUILD-2024-12-19-TEST';
+
 const textureOptions = [
   { value: 'rice-paper', label: 'Rice Paper', url: 'https://www.transparenttextures.com/patterns/rice-paper.png' },
   { value: 'egg-shell', label: 'Egg Shell', url: 'https://www.transparenttextures.com/patterns/egg-shell.png' },
@@ -175,6 +178,7 @@ const GlassSettings: React.FC = () => {
 
   // 颜色选择器变化
   const handleColorChange = (color: Color) => {
+    console.log('🚀 Build version:', BUILD_VERSION);
     console.log('🚀 NEW CODE VERSION 2024-12-19-FINAL - ColorPicker onChange triggered');
     console.log('Available methods:', Object.getOwnPropertyNames(color));
     
