@@ -41,7 +41,7 @@ jobs:
         echo "Frontend build completed. Checking dist directory:"
         ls -la dist/
         echo "Checking for updated GlassSettings component:"
-        grep -n "NEW CODE VERSION 2024-12-19" dist/assets/*.js || echo "Version identifier not found in built files"
+        grep -n "NEW CODE VERSION 2024-12-19-FINAL" dist/assets/*.js || echo "Version identifier not found in built files"
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
