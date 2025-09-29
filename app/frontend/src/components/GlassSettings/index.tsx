@@ -444,7 +444,7 @@ const GlassSettings: React.FC = () => {
                   key: 'color',
                   label: (
                     <Text strong style={{ color: '#ffffff', fontSize: '15px' }}>
-                      color 背景颜色
+                      color 背景颜色 [UPDATED-FINAL]
                     </Text>
                   ),
                   children: (
