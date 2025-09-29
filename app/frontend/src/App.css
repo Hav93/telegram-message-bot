@@ -1412,7 +1412,20 @@ body.theme-custom .ant-alert-description {
   background: rgba(0, 0, 0, 0.4) !important; /* 半透明黑色蒙版 */
   backdrop-filter: blur(8px) brightness(0.7) !important;
   -webkit-backdrop-filter: blur(8px) brightness(0.7) !important;
-  z-index: 10000 !important;
+  z-index: 19999 !important; /* 确保蒙版在Modal内容之下 */
+}
+
+/* 主题设置Modal的特殊z-index */
+.glass-modal.theme-settings-modal .ant-modal-mask {
+  z-index: 19999 !important;
+}
+
+.glass-modal.theme-settings-modal .ant-modal-wrap {
+  z-index: 20000 !important;
+}
+
+.glass-modal.theme-settings-modal .ant-modal-content {
+  z-index: 20001 !important;
 }
 
 .glass-modal .ant-modal-header {

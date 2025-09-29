@@ -363,6 +363,9 @@ const ThemeSwitcher: React.FC = () => {
         cancelText="取消"
         className="glass-modal theme-settings-modal"
         width={600}
+        zIndex={20000}
+        centered
+        destroyOnClose
         styles={{
           content: {
             background: 'transparent',
