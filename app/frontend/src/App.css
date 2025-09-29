@@ -1588,39 +1588,74 @@ body.theme-custom .ant-alert-description {
   color: rgba(255, 255, 255, 0.6) !important;
 }
 
-/* 主题颜色预览样式 - 确保内联背景样式生效 */
+/* 彻底重置主题预览样式 - 移除所有可能的干扰 */
 .theme-preview {
+  /* 基础布局 */
   width: 100% !important;
   height: 40px !important;
   border-radius: 8px !important;
   margin-bottom: 8px !important;
   border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  
+  /* 背景相关 - 让内联样式完全控制 */
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
   background-attachment: scroll !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  background-origin: padding-box !important;
+  background-clip: padding-box !important;
+  
+  /* 显示控制 */
   display: block !important;
   min-height: 40px !important;
   position: relative !important;
   overflow: hidden !important;
+  
+  /* 完全移除所有滤镜效果 */
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  /* 关键：阻止任何父级的backdrop-filter影响 */
+  filter: none !important;
+  -webkit-filter: none !important;
+  
+  /* 创建独立的层叠上下文 */
   isolation: isolate !important;
+  transform: translateZ(0) !important;
+  
+  /* 阴影效果 */
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* 更高优先级的选择器确保在glass-modal中也生效 */
+/* 强制覆盖所有可能的父级样式 */
 .glass-modal .theme-preview,
 .glass-modal.theme-settings-modal .theme-preview,
-html body .glass-modal .theme-preview {
+html body .glass-modal .theme-preview,
+html body .glass-modal.theme-settings-modal .theme-preview {
+  /* 移除所有滤镜 */
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+  
+  /* 确保独立渲染 */
   isolation: isolate !important;
-  /* 确保background属性不被覆盖 */
-  background-color: transparent !important;
+  transform: translateZ(0) !important;
+  
+  /* 不设置background-color，让内联background生效 */
+  background-color: initial !important;
+  background-image: initial !important;
+}
+
+/* 最高优先级 - 直接针对特定背景 */
+html body .theme-preview[style*="linear-gradient"] {
+  background-attachment: scroll !important;
+  background-clip: padding-box !important;
+}
+
+html body .theme-preview[style*="#1a1a1a"] {
+  background-attachment: scroll !important;
+  background-clip: padding-box !important;
 }
 
 /* 清理重复的CSS规则，依赖内联样式 */
@@ -1677,11 +1712,42 @@ html body .glass-modal .theme-preview {
 /* 确保历史图片网格布局正确显示 */
 .glass-modal .ant-tabs-tabpane {
   overflow: visible !important;
-  min-height: 450px !important; /* 确保有足够高度显示多行图片 */
+  min-height: 550px !important; /* 增加高度确保显示多行图片 */
 }
 
 .glass-modal .ant-tabs-tabpane > div {
   overflow: visible !important;
+}
+
+/* 优化历史图片网格容器滚动条样式 */
+.glass-modal .ant-tabs-tabpane div[style*="grid"]::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.glass-modal .ant-tabs-tabpane div[style*="grid"]::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 3px !important;
+}
+
+.glass-modal .ant-tabs-tabpane div[style*="grid"]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-radius: 3px !important;
+}
+
+.glass-modal .ant-tabs-tabpane div[style*="grid"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 确保卡片在网格中正确显示 */
+.glass-modal .ant-card.ant-card-small {
+  min-height: 140px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.glass-modal .ant-card.ant-card-small .ant-card-body {
+  flex: 1 !important;
+  padding: 8px !important;
 }
 
 /* 确保历史图片容器有足够的z-index */
