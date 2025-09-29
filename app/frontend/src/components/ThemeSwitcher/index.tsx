@@ -404,15 +404,34 @@ const ThemeSwitcher: React.FC = () => {
                       border: '1px solid rgba(255, 255, 255, 0.25)',
                       boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1)',
                       display: 'block',
-                      // 分别处理渐变和纯色
+                      // 分别处理渐变和纯色 - 使用更强的方式
                       backgroundColor: option.preview.includes('gradient') ? 'transparent' : option.preview,
                       backgroundImage: option.preview.includes('gradient') ? option.preview : 'none',
+                      background: option.preview, // 额外添加这个作为后备
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
-                      backgroundRepeat: 'no-repeat'
+                      backgroundRepeat: 'no-repeat',
+                      // 确保没有干扰
+                      backdropFilter: 'none',
+                      WebkitBackdropFilter: 'none',
+                      position: 'relative',
+                      zIndex: 10
                     }}
                     onMouseEnter={() => {
                       console.log(`🎨 主题预览 ${option.label}:`, option.preview);
+                    }}
+                    ref={(el) => {
+                      // 使用ref直接设置样式，绕过React的样式系统
+                      if (el) {
+                        if (option.preview.includes('gradient')) {
+                          el.style.setProperty('background-image', option.preview, 'important');
+                          el.style.setProperty('background-color', 'transparent', 'important');
+                        } else {
+                          el.style.setProperty('background-color', option.preview, 'important');
+                          el.style.setProperty('background-image', 'none', 'important');
+                        }
+                        el.style.setProperty('background', option.preview, 'important');
+                      }
                     }}
                   />
                 )}
