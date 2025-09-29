@@ -50,6 +50,7 @@ const ThemeSwitcher: React.FC = () => {
   const [historyImages, setHistoryImages] = useState<BackgroundImage[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [selectedHistoryImage, setSelectedHistoryImage] = useState<string>('');
+  const [previewImage, setPreviewImage] = useState<{ url: string; filename: string } | null>(null);
 
   // 获取历史背景图片
   const fetchHistoryImages = async () => {
@@ -547,16 +548,19 @@ const ThemeSwitcher: React.FC = () => {
                           />
                         ) : (
                           <div style={{ 
-                            maxHeight: '500px', 
+                            maxHeight: '450px', 
                             overflowY: 'auto',
                             overflowX: 'hidden',
                             display: 'grid',
                             gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
                             gridAutoRows: 'minmax(140px, auto)',
                             gap: '12px',
-                            padding: '0 4px 40px 4px', // 增加底部和左右padding
+                            padding: '8px 8px 60px 8px', // 增加顶部、底部和左右padding
                             scrollbarWidth: 'thin',
-                            scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+                            scrollbarColor: 'rgba(255,255,255,0.4) rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            borderRadius: '8px',
+                            background: 'rgba(255, 255, 255, 0.02)'
                           }}>
                             {historyImages.map((img) => (
                               <Card
@@ -597,8 +601,8 @@ const ThemeSwitcher: React.FC = () => {
                                         e.stopPropagation();
                                         console.log('👁️ 预览图片:', img.filename, img.url);
                                         
-                                        // 直接打开新窗口预览图片
-                                        window.open(img.url, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+                                        // 设置预览图片状态，显示预览框
+                                        setPreviewImage({ url: img.url, filename: img.filename });
                                       }}
                                     />
                                   </Tooltip>,
@@ -608,7 +612,7 @@ const ThemeSwitcher: React.FC = () => {
                                       size="small"
                                       danger
                                       icon={<DeleteOutlined />}
-                                      style={{ 
+                style={{
                                         color: '#ff4d4f', 
                                         fontSize: '16px',
                                         zIndex: 10005,
@@ -707,6 +711,53 @@ const ThemeSwitcher: React.FC = () => {
           )}
         </div>
       </Modal>
+
+      {/* 图片预览Modal */}
+      {previewImage && (
+        <Modal
+          title={`图片预览 - ${previewImage.filename}`}
+          open={true}
+          onCancel={() => setPreviewImage(null)}
+          footer={[
+            <Button key="close" onClick={() => setPreviewImage(null)}>
+              关闭
+            </Button>
+          ]}
+          width={800}
+          centered
+          className="glass-modal"
+          zIndex={60000}
+        >
+          <div style={{ textAlign: 'center', padding: '20px' }}>
+            <img 
+              src={previewImage.url} 
+              alt={previewImage.filename}
+              style={{ 
+                maxWidth: '100%', 
+                maxHeight: '500px',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+              }}
+              onLoad={() => {
+                console.log('✅ 预览图片加载成功:', previewImage.url);
+              }}
+              onError={() => {
+                console.error('❌ 预览图片加载失败:', previewImage.url);
+                message.error('图片加载失败');
+              }}
+            />
+            <div style={{ 
+              marginTop: '16px',
+              fontSize: '12px',
+              color: 'rgba(255, 255, 255, 0.7)',
+              wordBreak: 'break-all'
+            }}>
+              文件名: {previewImage.filename}<br/>
+              URL: {previewImage.url}
+            </div>
+          </div>
+        </Modal>
+      )}
     </>
   );
 };

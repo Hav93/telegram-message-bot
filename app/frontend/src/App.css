@@ -1721,21 +1721,33 @@ html body .theme-preview[style*="#1a1a1a"] {
 
 /* 优化历史图片网格容器滚动条样式 */
 .glass-modal .ant-tabs-tabpane div[style*="grid"]::-webkit-scrollbar {
-  width: 6px !important;
+  width: 8px !important;
+  height: 8px !important;
 }
 
 .glass-modal .ant-tabs-tabpane div[style*="grid"]::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-radius: 3px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 4px !important;
+  margin: 4px !important;
 }
 
 .glass-modal .ant-tabs-tabpane div[style*="grid"]::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3) !important;
-  border-radius: 3px !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  border-radius: 4px !important;
+  transition: background 0.2s ease !important;
 }
 
 .glass-modal .ant-tabs-tabpane div[style*="grid"]::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+}
+
+.glass-modal .ant-tabs-tabpane div[style*="grid"]::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+/* 确保网格容器有正确的滚动行为 */
+.glass-modal .ant-tabs-tabpane div[style*="grid"] {
+  scroll-behavior: smooth !important;
 }
 
 /* 确保卡片在网格中正确显示 */
