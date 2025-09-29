@@ -394,7 +394,16 @@ const ThemeSwitcher: React.FC = () => {
                   <div
                     className="theme-preview"
                     style={{
-                      background: option.preview
+                      background: option.preview,
+                      backgroundImage: option.preview.includes('gradient') ? option.preview : 'none',
+                      backgroundColor: option.preview.includes('gradient') ? 'transparent' : option.preview,
+                      backdropFilter: 'none',
+                      WebkitBackdropFilter: 'none',
+                      filter: 'none',
+                      mixBlendMode: 'normal',
+                      isolation: 'isolate',
+                      zIndex: 10000,
+                      position: 'relative'
                     }}
                   />
                 )}
@@ -573,13 +582,17 @@ const ThemeSwitcher: React.FC = () => {
                             {/* 调试信息 */}
                             <div style={{ 
                               gridColumn: '1 / -1', 
-                              padding: '4px 8px', 
-                              background: 'rgba(255,255,255,0.1)', 
-                              borderRadius: '4px', 
-                              fontSize: '12px', 
-                              color: 'rgba(255,255,255,0.7)',
+                              padding: '2px 6px', 
+                              background: 'rgba(255,255,255,0.08)', 
+                              borderRadius: '3px', 
+                              fontSize: '11px', 
+                              color: 'rgba(255,255,255,0.6)',
                               textAlign: 'center',
-                              marginBottom: '8px'
+                              marginBottom: '4px',
+                              height: '20px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
                             }}>
                               共 {historyImages.length} 张图片 - 可向下滚动查看更多
                             </div>
@@ -601,10 +614,20 @@ const ThemeSwitcher: React.FC = () => {
                                   transform: selectedHistoryImage === img.url ? 'scale(1.02)' : 'scale(1)',
                                   boxShadow: selectedHistoryImage === img.url 
                                     ? '0 4px 16px rgba(24, 144, 255, 0.4), 0 0 0 1px rgba(24, 144, 255, 0.2)' 
-                                    : '0 2px 8px rgba(0, 0, 0, 0.1)'
+                                    : '0 2px 8px rgba(0, 0, 0, 0.1)',
+                                  overflow: 'hidden', // 防止内容溢出
+                                  height: '140px', // 固定高度
+                                  display: 'flex',
+                                  flexDirection: 'column'
                                 }}
                                 onClick={() => setSelectedHistoryImage(img.url)}
-                                bodyStyle={{ padding: '8px' }}
+                                bodyStyle={{ 
+                                  padding: '6px', 
+                                  flex: '1', 
+                                  display: 'flex', 
+                                  flexDirection: 'column',
+                                  overflow: 'hidden'
+                                }}
                                 actions={[
                                   <Tooltip title="预览" key="preview">
                                     <Button
@@ -667,54 +690,68 @@ const ThemeSwitcher: React.FC = () => {
                                   </Tooltip>
                                 ]}
                               >
-                                <div style={{ textAlign: 'center', position: 'relative' }}>
+                                <div style={{ 
+                                  textAlign: 'center', 
+                                  position: 'relative',
+                                  height: '100%',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  justifyContent: 'space-between',
+                                  overflow: 'hidden'
+                                }}>
                                   {selectedHistoryImage === img.url && (
                                     <div style={{
                                       position: 'absolute',
-                                      top: '4px',
-                                      right: '4px',
-                                      width: '20px',
-                                      height: '20px',
+                                      top: '2px',
+                                      right: '2px',
+                                      width: '16px',
+                                      height: '16px',
                                       borderRadius: '50%',
                                       background: '#1890ff',
                                       display: 'flex',
                                       alignItems: 'center',
                                       justifyContent: 'center',
                                       zIndex: 2,
-                                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                                      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)'
                                     }}>
-                                      <CheckOutlined style={{ fontSize: '12px', color: 'white' }} />
+                                      <CheckOutlined style={{ fontSize: '10px', color: 'white' }} />
                                     </div>
                                   )}
-                                  <Image
-                                    src={img.url}
-                                    alt={img.filename}
-                                    width={80}
-                                    height={60}
-                                    style={{ 
-                                      objectFit: 'cover',
-                                      borderRadius: '4px',
-                                      filter: selectedHistoryImage === img.url ? 'brightness(1.1)' : 'brightness(1)'
-                                    }}
-                                    preview={false}
-                                  />
+                                  <div style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Image
+                                      src={img.url}
+                                      alt={img.filename}
+                                      width={75}
+                                      height={50}
+                                      style={{ 
+                                        objectFit: 'cover',
+                                        borderRadius: '3px',
+                                        filter: selectedHistoryImage === img.url ? 'brightness(1.1)' : 'brightness(1)',
+                                        maxWidth: '100%',
+                                        maxHeight: '100%'
+                                      }}
+                                      preview={false}
+                                    />
+                                  </div>
                                   <div style={{ 
-                                    marginTop: '4px',
-                                    fontSize: '10px',
+                                    marginTop: '2px',
+                                    fontSize: '9px',
                                     color: selectedHistoryImage === img.url ? '#1890ff' : 'rgba(255, 255, 255, 0.6)',
                                     textOverflow: 'ellipsis',
                                     overflow: 'hidden',
                                     whiteSpace: 'nowrap',
-                                    fontWeight: selectedHistoryImage === img.url ? 'bold' : 'normal'
+                                    fontWeight: selectedHistoryImage === img.url ? 'bold' : 'normal',
+                                    lineHeight: '1.2'
                                   }}>
                                     {formatFileSize(img.size)}
                                   </div>
                                   <div style={{ 
-                                    fontSize: '9px',
-                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    fontSize: '8px',
+                                    color: 'rgba(255, 255, 255, 0.4)',
                                     textOverflow: 'ellipsis',
                                     overflow: 'hidden',
-                                    whiteSpace: 'nowrap'
+                                    whiteSpace: 'nowrap',
+                                    lineHeight: '1.2'
                                   }}>
                                     {formatDate(img.uploaded_at)}
                                   </div>

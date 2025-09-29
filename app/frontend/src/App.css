@@ -1407,12 +1407,12 @@ body.theme-custom .ant-alert-description {
   overflow: hidden !important;
 }
 
-/* 添加客户端弹窗蒙版层也要透明 */
+/* 添加客户端弹窗蒙版层样式 - 统一设置 */
 .glass-modal .ant-modal-mask {
-  background: rgba(0, 0, 0, 0.3) !important; /* 更透明的蒙版 */
-  backdrop-filter: blur(5px) !important;
-  -webkit-backdrop-filter: blur(5px) !important;
-  z-index: 10000 !important; /* 确保蒙版层在下方 */
+  background: rgba(0, 0, 0, 0.4) !important; /* 半透明黑色蒙版 */
+  backdrop-filter: blur(8px) brightness(0.7) !important;
+  -webkit-backdrop-filter: blur(8px) brightness(0.7) !important;
+  z-index: 10000 !important;
 }
 
 .glass-modal .ant-modal-header {
@@ -1627,24 +1627,58 @@ body.theme-custom .ant-alert-description {
     0 4px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* 强制覆盖所有可能的父级样式 */
+/* 强制覆盖所有可能的父级样式 - 最高优先级 */
 .glass-modal .theme-preview,
 .glass-modal.theme-settings-modal .theme-preview,
 html body .glass-modal .theme-preview,
 html body .glass-modal.theme-settings-modal .theme-preview {
-  /* 移除所有滤镜 */
+  /* 移除所有滤镜效果 */
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   filter: none !important;
   -webkit-filter: none !important;
   
-  /* 确保独立渲染 */
+  /* 确保独立渲染上下文 */
   isolation: isolate !important;
   transform: translateZ(0) !important;
+  contain: layout style paint !important;
   
-  /* 不设置background-color，让内联background生效 */
-  background-color: initial !important;
-  background-image: initial !important;
+  /* 强制重置背景属性，让内联样式生效 */
+  background-color: transparent !important;
+  background-image: none !important;
+  
+  /* 确保z-index足够高 */
+  position: relative !important;
+  z-index: 9999 !important;
+}
+
+/* 终极修复 - 使用更高优先级的选择器 */
+html body .glass-modal .theme-card .theme-preview {
+  background-color: unset !important;
+  background-image: unset !important;
+  backdrop-filter: unset !important;
+  -webkit-backdrop-filter: unset !important;
+}
+
+/* 超级强制修复 - 针对具体的背景值 */
+.glass-modal .theme-preview[style*="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"] {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.glass-modal .theme-preview[style*="#1a1a1a"] {
+  background: #1a1a1a !important;
+}
+
+.glass-modal .theme-preview[style*="linear-gradient(135deg, #2c3e50 0%, #34495e 100%)"] {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+}
+
+/* 通用强制修复 - 任何内联background样式都要生效 */
+.glass-modal .theme-preview[style*="background"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
 }
 
 /* 最高优先级 - 直接针对特定背景 */
@@ -1805,14 +1839,24 @@ html body .theme-preview[style*="#1a1a1a"] {
 
 /* 确保卡片在网格中正确显示 */
 .glass-modal .ant-card.ant-card-small {
-  min-height: 140px !important;
+  height: 140px !important;
   display: flex !important;
   flex-direction: column !important;
+  overflow: hidden !important;
 }
 
 .glass-modal .ant-card.ant-card-small .ant-card-body {
   flex: 1 !important;
-  padding: 8px !important;
+  padding: 6px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.glass-modal .ant-card.ant-card-small .ant-card-actions {
+  padding: 4px 8px !important;
+  min-height: 32px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 /* 确保历史图片容器有足够的z-index */
@@ -3525,12 +3569,7 @@ html body .ant-modal .ant-collapse-item {
   border-radius: 12px !important;
 }
 
-/* 添加客户端弹窗终极修复 - 完全移除灰色背景 */
-html body .glass-modal .ant-modal-mask {
-  background: transparent !important; /* 完全透明的蒙版 */
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
+/* 移除冲突的蒙版样式规则 */
 
 html body .glass-modal .ant-modal-content {
   background: rgba(255, 255, 255, 0.05) !important; /* 极浅的白色透明背景 */
