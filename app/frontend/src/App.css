@@ -1355,24 +1355,9 @@ body.theme-custom .ant-alert-description {
 
 /* 客户端弹窗玻璃质感样式已移至文件末尾统一管理 */
 
-/* 添加客户端弹窗蒙版层样式 - 统一设置 */
-.glass-modal .ant-modal-mask {
-  background: rgba(0, 0, 0, 0.4) !important; /* 半透明黑色蒙版 */
-  backdrop-filter: blur(8px) brightness(0.7) !important;
-  -webkit-backdrop-filter: blur(8px) brightness(0.7) !important;
-  z-index: 19999 !important; /* 确保蒙版在Modal内容之下 */
-}
+/* 客户端弹窗蒙版层样式已移至文件末尾统一管理 */
 
-/* 主题设置Modal的特殊配置 - 确保只有一个蒙版 */
-.glass-modal.theme-settings-modal .ant-modal-mask {
-  z-index: 19999 !important;
-  /* 确保不会有重复蒙版 */
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-}
+/* 主题设置Modal蒙版配置已移至文件末尾统一管理 */
 
 .glass-modal.theme-settings-modal .ant-modal-wrap {
   z-index: 20000 !important;
@@ -2445,11 +2430,7 @@ body.theme-custom .glass3d {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
 }
 
-/* 优化弹窗样式 - 玻璃质感设计 */
-.ant-modal {
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-}
+/* 优化弹窗样式 - 全局backdrop-filter已删除，避免双层效果 */
 
 /* 通用Modal样式已移至文件末尾统一管理 */
 
