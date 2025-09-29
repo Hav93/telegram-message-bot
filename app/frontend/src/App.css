@@ -1629,6 +1629,27 @@ html body .theme-preview[style*="#1a1a1a"] {
 
 /* 清理重复的CSS规则，依赖内联样式 */
 
+/* 专门为主题预览添加最高优先级规则，覆盖通配符干扰 */
+.glass-modal .theme-preview-debug {
+  background: revert !important;
+  background-color: revert !important;
+  background-image: revert !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  /* 确保内联样式生效 */
+  all: revert !important;
+  display: block !important;
+  width: 100% !important;
+  height: 40px !important;
+  border-radius: 8px !important;
+  margin-bottom: 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
 /* 移除不准确的nth-child选择器，改用更精确的方式 */
 
 /* 修复历史图片卡片的按钮显示问题 */
