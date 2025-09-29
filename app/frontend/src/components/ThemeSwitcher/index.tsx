@@ -530,11 +530,12 @@ const ThemeSwitcher: React.FC = () => {
                           />
                         ) : (
                           <div style={{ 
-                            maxHeight: '300px', 
+                            maxHeight: '400px', 
                             overflowY: 'auto',
                             display: 'grid',
                             gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-                            gap: '8px'
+                            gap: '8px',
+                            paddingBottom: '20px' // 确保底部有足够空间
                           }}>
                             {historyImages.map((img) => (
                               <Card
@@ -622,7 +623,9 @@ const ThemeSwitcher: React.FC = () => {
                                           ),
                                           width: 700,
                                           okText: '关闭',
-                                          className: 'glass-modal'
+                                          className: 'glass-modal',
+                                          zIndex: 10000,
+                                          centered: true
                                         });
                                       }}
                                     />
@@ -650,9 +653,11 @@ const ThemeSwitcher: React.FC = () => {
                                           cancelText: '取消',
                                           okType: 'danger',
                                           className: 'glass-modal',
+                                          zIndex: 10000,
+                                          centered: true,
                                           onOk: () => {
-                                            console.log('删除图片:', img.filename);
-                                            deleteHistoryImage(img.filename);
+                                            console.log('确认删除图片:', img.filename);
+                                            return deleteHistoryImage(img.filename);
                                           }
                                         });
                                       }}

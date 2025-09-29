@@ -1586,7 +1586,7 @@ body.theme-custom .ant-alert-description {
   color: rgba(255, 255, 255, 0.6) !important;
 }
 
-/* 主题颜色预览样式 - 强制覆盖所有样式 */
+/* 主题颜色预览样式 - 不覆盖background属性 */
 .theme-preview,
 .glass-modal .theme-preview,
 html body .theme-preview {
@@ -1598,6 +1598,7 @@ html body .theme-preview {
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
+  background-attachment: scroll !important;
   box-shadow: 
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 4px 8px rgba(0, 0, 0, 0.1) !important;
@@ -1607,59 +1608,12 @@ html body .theme-preview {
   overflow: hidden !important;
   backdrop-filter: none !important; /* 移除backdrop-filter */
   -webkit-backdrop-filter: none !important;
-  background-attachment: scroll !important;
+  /* 不强制设置background，让内联样式生效 */
 }
 
-/* 确保主题预览在模态框中正确显示 */
-.glass-modal .theme-preview {
-  background-attachment: scroll !important; /* 修复渐变背景显示 */
-  backdrop-filter: none !important; /* 关闭毛玻璃效果 */
-  -webkit-backdrop-filter: none !important;
-}
+/* 清理重复的CSS规则，依赖内联样式 */
 
-/* 使用最高优先级强制修复所有主题预览 */
-html body .glass-modal .theme-preview[style*="#1a1a1a"],
-html body .theme-preview[style*="#1a1a1a"] {
-  background: #1a1a1a !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-html body .glass-modal .theme-preview[style*="linear-gradient"],
-html body .theme-preview[style*="linear-gradient"] {
-  background-attachment: scroll !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* 紫蓝渐变主题强制修复 */
-html body .glass-modal .theme-preview[style*="667eea"],
-html body .theme-preview[style*="667eea"] {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* 灰色渐变主题强制修复 */
-html body .glass-modal .theme-preview[style*="2c3e50"],
-html body .theme-preview[style*="2c3e50"] {
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* 额外的强制修复 - 直接指定每个主题 */
-html body .theme-preview:nth-child(1) {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-}
-
-html body .theme-preview:nth-child(2) {
-  background: #1a1a1a !important;
-}
-
-html body .theme-preview:nth-child(3) {
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-}
+/* 移除不准确的nth-child选择器，改用更精确的方式 */
 
 /* 修复历史图片卡片的按钮显示问题 */
 .glass-modal .ant-card-actions {
@@ -1695,6 +1649,17 @@ html body .theme-preview:nth-child(3) {
 /* 修复网格容器的溢出问题 */
 .glass-modal .ant-tabs-content-holder {
   overflow: visible !important;
+  max-height: none !important;
+}
+
+/* 确保主题设置弹窗有足够高度 */
+.glass-modal.theme-settings-modal {
+  max-height: 90vh !important;
+}
+
+.glass-modal.theme-settings-modal .ant-modal-content {
+  max-height: 90vh !important;
+  overflow-y: auto !important;
 }
 
 /* 确保历史图片容器有足够的z-index */
