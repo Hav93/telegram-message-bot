@@ -74,8 +74,8 @@ html, body {
   z-index: 10000 !important;
 }
 
-/* 通用Modal蒙版 - 降低优先级，让glass-modal规则覆盖 */
-.ant-modal-mask {
+/* 通用Modal蒙版 - 只对非glass-modal生效 */
+.ant-modal-mask:not(.glass-modal .ant-modal-mask) {
   z-index: 10000 !important;
   background-color: rgba(0, 0, 0, 0.6) !important;
   backdrop-filter: blur(4px) !important;
@@ -566,18 +566,7 @@ a:hover, .ant-typography a:hover {
   color: rgba(255, 255, 255, 0.7) !important;
 }
 
-/* 模态框样式 - 优化可读性的玻璃质感 */
-.ant-modal-content {
-  background: rgba(255, 255, 255, 0.25) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  border-radius: 16px !important;
-  box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
-}
+/* 通用模态框样式已移至文件末尾统一管理 */
 
 .ant-modal-header {
   background: rgba(255, 255, 255, 0.15) !important;
@@ -705,14 +694,7 @@ a:hover, .ant-typography a:hover {
   border-radius: 8px !important;
 }
 
-/* 主题设置Modal专用样式 - 移除多余背景层 */
-.theme-modal .ant-modal-content {
-  background: rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-}
+/* 主题设置Modal样式已移至文件末尾统一管理 */
 
 .theme-modal .ant-modal-header {
   background: transparent !important;
@@ -1070,24 +1052,7 @@ body.theme-custom .ant-alert-description {
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
 }
 
-/* 性能优化的玻璃质感模态框 */
-.glass-modal .ant-modal-content {
-  position: relative !important; 
-  z-index: 4 !important;
-  border-radius: 16px !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
-  overflow: hidden !important;
-  
-  /* 简化的阴影 */
-  box-shadow:  
-    0 8px 32px rgba(0, 0, 0, 0.2), 
-    0 24px 96px rgba(0, 0, 0, 0.1) !important;
-  
-  /* 直接背景，减少backdrop-filter */
-  background: rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(8px) !important; /* 减少模糊半径 */
-  -webkit-backdrop-filter: blur(8px) !important;
-}
+/* 性能优化的玻璃质感模态框样式已移至文件末尾统一管理 */
 
 .glass-modal .ant-modal-content::before { 
   content: "" !important; 
@@ -1236,12 +1201,7 @@ body.theme-custom .ant-alert-description {
   backdrop-filter: none !important;
 }
 
-/* 只在content容器上保留玻璃效果 */
-.glass-modal .ant-modal-content {
-  background: var(--glass-color, rgba(255, 255, 255, 0.08)) !important;
-  backdrop-filter: var(--glass-filter, blur(12px) brightness(1.05) saturate(1.1)) !important;
-  -webkit-backdrop-filter: var(--glass-filter, blur(12px) brightness(1.05) saturate(1.1)) !important;
-}
+/* 玻璃效果样式已移至文件末尾统一管理 */
 
 /* 优化Collapse组件内的背景 - 玻璃质感效果 */
 .glass-modal .ant-collapse-content-box,
@@ -1393,20 +1353,7 @@ body.theme-custom .ant-alert-description {
   color: rgba(255, 255, 255, 0.6) !important;
 }
 
-/* 添加客户端弹窗玻璃质感 - 强化透明效果 */
-.glass-modal .ant-modal-content {
-  background: rgba(0, 0, 0, 0.15) !important; /* 更透明的背景 */
-  backdrop-filter: blur(25px) brightness(1.3) saturate(1.8) !important;
-  -webkit-backdrop-filter: blur(25px) brightness(1.3) saturate(1.8) !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
-  border-radius: 20px !important;
-  box-shadow: 
-    0 30px 60px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 120px rgba(102, 126, 234, 0.15) !important;
-  z-index: 10001 !important; /* 确保Modal内容在最顶层 */
-  overflow: hidden !important;
-}
+/* 客户端弹窗玻璃质感样式已移至文件末尾统一管理 */
 
 /* 添加客户端弹窗蒙版层样式 - 统一设置 */
 .glass-modal .ant-modal-mask {
@@ -1432,10 +1379,7 @@ body.theme-custom .ant-alert-description {
   position: fixed !important;
 }
 
-.glass-modal.theme-settings-modal .ant-modal-content {
-  z-index: 20001 !important;
-  position: relative !important;
-}
+/* 主题设置Modal z-index样式已移至文件末尾统一管理 */
 
 .glass-modal .ant-modal-header {
   background: transparent !important;
@@ -1476,18 +1420,7 @@ body.theme-custom .ant-alert-description {
   background: transparent !important;
 }
 
-/* 主题设置弹窗整体玻璃质感 */
-.glass-modal.theme-settings-modal .ant-modal-content {
-  background: rgba(0, 0, 0, 0.4) !important;
-  backdrop-filter: blur(20px) brightness(1.1) saturate(1.05) !important;
-  -webkit-backdrop-filter: blur(20px) brightness(1.1) saturate(1.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 16px !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 20px 40px rgba(0, 0, 0, 0.3) !important;
-  overflow: hidden !important; /* 防止内容溢出 */
-}
+/* 主题设置弹窗整体玻璃质感样式已移至文件末尾统一管理 */
 
 .glass-modal.theme-settings-modal .ant-modal-header {
   background: transparent !important;
@@ -2518,19 +2451,7 @@ body.theme-custom .glass3d {
   -webkit-backdrop-filter: blur(20px) !important;
 }
 
-.ant-modal .ant-modal-content {
-  background: var(--color-glass3d, rgba(255, 255, 255, 0.08)) !important;
-  backdrop-filter: var(--glass-filter, blur(12px) brightness(0.9) saturate(1.2)) !important;
-  -webkit-backdrop-filter: var(--glass-filter, blur(12px) brightness(0.9) saturate(1.2)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 16px !important;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    0 4px 16px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-  overflow: hidden !important;
-  position: relative !important;
-}
+/* 通用Modal样式已移至文件末尾统一管理 */
 
 .ant-modal .ant-modal-content::before {
   content: '';
@@ -3552,17 +3473,22 @@ html body .ant-modal .ant-collapse-item {
 
 /* 移除冲突的蒙版样式规则 */
 
+/* 最高优先级：统一所有glass-modal样式，避免多层backdrop-filter */
 html body .glass-modal .ant-modal-content {
-  background: rgba(255, 255, 255, 0.05) !important; /* 极浅的白色透明背景 */
-  background-color: rgba(255, 255, 255, 0.05) !important;
-  backdrop-filter: blur(25px) brightness(1.3) saturate(1.8) !important;
-  -webkit-backdrop-filter: blur(25px) brightness(1.3) saturate(1.8) !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  border-radius: 20px !important;
+  /* 单一背景设置 - 避免多层效果 */
+  background: rgba(255, 255, 255, 0.08) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  /* 只使用一个适中的backdrop-filter */
+  backdrop-filter: blur(12px) brightness(1.1) !important;
+  -webkit-backdrop-filter: blur(12px) brightness(1.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 16px !important;
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 0 100px rgba(102, 126, 234, 0.15) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  z-index: 20001 !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
 /* 弹窗按钮区域背景完全透明 */
@@ -3580,4 +3506,17 @@ html body .glass-modal .ant-modal-header {
 /* 弹窗主体内容背景完全透明 */
 html body .glass-modal .ant-modal-body {
   background: transparent !important;
+}
+
+/* 确保蒙版只有一层 - 最高优先级 */
+html body .glass-modal .ant-modal-mask {
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(8px) brightness(0.8) !important;
+  -webkit-backdrop-filter: blur(8px) brightness(0.8) !important;
+  z-index: 19999 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
 }
