@@ -180,19 +180,29 @@ const GlassSettings: React.FC = () => {
     const hsb = color.toHsb();
     console.log('Using toHsb():', hsb);
     
-    // HSB值已经是0-1范围的小数，不需要除以100
+    // HSB值已经是0-1范围的小数
     const h = Math.round(hsb.h || 0);
-    const s_hsb = hsb.s || 0;  // 已经是0-1的小数
-    const v = hsb.b || 0;      // 已经是0-1的小数
+    const s_hsb = hsb.s || 0;
+    const v = hsb.b || 0;
     const a = Number((hsb.a || 1).toFixed(2));
+    
+    console.log('HSB components:', { h, s_hsb, v, a });
     
     // 正确的HSB到HSL转换公式
     const l = v * (2 - s_hsb) / 2;
-    const s_hsl = (l !== 0 && l !== 1) ? (v - l) / Math.min(l, 1 - l) : 0;
+    console.log('Lightness calculation: v * (2 - s_hsb) / 2 =', v, '* (2 -', s_hsb, ') / 2 =', l);
     
-    // 转换为百分比（0-100）
-    const s = Math.round(s_hsl * 100);
-    const lightness = Math.round(l * 100);
+    const s_hsl = (l !== 0 && l !== 1) ? (v - l) / Math.min(l, 1 - l) : 0;
+    console.log('Saturation calculation: (v - l) / min(l, 1-l) = (', v, '-', l, ') /', Math.min(l, 1 - l), '=', s_hsl);
+    
+    // 转换为百分比（0-100），但先检查计算结果
+    const s_percent = s_hsl * 100;
+    const l_percent = l * 100;
+    
+    console.log('Before rounding:', { s_percent, l_percent });
+    
+    const s = Math.round(s_percent);
+    const lightness = Math.round(l_percent);
     
     console.log('Final HSL values:', { h, s, l: lightness });
     
