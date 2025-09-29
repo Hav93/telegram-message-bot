@@ -560,9 +560,18 @@ const ThemeSwitcher: React.FC = () => {
                                 bodyStyle={{ padding: '8px' }}
                                 actions={[
                                   <Tooltip title="预览" key="preview">
-                                    <EyeOutlined 
-                                      style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '16px' }}
+                                    <Button
+                                      type="text"
+                                      size="small"
+                                      icon={<EyeOutlined />}
+                                      style={{ 
+                                        color: 'rgba(255, 255, 255, 0.8)', 
+                                        fontSize: '16px',
+                                        zIndex: 999,
+                                        position: 'relative'
+                                      }}
                                       onClick={(e) => {
+                                        e.preventDefault();
                                         e.stopPropagation();
                                         console.log('👁️ 预览图片:', img.filename, img.url);
                                         Modal.info({
@@ -619,10 +628,21 @@ const ThemeSwitcher: React.FC = () => {
                                     />
                                   </Tooltip>,
                                   <Tooltip title="删除" key="delete">
-                                    <DeleteOutlined 
-                                      style={{ color: '#ff4d4f', fontSize: '16px' }}
+                                    <Button
+                                      type="text"
+                                      size="small"
+                                      danger
+                                      icon={<DeleteOutlined />}
+                                      style={{ 
+                                        color: '#ff4d4f', 
+                                        fontSize: '16px',
+                                        zIndex: 999,
+                                        position: 'relative'
+                                      }}
                                       onClick={(e) => {
+                                        e.preventDefault();
                                         e.stopPropagation();
+                                        console.log('🗑️ 点击删除按钮:', img.filename);
                                         Modal.confirm({
                                           title: '确认删除',
                                           content: '确定要删除这张图片吗？此操作不可恢复。',
