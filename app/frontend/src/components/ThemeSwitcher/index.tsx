@@ -86,17 +86,34 @@ const ThemeSwitcher: React.FC = () => {
       console.log('🔗 删除URL:', deleteUrl);
       
       const response = await fetch(deleteUrl, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
       
       console.log('📡 删除API响应状态:', response.status, response.statusText);
-      const result = await response.json();
-      console.log('📋 删除API响应数据:', result);
+      
+      // 检查响应内容类型
+      const contentType = response.headers.get('content-type');
+      console.log('📋 响应内容类型:', contentType);
+      
+      let result;
+      try {
+        result = await response.json();
+        console.log('📋 删除API响应数据:', result);
+      } catch (jsonError) {
+        console.error('❌ 解析JSON响应失败:', jsonError);
+        const textResult = await response.text();
+        console.log('📄 原始响应文本:', textResult);
+        throw new Error(`无法解析服务器响应: ${textResult}`);
+      }
       
       if (result.success) {
         message.success('删除成功');
         console.log('✅ 图片删除成功，重新获取列表...');
-        fetchHistoryImages(); // 重新获取列表
+        await fetchHistoryImages(); // 等待列表更新完成
+        console.log('🔄 历史图片列表已更新');
         
         // 如果删除的是当前使用的背景，切换回默认主题
         if (themeConfig.customImageUrl?.includes(filename)) {
@@ -579,75 +596,9 @@ const ThemeSwitcher: React.FC = () => {
                                         e.preventDefault();
                                         e.stopPropagation();
                                         console.log('👁️ 预览图片:', img.filename, img.url);
-                                        console.log('🚀 准备显示预览Modal');
                                         
-                                        // 简单测试 - 先显示一个alert确认点击事件正常
-                                        alert(`预览图片: ${img.filename}`);
-                                        
-                                        // 使用setTimeout确保事件处理完成后再显示Modal
-                                        setTimeout(() => {
-                                          try {
-                                            const modal = Modal.info({
-                                              title: `图片预览 - ${img.filename}`,
-                                              content: (
-                                                <div style={{ textAlign: 'center', padding: '20px' }}>
-                                                  <img 
-                                                    src={img.url} 
-                                                    alt={img.filename}
-                                                    style={{ 
-                                                      maxWidth: '100%', 
-                                                      maxHeight: '400px',
-                                                      borderRadius: '8px',
-                                                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
-                                                    }}
-                                                    onLoad={() => {
-                                                      console.log('✅ 预览图片加载成功:', img.url);
-                                                    }}
-                                                    onError={(e) => {
-                                                      console.error('❌ 预览图片加载失败:', img.url);
-                                                      const target = e.target as HTMLImageElement;
-                                                      target.style.display = 'none';
-                                                      const errorDiv = target.nextElementSibling as HTMLElement;
-                                                      if (errorDiv) {
-                                                        errorDiv.style.display = 'block';
-                                                      }
-                                                    }}
-                                                  />
-                                                  <div style={{ 
-                                                    display: 'none', 
-                                                    color: '#ff4d4f', 
-                                                    marginTop: '20px',
-                                                    fontSize: '14px'
-                                                  }}>
-                                                    图片加载失败: {img.url}
-                                                  </div>
-                                                  <div style={{ 
-                                                    marginTop: '16px',
-                                                    fontSize: '12px',
-                                                    color: '#666',
-                                                    wordBreak: 'break-all'
-                                                  }}>
-                                                    文件名: {img.filename}<br/>
-                                                    大小: {formatFileSize(img.size)}<br/>
-                                                    URL: {img.url}
-                                                  </div>
-                                                </div>
-                                              ),
-                                              width: 700,
-                                              okText: '关闭',
-                                              className: 'glass-modal',
-                                              zIndex: 50000,
-                                              centered: true,
-                                              maskClosable: true,
-                                              keyboard: true,
-                                              getContainer: () => document.body
-                                            });
-                                            console.log('✅ 预览Modal已创建:', modal);
-                                          } catch (error) {
-                                            console.error('❌ 创建预览Modal失败:', error);
-                                            message.error('预览功能暂时不可用');
-                                          }
-                                        }, 50);
+                                        // 直接打开新窗口预览图片
+                                        window.open(img.url, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
                                       }}
                                     />
                                   </Tooltip>,
@@ -667,37 +618,25 @@ const ThemeSwitcher: React.FC = () => {
                                         e.preventDefault();
                                         e.stopPropagation();
                                         console.log('🗑️ 点击删除按钮:', img.filename);
-                                        console.log('🚀 准备显示删除确认Modal');
                                         
-                                        // 简单测试 - 先显示一个alert确认点击事件正常
-                                        alert(`删除图片: ${img.filename}`);
-                                        
-                                        // 使用setTimeout确保事件处理完成后再显示Modal
-                                        setTimeout(() => {
-                                          try {
-                                            const modal = Modal.confirm({
-                                              title: '确认删除',
-                                              content: '确定要删除这张图片吗？此操作不可恢复。',
-                                              okText: '删除',
-                                              cancelText: '取消',
-                                              okType: 'danger',
-                                              className: 'glass-modal',
-                                              zIndex: 50000,
-                                              centered: true,
-                                              maskClosable: true,
-                                              keyboard: true,
-                                              getContainer: () => document.body,
-                                              onOk: () => {
-                                                console.log('确认删除图片:', img.filename);
-                                                return deleteHistoryImage(img.filename);
-                                              }
-                                            });
-                                            console.log('✅ 删除Modal已创建:', modal);
-                                          } catch (error) {
-                                            console.error('❌ 创建删除Modal失败:', error);
-                                            message.error('删除功能暂时不可用');
-                                          }
-                                        }, 50);
+                                        // 直接调用删除函数，不使用Modal
+                                        const confirmDelete = window.confirm(`确定要删除图片 "${img.filename}" 吗？此操作不可恢复。`);
+                                        if (confirmDelete) {
+                                          console.log('✅ 用户确认删除，开始执行删除操作...');
+                                          
+                                          // 使用异步调用确保删除函数被正确执行
+                                          (async () => {
+                                            try {
+                                              await deleteHistoryImage(img.filename);
+                                              console.log('🎉 删除操作完成');
+                                            } catch (error) {
+                                              console.error('💥 删除操作失败:', error);
+                                              message.error('删除失败，请重试');
+                                            }
+                                          })();
+                                        } else {
+                                          console.log('❌ 用户取消删除操作');
+                                        }
                                       }}
                                     />
                                   </Tooltip>
