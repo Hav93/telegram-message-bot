@@ -395,15 +395,17 @@ const ThemeSwitcher: React.FC = () => {
                     className="theme-preview"
                     style={{
                       background: option.preview,
-                      backgroundImage: option.preview.includes('gradient') ? option.preview : 'none',
-                      backgroundColor: option.preview.includes('gradient') ? 'transparent' : option.preview,
-                      backdropFilter: 'none',
-                      WebkitBackdropFilter: 'none',
-                      filter: 'none',
-                      mixBlendMode: 'normal',
-                      isolation: 'isolate',
-                      zIndex: 10000,
-                      position: 'relative'
+                      backgroundImage: option.preview.includes('linear-gradient') ? option.preview : 'none',
+                      backgroundColor: option.preview.includes('linear-gradient') ? 'transparent' : option.preview,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundAttachment: 'scroll',
+                      backgroundOrigin: 'padding-box',
+                      backgroundClip: 'padding-box'
+                    }}
+                    onMouseEnter={() => {
+                      console.log(`🎨 主题预览 ${option.label}:`, option.preview);
                     }}
                   />
                 )}

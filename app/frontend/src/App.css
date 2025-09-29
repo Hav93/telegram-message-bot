@@ -1588,97 +1588,32 @@ body.theme-custom .ant-alert-description {
   color: rgba(255, 255, 255, 0.6) !important;
 }
 
-/* 彻底重置主题预览样式 - 移除所有可能的干扰 */
+/* 彻底重写主题预览样式 - 完全隔离 */
 .theme-preview {
-  /* 基础布局 */
+  /* 完全重置所有样式 */
+  all: unset !important;
+  
+  /* 基础显示 */
+  display: block !important;
   width: 100% !important;
   height: 40px !important;
+  
+  /* 边框和圆角 */
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
   border-radius: 8px !important;
   margin-bottom: 8px !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
   
-  /* 背景相关 - 让内联样式完全控制 */
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-  background-attachment: scroll !important;
-  background-origin: padding-box !important;
-  background-clip: padding-box !important;
-  
-  /* 显示控制 */
-  display: block !important;
-  min-height: 40px !important;
-  position: relative !important;
-  overflow: hidden !important;
-  
-  /* 完全移除所有滤镜效果 */
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  filter: none !important;
-  -webkit-filter: none !important;
-  
-  /* 创建独立的层叠上下文 */
-  isolation: isolate !important;
-  transform: translateZ(0) !important;
-  
-  /* 阴影效果 */
+  /* 阴影 */
   box-shadow: 
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 4px 8px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* 强制覆盖所有可能的父级样式 - 最高优先级 */
-.glass-modal .theme-preview,
-.glass-modal.theme-settings-modal .theme-preview,
-html body .glass-modal .theme-preview,
-html body .glass-modal.theme-settings-modal .theme-preview {
-  /* 移除所有滤镜效果 */
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  filter: none !important;
-  -webkit-filter: none !important;
   
-  /* 确保独立渲染上下文 */
-  isolation: isolate !important;
-  transform: translateZ(0) !important;
-  contain: layout style paint !important;
-  
-  /* 强制重置背景属性，让内联样式生效 */
-  background-color: transparent !important;
-  background-image: none !important;
-  
-  /* 确保z-index足够高 */
-  position: relative !important;
-  z-index: 9999 !important;
-}
-
-/* 终极修复 - 使用更高优先级的选择器 */
-html body .glass-modal .theme-card .theme-preview {
-  background-color: unset !important;
-  background-image: unset !important;
-  backdrop-filter: unset !important;
-  -webkit-backdrop-filter: unset !important;
-}
-
-/* 超级强制修复 - 针对具体的背景值 */
-.glass-modal .theme-preview[style*="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"] {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-}
-
-.glass-modal .theme-preview[style*="#1a1a1a"] {
-  background: #1a1a1a !important;
-}
-
-.glass-modal .theme-preview[style*="linear-gradient(135deg, #2c3e50 0%, #34495e 100%)"] {
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-}
-
-/* 通用强制修复 - 任何内联background样式都要生效 */
-.glass-modal .theme-preview[style*="background"] {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  filter: none !important;
-  mix-blend-mode: normal !important;
+  /* 确保内联样式生效 */
+  background-origin: padding-box !important;
+  background-clip: padding-box !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
 }
 
 /* 最高优先级 - 直接针对特定背景 */
