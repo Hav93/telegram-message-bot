@@ -36,6 +36,13 @@ const defaultSettings: GlassSettings = {
 // DEBUG: Force build change - this should appear in built files
 const BUILD_VERSION = 'FINAL-BUILD-2024-12-19-TEST';
 
+// Add a global variable to window to ensure it's not tree-shaken
+if (typeof window !== 'undefined') {
+  (window as any).BUILD_VERSION_GLASS_SETTINGS = BUILD_VERSION;
+  // Add a unique string that should survive minification
+  console.log('🚀 GlassSettings loaded - BUILD_VERSION_FINAL_2024_12_19_TEST');
+}
+
 const textureOptions = [
   { value: 'rice-paper', label: 'Rice Paper', url: 'https://www.transparenttextures.com/patterns/rice-paper.png' },
   { value: 'egg-shell', label: 'Egg Shell', url: 'https://www.transparenttextures.com/patterns/egg-shell.png' },

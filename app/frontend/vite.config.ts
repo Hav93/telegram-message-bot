@@ -24,6 +24,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -33,6 +34,9 @@ export default defineConfig({
         },
       },
     },
+  },
+  esbuild: {
+    drop: [], // 不删除任何内容，保留console.log
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'antd', 'echarts'],
