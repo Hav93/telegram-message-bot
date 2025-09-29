@@ -175,7 +175,7 @@ const GlassSettings: React.FC = () => {
 
   // 颜色选择器变化
   const handleColorChange = (color: Color) => {
-    console.log('🎨 ColorPicker onChange triggered');
+    console.log('🚀 NEW CODE VERSION 2024-12-19 - ColorPicker onChange triggered');
     console.log('Available methods:', Object.getOwnPropertyNames(color));
     
     // 尝试多种方法获取颜色值
