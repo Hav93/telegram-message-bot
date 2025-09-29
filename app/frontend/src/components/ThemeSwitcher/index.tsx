@@ -568,14 +568,15 @@ const ThemeSwitcher: React.FC = () => {
                                       style={{ 
                                         color: 'rgba(255, 255, 255, 0.8)', 
                                         fontSize: '16px',
-                                        zIndex: 999,
+                                        zIndex: 10005,
                                         position: 'relative'
                                       }}
                                       onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
                                         console.log('👁️ 预览图片:', img.filename, img.url);
-                                        Modal.info({
+                                        console.log('🚀 准备显示预览Modal');
+                                        const modal = Modal.info({
                                           title: `图片预览 - ${img.filename}`,
                                           content: (
                                             <div style={{ textAlign: 'center', padding: '20px' }}>
@@ -624,9 +625,12 @@ const ThemeSwitcher: React.FC = () => {
                                           width: 700,
                                           okText: '关闭',
                                           className: 'glass-modal',
-                                          zIndex: 10000,
-                                          centered: true
+                                          zIndex: 20000,
+                                          centered: true,
+                                          maskClosable: true,
+                                          keyboard: true
                                         });
+                                        console.log('✅ 预览Modal已创建:', modal);
                                       }}
                                     />
                                   </Tooltip>,
@@ -639,27 +643,31 @@ const ThemeSwitcher: React.FC = () => {
                                       style={{ 
                                         color: '#ff4d4f', 
                                         fontSize: '16px',
-                                        zIndex: 999,
+                                        zIndex: 10005,
                                         position: 'relative'
                                       }}
                                       onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
                                         console.log('🗑️ 点击删除按钮:', img.filename);
-                                        Modal.confirm({
+                                        console.log('🚀 准备显示删除确认Modal');
+                                        const modal = Modal.confirm({
                                           title: '确认删除',
                                           content: '确定要删除这张图片吗？此操作不可恢复。',
                                           okText: '删除',
                                           cancelText: '取消',
                                           okType: 'danger',
                                           className: 'glass-modal',
-                                          zIndex: 10000,
+                                          zIndex: 20000,
                                           centered: true,
+                                          maskClosable: true,
+                                          keyboard: true,
                                           onOk: () => {
                                             console.log('确认删除图片:', img.filename);
                                             return deleteHistoryImage(img.filename);
                                           }
                                         });
+                                        console.log('✅ 删除Modal已创建:', modal);
                                       }}
                                     />
                                   </Tooltip>

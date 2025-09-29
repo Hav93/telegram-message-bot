@@ -1403,6 +1403,7 @@ body.theme-custom .ant-alert-description {
     0 30px 60px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
     0 0 120px rgba(102, 126, 234, 0.15) !important;
+  z-index: 10001 !important; /* 确保Modal内容在最顶层 */
   overflow: hidden !important;
 }
 
@@ -1411,6 +1412,7 @@ body.theme-custom .ant-alert-description {
   background: rgba(0, 0, 0, 0.3) !important; /* 更透明的蒙版 */
   backdrop-filter: blur(5px) !important;
   -webkit-backdrop-filter: blur(5px) !important;
+  z-index: 10000 !important; /* 确保蒙版层在下方 */
 }
 
 .glass-modal .ant-modal-header {
@@ -1586,10 +1588,8 @@ body.theme-custom .ant-alert-description {
   color: rgba(255, 255, 255, 0.6) !important;
 }
 
-/* 主题颜色预览样式 - 不覆盖background属性 */
-.theme-preview,
-.glass-modal .theme-preview,
-html body .theme-preview {
+/* 主题颜色预览样式 - 确保内联背景样式生效 */
+.theme-preview {
   width: 100% !important;
   height: 40px !important;
   border-radius: 8px !important;
@@ -1602,13 +1602,25 @@ html body .theme-preview {
   box-shadow: 
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 4px 8px rgba(0, 0, 0, 0.1) !important;
-  display: block !important; /* 确保显示 */
-  min-height: 40px !important; /* 最小高度 */
+  display: block !important;
+  min-height: 40px !important;
   position: relative !important;
   overflow: hidden !important;
-  backdrop-filter: none !important; /* 移除backdrop-filter */
+  backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  /* 不强制设置background，让内联样式生效 */
+  /* 关键：阻止任何父级的backdrop-filter影响 */
+  isolation: isolate !important;
+}
+
+/* 更高优先级的选择器确保在glass-modal中也生效 */
+.glass-modal .theme-preview,
+.glass-modal.theme-settings-modal .theme-preview,
+html body .glass-modal .theme-preview {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  isolation: isolate !important;
+  /* 确保background属性不被覆盖 */
+  background-color: transparent !important;
 }
 
 /* 清理重复的CSS规则，依赖内联样式 */
@@ -1621,19 +1633,19 @@ html body .theme-preview {
   border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
   padding: 8px 12px !important;
   min-height: 40px !important;
-  z-index: 1000 !important;
+  z-index: 10002 !important; /* 提高z-index */
   position: relative !important;
 }
 
 .glass-modal .ant-card-actions li {
   margin: 0 4px !important;
-  z-index: 1001 !important;
+  z-index: 10003 !important; /* 提高z-index */
   position: relative !important;
 }
 
 .glass-modal .ant-card-actions li button,
 .glass-modal .ant-card-actions li .anticon {
-  z-index: 1002 !important;
+  z-index: 10004 !important; /* 提高z-index */
   position: relative !important;
   pointer-events: auto !important;
 }
@@ -1660,6 +1672,16 @@ html body .theme-preview {
 .glass-modal.theme-settings-modal .ant-modal-content {
   max-height: 90vh !important;
   overflow-y: auto !important;
+}
+
+/* 确保历史图片网格布局正确显示 */
+.glass-modal .ant-tabs-tabpane {
+  overflow: visible !important;
+  min-height: 450px !important; /* 确保有足够高度显示多行图片 */
+}
+
+.glass-modal .ant-tabs-tabpane > div {
+  overflow: visible !important;
 }
 
 /* 确保历史图片容器有足够的z-index */
